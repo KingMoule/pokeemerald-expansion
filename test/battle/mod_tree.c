@@ -291,3 +291,93 @@ SINGLE_BATTLE_TEST("Mod: Herald calls the tree's weather on first entry")
         EXPECT(gBattleWeather & B_WEATHER_RAIN);
     }
 }
+
+SINGLE_BATTLE_TEST("Mod: Fan the Flames boosts the damage of burns it inflicts", s16 damage)
+{
+    u32 rank;
+    PARAMETRIZE { rank = 0; }
+    PARAMETRIZE { rank = 10; }
+    GIVEN {
+        PLAYER(SPECIES_CHARMANDER) { TreeRank(TYPE_FIRE, 9, rank); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_WILL_O_WISP); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WILL_O_WISP, player);
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[1].damage, results[0].damage + results[0].damage * 200 / 1000);
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Stubborn Embers brings a cured burn back for one turn")
+{
+    GIVEN {
+        PLAYER(SPECIES_CHARMANDER) { TreeRank(TYPE_FIRE, 11, 1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_RAWST_BERRY); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WILL_O_WISP); }
+        TURN { }
+        TURN { }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WILL_O_WISP, player);
+        MESSAGE("The affliction clings to the opposing Wobbuffet!");
+        STATUS_ICON(opponent, burn: TRUE);
+        MESSAGE("The opposing Wobbuffet was hurt by its burn!");
+        MESSAGE("The lingering affliction left the opposing Wobbuffet.");
+        STATUS_ICON(opponent, none: TRUE);
+        NOT MESSAGE("The opposing Wobbuffet was hurt by its burn!");
+    } THEN {
+        EXPECT_EQ(opponent->status1, STATUS1_NONE);
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Stubborn Embers does nothing without the mastery")
+{
+    GIVEN {
+        PLAYER(SPECIES_CHARMANDER);
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_RAWST_BERRY); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_WILL_O_WISP); }
+        TURN { }
+    } SCENE {
+        NOT MESSAGE("The affliction clings to the opposing Wobbuffet!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Piercing Focus adds a critical-hit stage to special moves of its type")
+{
+    PASSES_RANDOMLY(1, 8, RNG_CRITICAL_HIT);
+    GIVEN {
+        WITH_CONFIG(B_CRIT_CHANCE, GEN_7);
+        PLAYER(SPECIES_SQUIRTLE) { TreeRank(TYPE_WATER, 11, 1); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, player);
+        MESSAGE("A critical hit!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Unbreakable halves only the first super effective hit of the battle", s16 damage1, s16 damage2)
+{
+    u32 rank;
+    PARAMETRIZE { rank = 0; }
+    PARAMETRIZE { rank = 1; }
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { TreeRank(TYPE_PSYCHIC, 15, rank); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_BITE, criticalHit: FALSE); }
+        TURN { MOVE(opponent, MOVE_BITE, criticalHit: FALSE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BITE, opponent);
+        HP_BAR(player, captureDamage: &results[i].damage1);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BITE, opponent);
+        HP_BAR(player, captureDamage: &results[i].damage2);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage1, Q_4_12(0.5), results[1].damage1);
+        EXPECT_EQ(results[0].damage2, results[1].damage2);
+    }
+}

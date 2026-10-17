@@ -1745,6 +1745,7 @@ void SetNonVolatileStatus(enum BattlerId battlerAtk, enum BattlerId effectBattle
     gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STATUSED;
 
     gBattleScripting.moveEffect = MOVE_EFFECT_NONE;
+    RecordTreeStatusInflicted(battlerAtk, effectBattler); // Mod : Attiser les flammes, Braises tenaces
 
     TrySynchronizeActivation(battlerAtk, effectBattler, effect);
 
@@ -3240,7 +3241,7 @@ static void Cmd_switchindataupdate(void)
     gBattleMons[battler].types[0] = GetBattlerMutatedType(battler, 0);
     gBattleMons[battler].types[1] = GetBattlerMutatedType(battler, 1);
     gBattleMons[battler].types[2] = TYPE_MYSTERY;
-    ResetTreeHeartStacks(battler); // Mod : le Cœur se perd au changement
+    ResetTreeOnSwitchIn(battler); // Mod : Cœur et statuts suivis perdus au changement
     gBattleMons[battler].ability = GetAbilityBySpecies(gBattleMons[battler].species, gBattleMons[battler].abilityNum);
     #if TESTING
     if (gTestRunnerEnabled)

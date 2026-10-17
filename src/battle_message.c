@@ -907,6 +907,8 @@ const u8 *const gBattleStringsTable[STRINGID_COUNT] =
     [STRINGID_TREEWEATHERHEAL]                      = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX} restored HP using the weather!"),
     [STRINGID_TREEHEART]                            = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX}'s mastery grows stronger, at a cost!"),
     [STRINGID_TREEWEATHERENTRY]                     = COMPOUND_STRING("{B_SCR_NAME_WITH_PREFIX}'s mastery calls the weather!"),
+    [STRINGID_TREELINGERRETURN]                     = COMPOUND_STRING("The affliction clings to {B_SCR_NAME_WITH_PREFIX2}!"),
+    [STRINGID_TREELINGERFADE]                       = COMPOUND_STRING("The lingering affliction left {B_SCR_NAME_WITH_PREFIX2}."),
 };
 
 const u16 gTrainerUsedItemStringIds[] =
@@ -1426,6 +1428,13 @@ const u16 gZenModeStringIds[] =
 {
     [B_MSG_ZEN_MODE_TRIGGERED] = STRINGID_ZENMODETRIGGERED,
     [B_MSG_ZEN_MODE_ENDED] = STRINGID_ZENMODEENDED
+};
+
+// Mod : retour puis fin du statut tenace (maîtrises Braises tenaces et statut).
+const u16 gTreeLingerStringIds[] =
+{
+    STRINGID_TREELINGERRETURN,
+    STRINGID_TREELINGERFADE,
 };
 
 const u16 gCureStatusStringIds[] =

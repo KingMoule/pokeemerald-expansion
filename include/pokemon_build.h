@@ -73,10 +73,10 @@ enum TreeEffect
     TREE_EFFECT_WEAKNESS_GUARD,       // ‰ de dégâts en moins contre les attaques super efficaces.
     TREE_EFFECT_TYPE_DAMAGE_STACK,    // ‰ de dégâts de l'élément par cumul, gagné après chaque attaque de l'élément.
     TREE_EFFECT_WEATHER_ON_ENTRY,     // Invoque la météo de l'élément à la première entrée.
-    // Effets dont les règles restent à préciser dans le wiki : sans effet pour l'instant.
-    TREE_EFFECT_STATUS_DAMAGE,
-    TREE_EFFECT_LINGERING_STATUS,
-    TREE_EFFECT_INACTIVE_MASTERY,     // Maîtrise générique des autres éléments.
+    TREE_EFFECT_STATUS_DAMAGE,        // ‰ de dégâts résiduels en plus pour le statut de l'élément infligé par ce Pokémon.
+    TREE_EFFECT_LINGERING_STATUS,     // Le premier statut infligé par combat revient quelques tours après un soin.
+    TREE_EFFECT_TYPE_SPECIAL_CRIT,    // Niveaux de critique des attaques spéciales de l'élément.
+    TREE_EFFECT_FIRST_WEAKNESS_GUARD, // Le premier coup super efficace subi par combat est amorti.
 };
 
 struct TreeNode
@@ -127,9 +127,15 @@ u32 GetTreeStatusChanceBonus(enum BattlerId battlerAtk, u32 moveEffect);
 u32 GetTreeWeatherTurnsBonus(enum BattlerId battler, u32 weatherFlag);
 u32 GetTreeWeatherHealAmount(enum BattlerId battler);
 void ResetTreeBattleState(void);
-void ResetTreeHeartStacks(enum BattlerId battler);
+void ResetTreeOnSwitchIn(enum BattlerId battler);
 u32 GetTreeHeartStacks(enum BattlerId battler);
 bool32 TryTreeHeartActivation(enum BattlerId battlerAtk, enum Move move);
 bool32 TryTreeWeatherOnEntry(enum BattlerId battler);
+u32 GetTreeCritStageBonus(enum BattlerId battlerAtk, enum Move move, enum Type moveType);
+uq4_12_t GetTreeFirstWeaknessModifier(enum BattlerId battlerDef, uq4_12_t typeEffectiveness);
+void UpdateTreeFirstWeaknessGuard(enum BattlerId battlerAtk);
+void RecordTreeStatusInflicted(enum BattlerId battlerAtk, enum BattlerId battlerDef);
+u32 ApplyTreeStatusDamageBonus(enum BattlerId battler, u32 status, u32 damage);
+bool32 TryTreeLingeringStatus(enum BattlerId battler);
 
 #endif // GUARD_POKEMON_BUILD_H

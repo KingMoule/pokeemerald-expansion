@@ -44,6 +44,9 @@
 #define MOD_TREE_HEART_MAX_STACKS     3    // Cœur : cumuls de +10 % aux dégâts de l'élément au plus...
 #define MOD_TREE_HEART_HP_COST        5    // ...chaque activation coûte N % des PV max.
 #define MOD_TREE_ENTRY_WEATHER_TURNS  3    // Aube : tours de météo invoqués à la première entrée (+ tours de la branche).
+#define MOD_TREE_FOCUS_CRIT_STAGES    1    // Focus : niveaux de coup critique en plus pour les attaques spéciales de l'élément.
+#define MOD_TREE_GUARD_FIRST_HIT      50   // Garde : % de dégâts en moins sur le premier coup super efficace subi par combat.
+#define MOD_TREE_LINGER_TURNS         1    // Braises tenaces / statut : tours de retour du premier statut infligé, une fois soigné.
 
 // EV
 #define MOD_BATTLE_EV_GAINS           FALSE // Les combats normaux ne donnent plus d'EV (donjon d'entraînement à la place).

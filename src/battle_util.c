@@ -7683,6 +7683,7 @@ static inline uq4_12_t GetOtherModifiers(struct DamageContext *ctx)
     }
     DAMAGE_MULTIPLY_MODIFIER(GetTreeDamageModifier(ctx->battlerAtk, ctx->battlerDef, ctx->move, ctx->moveType));
     DAMAGE_MULTIPLY_MODIFIER(GetTreeGuardModifier(ctx->battlerDef, ctx->typeEffectivenessModifier));
+    DAMAGE_MULTIPLY_MODIFIER(GetTreeFirstWeaknessModifier(ctx->battlerDef, ctx->typeEffectivenessModifier));
     return finalModifier;
 }
 
@@ -7965,7 +7966,8 @@ s32 CalcCritChanceStage(struct DamageContext *ctx)
                     + GetHoldEffectCritChanceIncrease(ctx->battlerAtk, ctx->holdEffects[ctx->battlerAtk])
                     + ((B_AFFECTION_MECHANICS == TRUE && GetBattlerAffectionHearts(ctx->battlerAtk) == AFFECTION_FIVE_HEARTS) ? 2 : 0)
                     + (ctx->abilities[ctx->battlerAtk] == ABILITY_SUPER_LUCK ? 1 : 0)
-                    + gBattleMons[ctx->battlerAtk].volatiles.bonusCritStages;
+                    + gBattleMons[ctx->battlerAtk].volatiles.bonusCritStages
+                    + GetTreeCritStageBonus(ctx->battlerAtk, ctx->move, ctx->moveType); // Mod : maîtrise Focus
 
         if (critChance >= ARRAY_COUNT(sCriticalHitOdds))
             critChance = ARRAY_COUNT(sCriticalHitOdds) - 1;

@@ -1,6 +1,7 @@
 #include "global.h"
 #include "battle.h"
 #include "battle_dynamax.h"
+#include "battle_controllers.h"
 #include "battle_util.h"
 #include "item.h"
 #include "pokemon.h"
@@ -672,15 +673,51 @@ u32 GetTreeWeatherHealAmount(enum BattlerId battler)
 static EWRAM_DATA u8 sTreeHeartStacks[MAX_BATTLERS_COUNT] = {0};
 static EWRAM_DATA u8 sTreeEntryWeatherUsed[NUM_BATTLE_SIDES] = {0}; // Un bit par place dans l'équipe.
 
+// Statuts suivis (Attiser les flammes, Braises tenaces) : qui a infligé le statut de chaque cible.
+struct TreeStatusSource
+{
+    u8 battler;
+    u8 partyIndex;
+    bool8 valid;
+};
+
+enum
+{
+    TREE_LINGER_NONE,
+    TREE_LINGER_WATCHING, // Le statut est en place ; on guette son soin.
+    TREE_LINGER_RETURNED, // Soigné puis revenu pour MOD_TREE_LINGER_TURNS tours.
+    TREE_LINGER_DONE,
+};
+
+struct TreeLinger
+{
+    u32 status;
+    u16 turn;
+    u8 state;
+};
+
+static EWRAM_DATA struct TreeStatusSource sTreeStatusSource[MAX_BATTLERS_COUNT] = {0};
+static EWRAM_DATA struct TreeLinger sTreeLinger[MAX_BATTLERS_COUNT] = {0};
+static EWRAM_DATA u8 sTreeLingerUsed[NUM_BATTLE_SIDES] = {0};        // Un bit par place dans l'équipe.
+static EWRAM_DATA u8 sTreeFirstWeaknessUsed[NUM_BATTLE_SIDES] = {0}; // Un bit par place dans l'équipe.
+
 void ResetTreeBattleState(void)
 {
     memset(sTreeHeartStacks, 0, sizeof(sTreeHeartStacks));
     memset(sTreeEntryWeatherUsed, 0, sizeof(sTreeEntryWeatherUsed));
+    memset(sTreeStatusSource, 0, sizeof(sTreeStatusSource));
+    memset(sTreeLinger, 0, sizeof(sTreeLinger));
+    memset(sTreeLingerUsed, 0, sizeof(sTreeLingerUsed));
+    memset(sTreeFirstWeaknessUsed, 0, sizeof(sTreeFirstWeaknessUsed));
 }
 
-void ResetTreeHeartStacks(enum BattlerId battler)
+// Le Pokémon qui entre repart de zéro : cumuls du Cœur perdus, statut suivi oublié
+// (la maîtrise « une fois par combat » de l'auteur reste dépensée).
+void ResetTreeOnSwitchIn(enum BattlerId battler)
 {
     sTreeHeartStacks[battler] = 0;
+    sTreeStatusSource[battler].valid = FALSE;
+    sTreeLinger[battler].state = TREE_LINGER_NONE;
 }
 
 u32 GetTreeHeartStacks(enum BattlerId battler)
@@ -740,5 +777,180 @@ bool32 TryTreeWeatherOnEntry(enum BattlerId battler)
     gBattleStruct->weatherDuration = MOD_TREE_ENTRY_WEATHER_TURNS + GetTreeWeatherTurnsBonus(battler, gBattleWeather);
     gBattleScripting.battler = battler;
     gBattleScripting.animArg1 = gBattleWeatherInfo[weather].animation;
+    return TRUE;
+}
+
+// Focus : coups critiques des attaques spéciales de l'élément.
+u32 GetTreeCritStageBonus(enum BattlerId battlerAtk, enum Move move, enum Type moveType)
+{
+    const struct BoxPokemon *boxMon;
+
+    // Sorties rapides : appelée à chaque calcul de critique, IA comprise.
+    if (!IsBattleMoveSpecial(move))
+        return 0;
+    boxMon = GetBattlerBoxMon(battlerAtk);
+    if (boxMon->build.treeType != moveType)
+        return 0;
+    return GetBoxMonTreeEffect(boxMon, TREE_EFFECT_TYPE_SPECIAL_CRIT);
+}
+
+static bool32 IsTreeFirstWeaknessReady(enum BattlerId battlerDef)
+{
+    return (sTreeFirstWeaknessUsed[GetBattlerSide(battlerDef)] & (1u << gBattlerPartyIndexes[battlerDef])) == 0
+        && GetBattlerTreeEffect(battlerDef, TREE_EFFECT_FIRST_WEAKNESS_GUARD) != 0;
+}
+
+// Garde : le premier coup super efficace subi dans le combat est amorti (multiplicatif, comme Bulwark).
+uq4_12_t GetTreeFirstWeaknessModifier(enum BattlerId battlerDef, uq4_12_t typeEffectiveness)
+{
+    u32 reduction;
+
+    if (typeEffectiveness <= UQ_4_12(1.0) || !IsTreeFirstWeaknessReady(battlerDef))
+        return UQ_4_12(1.0);
+    reduction = min(GetBattlerTreeEffect(battlerDef, TREE_EFFECT_FIRST_WEAKNESS_GUARD), 100);
+    return UQ_4_12(1.0) - (reduction * UQ_4_12(1.0)) / 100;
+}
+
+// Fin d'attaque : la Garde est dépensée par les cibles touchées par un coup super efficace.
+// Le calcul des dégâts ne fait que lire l'état, pour que les simulations de l'IA n'y touchent pas.
+void UpdateTreeFirstWeaknessGuard(enum BattlerId battlerAtk)
+{
+    enum BattlerId battler;
+
+    for (battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (battler == battlerAtk || !IsTreeFirstWeaknessReady(battler))
+            continue;
+        if (IsBattlerTurnDamaged(battler, INCLUDING_SUBSTITUTES)
+         && (gBattleStruct->moveResultFlags[battler] & MOVE_RESULT_HIGH_EFFECTIVENESS))
+            sTreeFirstWeaknessUsed[GetBattlerSide(battler)] |= 1u << gBattlerPartyIndexes[battler];
+    }
+}
+
+static const struct ElementTree *GetBoxMonTree(const struct BoxPokemon *boxMon)
+{
+    enum Type treeType = boxMon->build.treeType;
+    if (treeType == TYPE_NONE || treeType >= NUMBER_OF_MON_TYPES)
+        return NULL;
+    return &gElementTrees[treeType];
+}
+
+// Appelé chaque fois qu'un statut est infligé à une cible par un autre Pokémon.
+void RecordTreeStatusInflicted(enum BattlerId battlerAtk, enum BattlerId battlerDef)
+{
+    const struct ElementTree *tree;
+    u32 status, slotBit;
+    enum BattleSide side;
+
+    if (battlerAtk == battlerDef || battlerAtk >= gBattlersCount)
+        return;
+    sTreeStatusSource[battlerDef].battler = battlerAtk;
+    sTreeStatusSource[battlerDef].partyIndex = gBattlerPartyIndexes[battlerAtk];
+    sTreeStatusSource[battlerDef].valid = TRUE;
+
+    // Braises tenaces : seulement le premier statut de l'élément infligé dans le combat.
+    tree = GetBattlerTree(battlerAtk);
+    side = GetBattlerSide(battlerAtk);
+    slotBit = 1u << gBattlerPartyIndexes[battlerAtk];
+    if (tree == NULL || (sTreeLingerUsed[side] & slotBit)
+     || GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_LINGERING_STATUS) == 0)
+        return;
+    status = gBattleMons[battlerDef].status1 & tree->status;
+    if (status == 0)
+        return;
+    if (status & STATUS1_SLEEP)
+        status = STATUS1_SLEEP;
+    sTreeLingerUsed[side] |= slotBit;
+    sTreeLinger[battlerDef].status = status;
+    sTreeLinger[battlerDef].state = TREE_LINGER_WATCHING;
+}
+
+static const struct BoxPokemon *GetTreeStatusSourceBoxMon(enum BattlerId battler)
+{
+    const struct TreeStatusSource *source = &sTreeStatusSource[battler];
+    if (!source->valid)
+        return NULL;
+    return &GetBattlerParty(source->battler)[source->partyIndex].box;
+}
+
+// Attiser les flammes : dégâts résiduels du statut de l'élément, si c'est ce Pokémon qui l'a infligé.
+u32 ApplyTreeStatusDamageBonus(enum BattlerId battler, u32 status, u32 damage)
+{
+    const struct BoxPokemon *source = GetTreeStatusSourceBoxMon(battler);
+    const struct ElementTree *tree;
+    u32 bonus;
+
+    if (source == NULL || (tree = GetBoxMonTree(source)) == NULL || !(tree->status & status))
+        return damage;
+    bonus = GetBoxMonTreeEffect(source, TREE_EFFECT_STATUS_DAMAGE);
+    return damage + damage * bonus / 1000;
+}
+
+static enum MoveEffect GetTreeLingerMoveEffect(u32 status)
+{
+    if (status & STATUS1_BURN)
+        return MOVE_EFFECT_BURN;
+    if (status & STATUS1_POISON)
+        return MOVE_EFFECT_POISON;
+    if (status & STATUS1_TOXIC_POISON)
+        return MOVE_EFFECT_TOXIC;
+    if (status & STATUS1_PARALYSIS)
+        return MOVE_EFFECT_PARALYSIS;
+    if (status & STATUS1_FREEZE)
+        return MOVE_EFFECT_FREEZE;
+    if (status & STATUS1_FROSTBITE)
+        return MOVE_EFFECT_FROSTBITE;
+    return MOVE_EFFECT_SLEEP;
+}
+
+// Braises tenaces, en fin de tour : si le statut suivi a été soigné alors que la cible est restée
+// en combat, il revient pour MOD_TREE_LINGER_TURNS tours puis s'éteint. Pas contre une immunité,
+// ni si un autre statut a pris sa place. Renvoie TRUE quand un message doit s'afficher
+// (gBattleCommunication[MULTISTRING_CHOOSER] : 0 = retour, 1 = fin).
+bool32 TryTreeLingeringStatus(enum BattlerId battler)
+{
+    struct TreeLinger *linger = &sTreeLinger[battler];
+    u32 *status1 = &gBattleMons[battler].status1;
+
+    if (!IsBattlerAlive(battler))
+        return FALSE;
+
+    switch (linger->state)
+    {
+    case TREE_LINGER_WATCHING:
+        if (*status1 & linger->status)
+            return FALSE;
+        linger->state = TREE_LINGER_DONE;
+        if ((*status1 & STATUS1_ANY)
+         || !CanSetNonVolatileStatus(sTreeStatusSource[battler].battler, battler, ABILITY_NONE, GetBattlerAbility(battler),
+                                     GetTreeLingerMoveEffect(linger->status), CHECK_TRIGGER))
+            return FALSE;
+        if (linger->status & STATUS1_SLEEP)
+            *status1 |= STATUS1_SLEEP_TURN(MOD_TREE_LINGER_TURNS + 1);
+        else
+            *status1 |= linger->status;
+        linger->state = TREE_LINGER_RETURNED;
+        linger->turn = gBattleTurnCounter;
+        gBattleCommunication[MULTISTRING_CHOOSER] = 0;
+        break;
+    case TREE_LINGER_RETURNED:
+        if (!(*status1 & linger->status))
+        {
+            linger->state = TREE_LINGER_DONE;
+            return FALSE;
+        }
+        if (gBattleTurnCounter - linger->turn < MOD_TREE_LINGER_TURNS)
+            return FALSE;
+        *status1 &= ~(linger->status | STATUS1_TOXIC_COUNTER);
+        linger->state = TREE_LINGER_DONE;
+        gBattleCommunication[MULTISTRING_CHOOSER] = 1;
+        break;
+    default:
+        return FALSE;
+    }
+
+    gBattleScripting.battler = battler;
+    BtlController_EmitSetMonData(battler, B_COMM_TO_CONTROLLER, REQUEST_STATUS_BATTLE, 0, sizeof(*status1), status1);
+    MarkBattlerForControllerExec(battler);
     return TRUE;
 }

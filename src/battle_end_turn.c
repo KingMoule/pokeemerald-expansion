@@ -568,7 +568,7 @@ static bool32 HandleEndTurnPoison(enum BattlerId battler)
         }
         else if (isToxicPoison)
         {
-            SetPassiveDamageAmount(battler, GetNonDynamaxMaxHP(battler) / 16);
+            SetPassiveDamageAmount(battler, ApplyTreeStatusDamageBonus(battler, STATUS1_TOXIC_POISON, GetNonDynamaxMaxHP(battler) / 16));
             if ((gBattleMons[battler].status1 & STATUS1_TOXIC_COUNTER) != STATUS1_TOXIC_TURN(15)) // not 16 turns
                 gBattleMons[battler].status1 += STATUS1_TOXIC_TURN(1);
             gBattleStruct->passiveHpUpdate[battler] *= (gBattleMons[battler].status1 & STATUS1_TOXIC_COUNTER) >> 8;
@@ -577,7 +577,7 @@ static bool32 HandleEndTurnPoison(enum BattlerId battler)
         }
         else
         {
-            SetPassiveDamageAmount(battler, GetNonDynamaxMaxHP(battler) / 8);
+            SetPassiveDamageAmount(battler, ApplyTreeStatusDamageBonus(battler, STATUS1_POISON, GetNonDynamaxMaxHP(battler) / 8));
             BattleScriptCall(BattleScript_PoisonTurnDmg);
             effect = TRUE;
         }
@@ -599,6 +599,7 @@ static bool32 HandleEndTurnBurn(enum BattlerId battler)
      && !IsAbilityAndRecord(battler, ability, ABILITY_MAGIC_GUARD))
     {
         s32 burnDamage = GetNonDynamaxMaxHP(battler) / ((GetConfig(B_BURN_DAMAGE) >= GEN_7 || GetConfig(B_BURN_DAMAGE) == GEN_1) ? 16 : 8);
+        burnDamage = ApplyTreeStatusDamageBonus(battler, STATUS1_BURN, burnDamage); // Mod : Attiser les flammes
         if (ability == ABILITY_HEATPROOF)
         {
             if (burnDamage > (burnDamage / 2) + 1) // Record ability if the burn takes less damage than it normally would.
@@ -623,12 +624,25 @@ static bool32 HandleEndTurnFrostbite(enum BattlerId battler)
      && IsBattlerPresent(battler)
      && !IsAbilityAndRecord(battler, GetBattlerAbility(battler), ABILITY_MAGIC_GUARD))
     {
-        SetPassiveDamageAmount(battler, GetNonDynamaxMaxHP(battler) / ((GetConfig(B_BURN_DAMAGE) >= GEN_7 || GetConfig(B_BURN_DAMAGE) == GEN_1) ? 16 : 8));
+        SetPassiveDamageAmount(battler, ApplyTreeStatusDamageBonus(battler, STATUS1_FROSTBITE, GetNonDynamaxMaxHP(battler) / ((GetConfig(B_BURN_DAMAGE) >= GEN_7 || GetConfig(B_BURN_DAMAGE) == GEN_1) ? 16 : 8)));
         BattleScriptCall(BattleScript_FrostbiteTurnDmg);
         effect = TRUE;
     }
 
     return effect;
+}
+
+// Mod : retour puis fin du premier statut infligé par un Pokémon qui a la maîtrise.
+static bool32 HandleEndTurnTreeLinger(enum BattlerId battler)
+{
+    gBattleStruct->eventState.endTurnBattler++;
+
+    if (IsBattlerPresent(battler) && TryTreeLingeringStatus(battler))
+    {
+        BattleScriptCall(BattleScript_TreeLingeringStatus);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 static bool32 HandleEndTurnNightmare(enum BattlerId battler)
@@ -1584,6 +1598,7 @@ static bool32 (*const sEndTurnEffectHandlers[])(enum BattlerId battler) =
     [ENDTURN_POISON] = HandleEndTurnPoison,
     [ENDTURN_BURN] = HandleEndTurnBurn,
     [ENDTURN_FROSTBITE] = HandleEndTurnFrostbite,
+    [ENDTURN_TREE_LINGER] = HandleEndTurnTreeLinger,
     [ENDTURN_NIGHTMARE] = HandleEndTurnNightmare,
     [ENDTURN_CURSE] = HandleEndTurnCurse,
     [ENDTURN_WRAP] = HandleEndTurnWrap,

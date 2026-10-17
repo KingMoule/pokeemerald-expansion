@@ -26,15 +26,8 @@
 // Branches génériques des éléments autres que le Feu (valeurs provisoires, à valider par Guillaume).
 // Assaut : attaques physiques de l'élément ; Focus : attaques spéciales ; Statut : infliger et
 // exploiter le statut de l'élément ; Météo : profiter de la météo de l'élément ; Garde : encaisser.
-// Maîtrises : Cœur (Assaut) et Aube (Météo) agissent comme celles du Feu ; les autres ouvrent
-// seulement la mutation pour l'instant.
-#define TREE_MASTERY(first)                                                                         \
-    [first + 3] = {                                                                                 \
-        .name = COMPOUND_STRING("Mastery"),                                                         \
-        .description = COMPOUND_STRING("Mastery. Rules not yet\ndefined (inactive)."),             \
-        .effect = TREE_EFFECT_INACTIVE_MASTERY, .maxRank = 1, .valuePerRank = 0,                    \
-    }
-
+// Maîtrises : Cœur (Assaut), Aube (Météo) et statut tenace agissent comme celles du Feu ;
+// Focus et Garde ont les leurs (valeurs MOD_TREE_FOCUS_CRIT_STAGES et MOD_TREE_GUARD_FIRST_HIT).
 #define BRANCH_ASSAULT(first)                                                                       \
     [first] = {                                                                                     \
         .name = COMPOUND_STRING("Elemental Impact"),                                                \
@@ -73,7 +66,11 @@
         .description = COMPOUND_STRING("+1% special damage\nper rank."),                           \
         .effect = TREE_EFFECT_SPECIAL_DAMAGE, .maxRank = 10, .valuePerRank = 10,                    \
     },                                                                                              \
-    TREE_MASTERY(first)
+    [first + 3] = {                                                                                 \
+        .name = COMPOUND_STRING("Piercing Focus"),                                                  \
+        .description = COMPOUND_STRING("Special moves of its type:\n+1 critical-hit stage."),      \
+        .effect = TREE_EFFECT_TYPE_SPECIAL_CRIT, .maxRank = 1, .valuePerRank = MOD_TREE_FOCUS_CRIT_STAGES, \
+    }
 
 #define BRANCH_STATUS(first)                                                                        \
     [first] = {                                                                                     \
@@ -91,7 +88,11 @@
         .description = COMPOUND_STRING("+1% max HP\nper rank."),                                   \
         .effect = TREE_EFFECT_MAX_HP, .maxRank = 10, .valuePerRank = 10,                            \
     },                                                                                              \
-    TREE_MASTERY(first)
+    [first + 3] = {                                                                                 \
+        .name = COMPOUND_STRING("Lingering Curse"),                                                 \
+        .description = COMPOUND_STRING("Once per battle, its first\nstatus outlasts a cure."), \
+        .effect = TREE_EFFECT_LINGERING_STATUS, .maxRank = 1, .valuePerRank = 1,                    \
+    }
 
 #define BRANCH_WEATHER(first)                                                                       \
     [first] = {                                                                                     \
@@ -131,7 +132,11 @@
         .description = COMPOUND_STRING("Below 50% HP, +2% damage\nof its type per rank."),         \
         .effect = TREE_EFFECT_TYPE_DAMAGE_LOW_HP, .maxRank = 10, .valuePerRank = 20,                \
     },                                                                                              \
-    TREE_MASTERY(first)
+    [first + 3] = {                                                                                 \
+        .name = COMPOUND_STRING("Unbreakable"),                                                     \
+        .description = COMPOUND_STRING("Once per battle, halves a\nsuper effective hit."),         \
+        .effect = TREE_EFFECT_FIRST_WEAKNESS_GUARD, .maxRank = 1, .valuePerRank = MOD_TREE_GUARD_FIRST_HIT, \
+    }
 
 #define B1 (TREE_TRUNK_NODES)
 #define B2 (TREE_TRUNK_NODES + TREE_BRANCH_NODES)
@@ -238,7 +243,7 @@ const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES] =
             },
             [11] = {
                 .name = COMPOUND_STRING("Stubborn Embers"),
-                .description = COMPOUND_STRING("Mastery. Rules not yet\ndefined (inactive)."),
+                .description = COMPOUND_STRING("Once per battle, its first\nburn outlasts a cure."),
                 .effect = TREE_EFFECT_LINGERING_STATUS, .maxRank = 1, .valuePerRank = 1,
             },
             // Solaire : soleil, puissance conditionnelle et survie.
@@ -278,5 +283,4 @@ const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES] =
 #undef BRANCH_STATUS
 #undef BRANCH_FOCUS
 #undef BRANCH_ASSAULT
-#undef TREE_MASTERY
 #undef TREE_TRUNK

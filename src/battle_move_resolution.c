@@ -4699,7 +4699,7 @@ static enum MoveEndResult MoveEndFormChange(struct BattleCalcValues *cv)
     return result;
 }
 
-// Mod : la maîtrise Cœur passe juste avant l'Orbe Vie, une fois par attaque.
+// Mod : maîtrises Garde et Cœur juste avant l'Orbe Vie, une fois par attaque.
 static EWRAM_DATA bool8 sTreeHeartChecked = FALSE;
 
 static enum MoveEndResult MoveEndLifeOrbShellBell(struct BattleCalcValues *cv)
@@ -4709,6 +4709,7 @@ static enum MoveEndResult MoveEndLifeOrbShellBell(struct BattleCalcValues *cv)
     if (!sTreeHeartChecked)
     {
         sTreeHeartChecked = TRUE;
+        UpdateTreeFirstWeaknessGuard(cv->battlerAtk);
         if (TryTreeHeartActivation(cv->battlerAtk, gCurrentMove))
         {
             BattleScriptCall(BattleScript_TreeHeartActivates);

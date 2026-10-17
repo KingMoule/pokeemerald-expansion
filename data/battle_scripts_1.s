@@ -3810,6 +3810,12 @@ BattleScript_TreeHeartActivates::
 	tryfaintmon BS_ATTACKER
 	return
 
+BattleScript_TreeLingeringStatus::
+	printfromtable gTreeLingerStringIds
+	waitmessage B_WAIT_TIME_LONG
+	updatestatusicon BS_SCRIPTING
+	return
+
 BattleScript_TreeWeatherOnEntry::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_TREEWEATHERENTRY
