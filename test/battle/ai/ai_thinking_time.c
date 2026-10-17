@@ -3,11 +3,11 @@
 
 #define AI_FRAME_CEILING_SINGLES_NO_FLAGS                       2
 #define AI_FRAME_CEILING_SINGLES_SMART_TRAINER                  7
-// Mod : +1 et +2 images en double pour les arbres et mutations (consultés à chaque calcul de dégâts).
+// Mod : marge de 1 à 2 images en double pour les arbres, mutations et variantes (consultés à chaque calcul de dégâts).
 #define AI_FRAME_CEILING_DOUBLES_NO_FLAGS                       15
 #define AI_FRAME_CEILING_DOUBLES_SMART_TRAINER                  30
 #define AI_FRAME_CEILING_STEVEN_MULTI                           21
-#define AI_FRAME_CEILING_STEVEN_MULTI_SMART_TRAINER             24
+#define AI_FRAME_CEILING_STEVEN_MULTI_SMART_TRAINER             26
 #define AI_FRAME_CEILING_CHECK                                  FALSE // If TRUE, forces all thinking time tests to fail. Useful for printing all actual frame times to console by running the tests
 
 AI_SINGLE_BATTLE_TEST("AI thinking time doesn't explode (singles, no flags)")
