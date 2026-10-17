@@ -308,5 +308,6 @@ RustboroCity_Gym_Text_ExplainTechniqueCodex:
 	.string "Choose carefully, though.\n"
 	.string "A variant can't be undone.\p"
 	.string "Codices like this one are found\n"
-	.string "deep in ancient ruins whose\l"
-	.string "halls change on every visit.$"
+	.string "deep in the SHIFTING RUINS.\p"
+	.string "They say its halls change\n"
+	.string "on every visit.$"

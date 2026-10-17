@@ -4,6 +4,8 @@
 // Valeurs provisoires du mod (wiki v0.2). Tous les chiffres d'équilibrage
 // sont regroupés ici pour être modifiés sans toucher au reste du code.
 
+// Donjon rogue-lite (étape 9, à la Lufia 2) : nom retenu « Shifting Ruins ».
+
 // Arbres élémentaires
 #define MOD_TREE_NODE_COUNT           16   // Nœuds stockés par Pokémon : 4 du tronc + 3 branches de 4 (maquette Feu).
 #define MOD_TREE_RANK_BITS            5    // Bits par nœud : rang maximal stockable de 31.
