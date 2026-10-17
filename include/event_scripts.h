@@ -427,6 +427,7 @@ extern const u8 EventScript_UseRockSmash[];
 extern const u8 EventScript_UseDig[];
 extern const u8 EventScript_UseCutGrass[];
 extern const u8 EventScript_UseDefog[];
+extern const u8 EventScript_TreeMenu[];
 
 //player pc
 extern const u8 EventScript_PalletTown_PlayersHouse_2F_ShutDownPC[];

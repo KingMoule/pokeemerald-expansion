@@ -638,3 +638,9 @@ gSpecials::
 	def_special UpdateTrainerCardPhotoIcons
 	def_special StickerManGetBragFlags
 	def_special CheckAddCoins
+	def_special TreeMenu_Begin
+	def_special TreeMenu_PushTypeChoices
+	def_special TreeMenu_BufferHeader
+	def_special TreeMenu_PushNodes
+	def_special TreeMenu_CheckNode
+	def_special TreeMenu_Invest

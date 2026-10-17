@@ -57,6 +57,7 @@
 #include "region_map.h"
 #include "reshow_battle_screen.h"
 #include "scanline_effect.h"
+#include "event_scripts.h"
 #include "script.h"
 #include "sound.h"
 #include "sprite.h"
@@ -110,6 +111,7 @@ enum {
     MENU_CATALOG_MOWER,
     MENU_CHANGE_FORM,
     MENU_CHANGE_ABILITY,
+    MENU_TREE,
     MENU_FIELD_MOVES
 };
 
@@ -185,7 +187,7 @@ struct PartyMenuInternal
     u32 spriteIdCancelPokeball:7;
     u32 messageId:14;
     u8 windowId[3];
-    u8 actions[8];
+    u8 actions[9]; // 8 + ARBRE (mod) : la fenêtre de 9 lignes tient encore à l'écran.
     u8 numActions;
     // In vanilla Emerald, only the first 0xB0 hwords (0x160 bytes) are actually used.
     // However, a full 0x100 hwords (0x200 bytes) are allocated.
@@ -474,6 +476,8 @@ static void CursorCb_Trade1(u8);
 static void CursorCb_Trade2(u8);
 static void CursorCb_Toss(u8);
 static void CursorCb_FieldMove(u8);
+static void CursorCb_Tree(u8);
+static void FieldCallback_TreeMenu(void);
 static void CursorCb_CatalogBulb(u8);
 static void CursorCb_CatalogOven(u8);
 static void CursorCb_CatalogWashing(u8);
@@ -2953,6 +2957,8 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
 
     sPartyMenuInternal->numActions = 0;
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SUMMARY);
+    if (!GetMonData(&mons[slotId], MON_DATA_IS_EGG))
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_TREE);
 
     // Add field moves to action list
     for (i = 0; i < MAX_MON_MOVES; i++)
@@ -4083,6 +4089,24 @@ static void Task_HandleSpinTradeYesNoInput(u8 taskId)
         Task_ReturnToChooseMonAfterText(taskId);
         break;
     }
+}
+
+// Ouvre l'écran d'investissement des points d'arbre (data/scripts/mod_tree.inc).
+static void CursorCb_Tree(u8 taskId)
+{
+    PlaySE(SE_SELECT);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+    gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
+    gPostMenuFieldCallback = FieldCallback_TreeMenu;
+    gPartyMenu.exitCallback = CB2_ReturnToField;
+    Task_ClosePartyMenu(taskId);
+}
+
+static void FieldCallback_TreeMenu(void)
+{
+    gSpecialVar_0x8004 = gPartyMenu.slotId;
+    ScriptContext_SetupScript(EventScript_TreeMenu);
 }
 
 static void CursorCb_FieldMove(u8 taskId)

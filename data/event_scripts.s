@@ -1699,6 +1699,7 @@ EventScript_PalletTown_PlayersHouse_2F_TurnOnPC::
 	.include "data/text/pokemon_news.inc"
 	.include "data/scripts/mauville_man.inc"
 	.include "data/scripts/field_move_scripts.inc"
+	.include "data/scripts/mod_tree.inc"
 	.include "data/scripts/item_ball_scripts.inc"
 	.include "data/scripts/profile_man.inc"
 	.include "data/scripts/day_care.inc"
