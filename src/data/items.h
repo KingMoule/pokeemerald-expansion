@@ -7350,9 +7350,9 @@ const struct ItemInfo gItemsInfo[] =
         .name = ITEM_NAME("Escape Orb"),
         .price = 0,
         .description = COMPOUND_STRING(
-            "Leaves the Shifting\n"
-            "Ruins at once, with\n"
-            "all your finds."),
+            "Leave the Ruins at\n"
+            "once and keep all\n"
+            "your finds."),
         .pocket = POCKET_ITEMS,
         .sortType = ITEM_TYPE_FIELD_USE,
         .type = ITEM_USE_FIELD,
