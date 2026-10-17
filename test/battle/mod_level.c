@@ -8,6 +8,7 @@ WILD_BATTLE_TEST("Mod: a level 100 Pokémon gains experience only once a seal ra
     PARAMETRIZE { seals = 0; }
     PARAMETRIZE { seals = 1; }
     GIVEN {
+        ASSUME(MOD_LEVELS_BEYOND_100);
         VarSet(VAR_MOD_LEVEL_SEALS, seals);
         PLAYER(SPECIES_WOBBUFFET) { Level(100); }
         OPPONENT(SPECIES_CATERPIE) { Level(50); HP(1); }

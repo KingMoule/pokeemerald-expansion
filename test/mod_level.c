@@ -15,15 +15,18 @@ TEST("Mod: experience curves are unchanged up to 100 and keep growing up to the 
         for (level = 2; level <= MAX_LEVEL; level++)
             EXPECT_GT(gExperienceTables[rate][level], gExperienceTables[rate][level - 1]);
     }
+#if MAX_LEVEL >= 200
     EXPECT_EQ(gExperienceTables[GROWTH_MEDIUM_FAST][200], 8000000);
+#endif
 }
 
 TEST("Mod: Pokémon above level 100 keep their experience and level")
 {
     struct Pokemon mon;
     u32 exp, level = 0;
+    ASSUME(MOD_LEVELS_BEYOND_100);
     PARAMETRIZE { level = 101; }
-    PARAMETRIZE { level = 180; }
+    PARAMETRIZE { level = min(180, MAX_LEVEL); }
     PARAMETRIZE { level = MAX_LEVEL; }
     CreateMonWithIVs(&mon, SPECIES_DRAGONITE, 50, 0, OTID_STRUCT_PLAYER_ID, 0);
     exp = gExperienceTables[gSpeciesInfo[SPECIES_DRAGONITE].growthRate][level];
@@ -37,6 +40,7 @@ TEST("Mod: Pokémon above level 100 keep their experience and level")
 
 TEST("Mod: the level cap starts at 100 and each seal raises it")
 {
+    ASSUME(MOD_LEVELS_BEYOND_100);
     VarSet(VAR_MOD_LEVEL_SEALS, 0);
     EXPECT_EQ(GetCurrentLevelCap(), MOD_LEVEL_BASE_CAP);
     VarSet(VAR_MOD_LEVEL_SEALS, 3);
@@ -50,8 +54,9 @@ TEST("Mod: Pokémon cannot level up past the current level cap")
 {
     struct Pokemon mon;
     u32 exp;
+    ASSUME(MOD_LEVELS_BEYOND_100);
     CreateMonWithIVs(&mon, SPECIES_DRAGONITE, 100, 0, OTID_STRUCT_PLAYER_ID, 0);
-    exp = gExperienceTables[gSpeciesInfo[SPECIES_DRAGONITE].growthRate][101];
+    exp = gExperienceTables[gSpeciesInfo[SPECIES_DRAGONITE].growthRate][min(101, MAX_LEVEL)];
     SetMonData(&mon, MON_DATA_EXP, &exp);
 
     VarSet(VAR_MOD_LEVEL_SEALS, 0);
@@ -62,4 +67,11 @@ TEST("Mod: Pokémon cannot level up past the current level cap")
     EXPECT(TryIncrementMonLevel(&mon));
     EXPECT_EQ(GetMonData(&mon, MON_DATA_LEVEL), 101);
     VarSet(VAR_MOD_LEVEL_SEALS, 0);
+}
+
+TEST("Mod: the level stays capped at 100 while levels beyond 100 are disabled")
+{
+    ASSUME(!MOD_LEVELS_BEYOND_100);
+    EXPECT_EQ(MAX_LEVEL, 100);
+    EXPECT_EQ(GetCurrentLevelCap(), 100);
 }

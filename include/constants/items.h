@@ -1053,7 +1053,9 @@ enum __attribute__((packed)) Item
     ITEM_GLIMMORANITE = 873,
     ITEM_TECHNIQUE_CODEX = 874, // Mod : donne une variante à une attaque.
     ITEM_LINEAGE_CHARM = 875,   // Mod : garantit ou choisit la mutation transmise à l'œuf (nom provisoire).
+#if MOD_LEVELS_BEYOND_100
     ITEM_ASCENSION_SEAL = 876,  // Mod : relève le plafond de niveau de toute la sauvegarde (nom provisoire).
+#endif
 
     ITEMS_COUNT,
     ITEM_FIELD_ARROW = ITEMS_COUNT,

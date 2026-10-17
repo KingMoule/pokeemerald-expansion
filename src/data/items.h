@@ -7343,6 +7343,7 @@ const struct ItemInfo gItemsInfo[] =
         .iconPalette = gItemIconPalette_OvalCharm,
     },
 
+#if MOD_LEVELS_BEYOND_100
     // Mod : sceau de dépassement, à rapporter vivant des Shifting Ruins.
     // Icône provisoire reprise du Shiny Charm.
     [ITEM_ASCENSION_SEAL] =
@@ -7360,6 +7361,7 @@ const struct ItemInfo gItemsInfo[] =
         .iconPic = gItemIcon_ShinyCharm,
         .iconPalette = gItemIconPalette_ShinyCharm,
     },
+#endif
 
 // Gems
 #if I_PRICE >= GEN_9

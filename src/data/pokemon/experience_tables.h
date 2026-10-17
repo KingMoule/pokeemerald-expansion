@@ -19,7 +19,7 @@
 // (même rythme relatif pour toutes les courbes ; Erratique ne redescend donc pas).
 #define EXP_BEYOND_100(exp100, n) ((u32)((u64)(exp100) * CUBE((u64)(n)) / 1000000))
 
-STATIC_ASSERT(MAX_LEVEL == 250, ExperienceTablesWrittenUpToLevel250);
+STATIC_ASSERT(MAX_LEVEL == 100 || MAX_LEVEL == 250, ExperienceTablesWrittenUpToLevel100Or250);
 
 const u32 gExperienceTables[][MAX_LEVEL + 1] =
 {
@@ -125,6 +125,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_MEDIUM_FAST(98),
         EXP_MEDIUM_FAST(99),
         EXP_MEDIUM_FAST(100),
+#if MAX_LEVEL > 100
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 101),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 102),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 103),
@@ -275,6 +276,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 248),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 249),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 250),
+#endif
     },
     { // Erratic
         0, // 0
@@ -378,6 +380,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_ERRATIC(98),
         EXP_ERRATIC(99),
         EXP_ERRATIC(100),
+#if MAX_LEVEL > 100
         EXP_BEYOND_100((EXP_ERRATIC(100)), 101),
         EXP_BEYOND_100((EXP_ERRATIC(100)), 102),
         EXP_BEYOND_100((EXP_ERRATIC(100)), 103),
@@ -528,6 +531,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_BEYOND_100((EXP_ERRATIC(100)), 248),
         EXP_BEYOND_100((EXP_ERRATIC(100)), 249),
         EXP_BEYOND_100((EXP_ERRATIC(100)), 250),
+#endif
     },
     { // Fluctuating
         0, // 0
@@ -631,6 +635,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_FLUCTUATING(98),
         EXP_FLUCTUATING(99),
         EXP_FLUCTUATING(100),
+#if MAX_LEVEL > 100
         EXP_BEYOND_100((EXP_FLUCTUATING(100)), 101),
         EXP_BEYOND_100((EXP_FLUCTUATING(100)), 102),
         EXP_BEYOND_100((EXP_FLUCTUATING(100)), 103),
@@ -781,6 +786,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_BEYOND_100((EXP_FLUCTUATING(100)), 248),
         EXP_BEYOND_100((EXP_FLUCTUATING(100)), 249),
         EXP_BEYOND_100((EXP_FLUCTUATING(100)), 250),
+#endif
     },
     { // Medium Slow
         0, // 0
@@ -884,6 +890,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_MEDIUM_SLOW(98),
         EXP_MEDIUM_SLOW(99),
         EXP_MEDIUM_SLOW(100),
+#if MAX_LEVEL > 100
         EXP_BEYOND_100((EXP_MEDIUM_SLOW(100)), 101),
         EXP_BEYOND_100((EXP_MEDIUM_SLOW(100)), 102),
         EXP_BEYOND_100((EXP_MEDIUM_SLOW(100)), 103),
@@ -1034,6 +1041,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_BEYOND_100((EXP_MEDIUM_SLOW(100)), 248),
         EXP_BEYOND_100((EXP_MEDIUM_SLOW(100)), 249),
         EXP_BEYOND_100((EXP_MEDIUM_SLOW(100)), 250),
+#endif
     },
     { // Fast
         0, // 0
@@ -1137,6 +1145,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_FAST(98),
         EXP_FAST(99),
         EXP_FAST(100),
+#if MAX_LEVEL > 100
         EXP_BEYOND_100((EXP_FAST(100)), 101),
         EXP_BEYOND_100((EXP_FAST(100)), 102),
         EXP_BEYOND_100((EXP_FAST(100)), 103),
@@ -1287,6 +1296,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_BEYOND_100((EXP_FAST(100)), 248),
         EXP_BEYOND_100((EXP_FAST(100)), 249),
         EXP_BEYOND_100((EXP_FAST(100)), 250),
+#endif
     },
     { // Slow
         0, // 0
@@ -1390,6 +1400,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_SLOW(98),
         EXP_SLOW(99),
         EXP_SLOW(100),
+#if MAX_LEVEL > 100
         EXP_BEYOND_100((EXP_SLOW(100)), 101),
         EXP_BEYOND_100((EXP_SLOW(100)), 102),
         EXP_BEYOND_100((EXP_SLOW(100)), 103),
@@ -1540,6 +1551,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_BEYOND_100((EXP_SLOW(100)), 248),
         EXP_BEYOND_100((EXP_SLOW(100)), 249),
         EXP_BEYOND_100((EXP_SLOW(100)), 250),
+#endif
     },
     { // Medium Fast copy 2 (unused? to-do: investigate)
         0, // 0
@@ -1643,6 +1655,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_MEDIUM_FAST(98),
         EXP_MEDIUM_FAST(99),
         EXP_MEDIUM_FAST(100),
+#if MAX_LEVEL > 100
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 101),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 102),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 103),
@@ -1793,6 +1806,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 248),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 249),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 250),
+#endif
     },
     { // Medium Fast copy 3 (unused? to-do: investigate)
         0, // 0
@@ -1896,6 +1910,7 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_MEDIUM_FAST(98),
         EXP_MEDIUM_FAST(99),
         EXP_MEDIUM_FAST(100),
+#if MAX_LEVEL > 100
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 101),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 102),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 103),
@@ -2046,5 +2061,6 @@ const u32 gExperienceTables[][MAX_LEVEL + 1] =
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 248),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 249),
         EXP_BEYOND_100((EXP_MEDIUM_FAST(100)), 250),
+#endif
     }
 };

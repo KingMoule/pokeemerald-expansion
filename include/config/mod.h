@@ -7,7 +7,9 @@
 // Donjon rogue-lite (étape 9, à la Lufia 2) : nom retenu « Shifting Ruins ».
 
 // Niveaux au-delà de 100 : chaque sceau rapporté du donjon relève le plafond de toute la sauvegarde.
-#define MOD_LEVEL_ABSOLUTE_MAX        250  // Plafond technique (niveau stocké sur 8 bits). Pas un plafond de jeu.
+// Désactivé pour l'instant (décision de Guillaume) : niveau 100 maximal et pas d'Ascension Seal en jeu.
+#define MOD_LEVELS_BEYOND_100         FALSE
+#define MOD_LEVEL_ABSOLUTE_MAX        (MOD_LEVELS_BEYOND_100 ? 250 : 100) // 250 : plafond technique (niveau sur 8 bits).
 #define MOD_LEVEL_BASE_CAP            100  // Plafond sans sceau.
 #define MOD_LEVEL_CAP_PER_SEAL        10   // Niveaux de plafond gagnés par sceau (provisoire).
 
