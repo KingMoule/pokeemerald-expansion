@@ -272,7 +272,8 @@ struct PokemonBuild
     u8 unused_0C:3;
     u8 treePoints; // Points d'arbre gagnés; les points dépensés sont la somme des rangs.
     u8 moveVariants; // MOD_MOVE_VARIANT_BITS bits par attaque.
-    u8 unused_0E[2];
+    u8 expHigh;  // Bits de poids fort de l'expérience au-delà de 21 bits (niveaux > 100).
+    u8 unused_0F;
 };
 
 struct BoxPokemon

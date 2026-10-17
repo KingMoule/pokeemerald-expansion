@@ -754,7 +754,7 @@ UNUSED static const struct BoxPokemon sBoxPokemonConstantsFit =
     },
     .secure.substructs[3].type3 = {
         .metLocation = min(MAPSEC_COUNT, min(METLOC_SPECIAL_EGG, min(METLOC_IN_GAME_TRADE, METLOC_FATEFUL_ENCOUNTER))),
-        .metLevel = MAX_LEVEL,
+        .metLevel = 100, // Mod : aucun Pokémon n'est rencontré au-delà du niveau 100.
         .metGame = NUM_VERSIONS, // NOTE: NUM_VERSIONS is inclusive!
         .dynamaxLevel = MAX_DYNAMAX_LEVEL,
         .otGender = GENDER_COUNT - 1,
@@ -768,7 +768,9 @@ UNUSED static const struct BoxPokemon sBoxPokemonConstantsFit =
     },
 };
 
-STATIC_ASSERT(MAX_LEVEL <= 100, PokemonSubstruct0_experience_PotentiallyTooSmall); // Maximum of ~2 million exp.
+// Mod : l'expérience dépasse 21 bits au-delà du niveau 100 ; les bits de poids fort vont dans build.expHigh.
+#define EXP_LOW_BITS 21
+STATIC_ASSERT(MAX_LEVEL <= 250, PokemonExperienceFitsIn29Bits);
 
 static u32 CompressStatus(u32 status)
 {
@@ -2129,7 +2131,7 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
             retVal = GetSubstruct0(boxMon)->heldItem;
             break;
         case MON_DATA_EXP:
-            retVal = GetSubstruct0(boxMon)->experience;
+            retVal = GetSubstruct0(boxMon)->experience | ((u32)boxMon->build.expHigh << EXP_LOW_BITS);
             break;
         case MON_DATA_PP_BONUSES:
             retVal = GetSubstruct0(boxMon)->ppBonuses;
@@ -2659,8 +2661,12 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
             SET16(GetSubstruct0(boxMon)->heldItem);
             break;
         case MON_DATA_EXP:
-            SET32(GetSubstruct0(boxMon)->experience);
+        {
+            u32 exp = data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+            GetSubstruct0(boxMon)->experience = exp & ((1 << EXP_LOW_BITS) - 1);
+            boxMon->build.expHigh = exp >> EXP_LOW_BITS;
             break;
+        }
         case MON_DATA_PP_BONUSES:
             SET8(GetSubstruct0(boxMon)->ppBonuses);
             break;

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "caps.h"
 #include "item_use.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -968,6 +969,22 @@ static void RemoveUsedItem(void)
         UpdatePyramidBagList();
         UpdatePyramidBagCursorPos();
     }
+}
+
+// Mod : chaque sceau relève de MOD_LEVEL_CAP_PER_SEAL le plafond de niveau de toute la sauvegarde.
+void ItemUseOutOfBattle_AscensionSeal(u8 taskId)
+{
+    if (GetModLevelCap() >= MAX_LEVEL)
+    {
+        DisplayItemMessage(taskId, FONT_NORMAL, gText_WontHaveEffect, CloseItemMessage);
+        return;
+    }
+    VarSet(VAR_MOD_LEVEL_SEALS, VarGet(VAR_MOD_LEVEL_SEALS) + 1);
+    RemoveUsedItem();
+    ConvertIntToDecimalStringN(gStringVar1, GetModLevelCap(), STR_CONV_MODE_LEFT_ALIGN, 3);
+    StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("The level cap of all your\nPokémon rose to {STR_VAR_1}!"));
+    PlaySE(SE_EXP_MAX);
+    DisplayItemMessage(taskId, FONT_NORMAL, gStringVar4, CloseItemMessage);
 }
 
 void ItemUseOutOfBattle_Repel(u8 taskId)

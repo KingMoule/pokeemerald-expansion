@@ -6,6 +6,11 @@
 
 // Donjon rogue-lite (étape 9, à la Lufia 2) : nom retenu « Shifting Ruins ».
 
+// Niveaux au-delà de 100 : chaque sceau rapporté du donjon relève le plafond de toute la sauvegarde.
+#define MOD_LEVEL_ABSOLUTE_MAX        250  // Plafond technique (niveau stocké sur 8 bits). Pas un plafond de jeu.
+#define MOD_LEVEL_BASE_CAP            100  // Plafond sans sceau.
+#define MOD_LEVEL_CAP_PER_SEAL        10   // Niveaux de plafond gagnés par sceau (provisoire).
+
 // Arbres élémentaires
 #define MOD_TREE_NODE_COUNT           16   // Nœuds stockés par Pokémon : 4 du tronc + 3 branches de 4 (maquette Feu).
 #define MOD_TREE_RANK_BITS            5    // Bits par nœud : rang maximal stockable de 31.

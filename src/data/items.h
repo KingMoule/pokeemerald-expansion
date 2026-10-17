@@ -7343,6 +7343,24 @@ const struct ItemInfo gItemsInfo[] =
         .iconPalette = gItemIconPalette_OvalCharm,
     },
 
+    // Mod : sceau de dépassement, à rapporter vivant des Shifting Ruins.
+    // Icône provisoire reprise du Shiny Charm.
+    [ITEM_ASCENSION_SEAL] =
+    {
+        .name = ITEM_NAME("Ascension Seal"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Raises the level\n"
+            "cap of all your\n"
+            "Pokémon for good."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_FIELD_USE,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_AscensionSeal,
+        .iconPic = gItemIcon_ShinyCharm,
+        .iconPalette = gItemIconPalette_ShinyCharm,
+    },
+
 // Gems
 #if I_PRICE >= GEN_9
     #define GEM_PRICE 15000

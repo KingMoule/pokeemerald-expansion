@@ -156,7 +156,7 @@ enum __attribute__((packed)) Stat
 #define MAX_GIFT_RIBBON 64
 
 #define MIN_LEVEL 1
-#define MAX_LEVEL 100
+#define MAX_LEVEL MOD_LEVEL_ABSOLUTE_MAX // Mod : le plafond réel dépend des sceaux (GetCurrentLevelCap).
 
 #define MAX_DYNAMAX_LEVEL 10
 
