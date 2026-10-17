@@ -75,4 +75,15 @@
 #define MOD_VARIANT_VOLATILE_POWER    85   // Incendiaire, généralisée : moins de puissance...
 #define MOD_VARIANT_VOLATILE_CHANCE   200  // ...plus de chances d'effet secondaire (brûlure, gel, recul...).
 
+// Adversaires avec des builds (wiki section 13). Valeurs provisoires.
+#define MOD_TRAINER_BUILDS            TRUE // Arbres et variantes pour les dresseurs importants (voir src/trainer_build.c).
+#define MOD_TRAINER_BUILD_MIN_BADGES  2    // Pas de build adverse avant N badges (le rival de la Route 110 les annonce).
+#define MOD_TRAINER_VARIANT_LEVEL     30   // Champions, rival, chefs d'équipe : une variante dès ce niveau.
+#define MOD_TRAINER_MUTATIONS         TRUE // Mutations de src/data/trainer_mutations.h (Conseil 4, Maître, revanches, défis).
+#define MOD_TRAINER_FAST_BASE_SPEED   80   // Vitesse de base à partir de laquelle l'IA investit la Vitesse avant les PV.
+
+// Défis à règles annoncées (wiki sections 13 et 14), au Centre Pokémon d'Ever Grande, après le Panthéon.
+#define MOD_CHALLENGE_RISING_MAX_LEVEL 50  // « Rising Trial » : niveau maximal des Pokémon du joueur.
+#define MOD_CHALLENGE_VARIETY_SIZE     6   // « Variety Trial » : Pokémon requis, sans type en commun.
+
 #endif // GUARD_CONFIG_MOD_H

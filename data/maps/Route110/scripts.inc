@@ -421,6 +421,7 @@ Route110_EventScript_MayBattleMudkip::
 	end
 
 Route110_EventScript_MayDefeated::
+	msgbox Route110_Text_ModMayExplainBuilds, MSGBOX_DEFAULT
 	msgbox Route110_Text_MayTakeThis, MSGBOX_DEFAULT
 	call Route110_EventScript_GiveItemfinder
 	msgbox Route110_Text_MayExplainItemfinder, MSGBOX_DEFAULT
@@ -451,6 +452,7 @@ Route110_EventScript_BrendanBattleMudkip::
 	end
 
 Route110_EventScript_BrendanDefeated::
+	msgbox Route110_Text_ModBrendanExplainBuilds, MSGBOX_DEFAULT
 	msgbox Route110_Text_BrendanTakeThis, MSGBOX_DEFAULT
 	call Route110_EventScript_GiveItemfinder
 	msgbox Route110_Text_BrendanExplainItemfinder, MSGBOX_DEFAULT
@@ -987,3 +989,22 @@ Route110_Text_KeepAnEyeOutForRival:
 	.string "Well, I had better get going.\n"
 	.string "See you again, {PLAYER}{KUN}!$"
 
+Route110_Text_ModMayExplainBuilds:
+	.string "MAY: Heh, you felt that?\n"
+	.string "I've been growing my team's\l"
+	.string "TREES too.\p"
+	.string "From here on, GYM LEADERS and other\n"
+	.string "strong TRAINERS will have builds\l"
+	.string "of their own.\p"
+	.string "Look at what their POKéMON do, and\n"
+	.string "plan your team around it!$"
+
+Route110_Text_ModBrendanExplainBuilds:
+	.string "BRENDAN: Heh, you felt that?\n"
+	.string "I've been growing my team's\l"
+	.string "TREES too.\p"
+	.string "From here on, GYM LEADERS and other\n"
+	.string "strong TRAINERS will have builds\l"
+	.string "of their own.\p"
+	.string "Look at what their POKéMON do, and\n"
+	.string "plan your team around it!$"

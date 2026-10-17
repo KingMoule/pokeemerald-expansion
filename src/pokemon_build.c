@@ -591,7 +591,7 @@ u32 ApplyTreeRecoilReduction(enum BattlerId battlerAtk, enum Type moveType, u32 
     return max(recoil, 1);
 }
 
-static u32 GetStatusMoveEffect(u32 status)
+u32 GetTreeStatusMoveEffect(u32 status)
 {
     switch (status)
     {
@@ -609,7 +609,7 @@ u32 GetTreeStatusChanceBonus(enum BattlerId battlerAtk, u32 moveEffect)
 {
     const struct ElementTree *tree = GetBattlerTree(battlerAtk);
 
-    if (tree == NULL || tree->status == 0 || GetStatusMoveEffect(tree->status) != moveEffect)
+    if (tree == NULL || tree->status == 0 || GetTreeStatusMoveEffect(tree->status) != moveEffect)
         return 0;
     return GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_STATUS_CHANCE) / 10;
 }

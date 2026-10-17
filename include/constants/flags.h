@@ -54,7 +54,7 @@
 #define FLAG_RECEIVED_TECHNIQUE_CODEX 0x20 // Mod : Technique Codex offert par Roxanne
 #define FLAG_MOD_EV_DUNGEON_EXPLAINED 0x21 // Mod : règles des Training Depths déjà expliquées
 #define FLAG_MOD_RUINS_EXPLAINED 0x22 // Mod : règles des Shifting Ruins déjà expliquées
-#define FLAG_UNUSED_0x023    0x23 // Unused Flag
+#define FLAG_MOD_CHALLENGES_EXPLAINED 0x23 // Mod : défis à règles annoncées déjà expliqués
 #define FLAG_UNUSED_0x024    0x24 // Unused Flag
 #define FLAG_UNUSED_0x025    0x25 // Unused Flag
 #define FLAG_UNUSED_0x026    0x26 // Unused Flag

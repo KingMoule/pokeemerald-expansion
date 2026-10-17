@@ -9,6 +9,7 @@
 #include "battle_transition.h"
 #include "event_data.h"
 #include "ev_dungeon.h"
+#include "mod_challenge.h"
 #include "frontier_util.h"
 #include "new_game.h"
 #include "overworld.h"
@@ -56,6 +57,7 @@ void CB2_EndSpecialTrainerBattle(void)
         gSpecialVar_Result = gBattleOutcome;
         break;
     case SPECIAL_BATTLE_EV_DUNGEON:
+    case SPECIAL_BATTLE_MOD_CHALLENGE:
         gSpecialVar_Result = gBattleOutcome;
         break;
     }
@@ -107,6 +109,12 @@ void DoSpecialTrainerBattle(void)
         CreateTask(Task_StartBattleAfterTransition, 1);
         PlayMapChosenOrBattleBGM(0);
         BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_TRAINER_HILL));
+        break;
+    case SPECIAL_BATTLE_MOD_CHALLENGE:
+        ModChallenge_SetupBattle();
+        CreateTask(Task_StartBattleAfterTransition, 1);
+        PlayMapChosenOrBattleBGM(0);
+        BattleTransition_StartOnField(GetTrainerBattleTransition());
         break;
     case SPECIAL_BATTLE_MULTI:
     default:

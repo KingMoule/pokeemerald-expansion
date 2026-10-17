@@ -2900,6 +2900,7 @@ BattleScript_LocalBattleLost::
 	jumpifhalfword CMP_EQUAL, gTrainerBattleParameter + 2, TRAINER_SECRET_BASE, BattleScript_LocalBattleLostEnd
 	jumpifhalfword CMP_EQUAL, gTrainerBattleParameter + 2, TRAINER_EV_DUNGEON, BattleScript_LocalBattleLostPrintTrainersWinText @ Mod : pas de perte d'argent dans les Training Depths
 	jumpifbyte CMP_NOT_EQUAL, gShiftingRuinsActive, FALSE, BattleScript_ShiftingRuinsBattleLost @ Mod : ni argent perdu ni retour au Centre dans les Shifting Ruins
+	jumpifbyte CMP_NOT_EQUAL, gModChallengeActive, FALSE, BattleScript_LocalBattleLostPrintTrainersWinText @ Mod : pas de perte d'argent dans les défis
 	jumpifbyte CMP_NOT_EQUAL, cMULTISTRING_CHOOSER, 0, BattleScript_RivalBattleLost
 	jumpifnowhiteout BattleScript_LocalBattleLostEnd_
 	jumpifbattletype BATTLE_TYPE_INGAME_PARTNER, BattleScript_LocalBattleLostPrintWhiteOut

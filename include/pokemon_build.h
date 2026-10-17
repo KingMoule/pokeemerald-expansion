@@ -118,6 +118,7 @@ const struct ElementTree *GetBattlerTree(enum BattlerId battler);
 // Effets des arbres en combat.
 uq4_12_t GetTreeDamageModifier(enum BattlerId battlerAtk, enum BattlerId battlerDef, enum Move move, enum Type moveType);
 u32 ApplyTreeRecoilReduction(enum BattlerId battlerAtk, enum Type moveType, u32 recoil);
+u32 GetTreeStatusMoveEffect(u32 status);
 u32 GetTreeStatusChanceBonus(enum BattlerId battlerAtk, u32 moveEffect);
 u32 GetTreeWeatherTurnsBonus(enum BattlerId battler, u32 weatherFlag);
 u32 GetTreeWeatherHealAmount(enum BattlerId battler);

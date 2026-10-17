@@ -650,6 +650,12 @@ gSpecials::
 	def_special VariantMenu_PushVariants
 	def_special VariantMenu_BufferVariant
 	def_special VariantMenu_Apply
+	def_special ModChallenge_PushList
+	def_special ModChallenge_BufferRules
+	def_special ModChallenge_CheckParty
+	def_special ModChallenge_Start
+	def_special ModChallenge_AfterBattle
+	def_special ModChallenge_Finish
 	def_special EvDungeon_CheckAccess
 	def_special EvDungeon_SetBeneficiary
 	def_special EvDungeon_PushPaths

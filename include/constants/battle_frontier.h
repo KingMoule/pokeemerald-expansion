@@ -37,6 +37,7 @@
 #define SPECIAL_BATTLE_EREADER 2
 #define SPECIAL_BATTLE_MULTI 3
 #define SPECIAL_BATTLE_EV_DUNGEON 4 // Mod : étage des Training Depths
+#define SPECIAL_BATTLE_MOD_CHALLENGE 5 // Mod : défi à règles annoncées
 
 // Facility trainer Battles
 #define FACILITY_BATTLE_TOWER           0

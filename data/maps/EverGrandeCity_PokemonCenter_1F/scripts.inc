@@ -26,6 +26,7 @@ EverGrandeCity_PokemonCenter_1F_EventScript_Woman::
 	end
 
 EverGrandeCity_PokemonCenter_1F_EventScript_ExpertM::
+	goto_if_set FLAG_SYS_GAME_CLEAR, EventScript_ChallengeMaster @ Mod : défis à règles annoncées après le Panthéon
 	msgbox EverGrandeCity_PokemonCenter_1F_Text_BelieveInYourPokemon, MSGBOX_NPC
 	end
 

@@ -6,6 +6,7 @@
 #include "battle_pike.h"
 #include "battle_pyramid.h"
 #include "shifting_ruins.h"
+#include "trainer_build.h"
 #include "battle_setup.h"
 #include "battle_special.h"
 #include "battle_partner.h"
@@ -2231,6 +2232,7 @@ static void CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum)
     if (!GetTrainerStructFromId(trainerNum)->overrideTrainer)
     {
         CreateNPCTrainerPartyFromTrainer(party, GetTrainerStructFromId(trainerNum));
+        ApplyTrainerPartyBuilds(party, trainerNum); // Mod : builds des adversaires importants
         return;
     }
 
@@ -2244,6 +2246,13 @@ static void CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum)
     if (tempTrainer.partySize == 0)
         tempTrainer.partySize = origTrainer->partySize;
     CreateNPCTrainerPartyFromTrainer(party, (const struct Trainer *)(&tempTrainer));
+    ApplyTrainerPartyBuilds(party, trainerNum); // Mod : builds des adversaires importants
+}
+
+// Mod : équipe d'un dresseur pour un combat lancé hors de trainerbattle (défis).
+void CreateTrainerPartyWithBuilds(struct Pokemon *party, u16 trainerNum)
+{
+    CreateNPCTrainerParty(party, trainerNum);
 }
 
 void CreateTrainerPartyForPlayer(void)
