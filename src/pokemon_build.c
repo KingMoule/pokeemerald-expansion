@@ -128,12 +128,17 @@ enum Type GetBattlerMutatedType(enum BattlerId battler, u32 slot)
 // la faiblesse, aucune pénalité (cas encore à définir dans le wiki).
 uq4_12_t ApplyMutationWeaknessPenalty(enum BattlerId battlerDef, enum Type moveType, uq4_12_t modifier)
 {
+    const struct BoxPokemon *boxMon;
     enum Type penaltyType;
 
-    if (gBattleMons[battlerDef].volatiles.transformed)
+    // Sorties rapides d'abord : cette fonction est appelée à chaque calcul d'efficacité, IA comprise.
+    if (modifier <= UQ_4_12(1.0) || gBattleMons[battlerDef].volatiles.transformed)
+        return modifier;
+    boxMon = GetBattlerBoxMon(battlerDef);
+    if (boxMon->build.mutationType == TYPE_NONE)
         return modifier;
 
-    penaltyType = GetBoxMonMutationPenaltyType(GetBattlerBoxMon(battlerDef), gBattleMons[battlerDef].species);
+    penaltyType = GetBoxMonMutationPenaltyType(boxMon, gBattleMons[battlerDef].species);
     if (penaltyType == TYPE_NONE || !IS_BATTLER_OF_TYPE(battlerDef, penaltyType))
         return modifier;
     if (GetTypeModifier(moveType, penaltyType) <= UQ_4_12(1.0) || modifier <= UQ_4_12(1.0))
@@ -275,13 +280,14 @@ const struct ElementTree *GetBattlerTree(enum BattlerId battler)
 // Les bonus de dégâts des arbres s'additionnent entre eux (proposition du wiki, ordre encore ouvert).
 uq4_12_t GetTreeDamageModifier(enum BattlerId battlerAtk, enum BattlerId battlerDef, enum Move move, enum Type moveType)
 {
-    const struct ElementTree *tree = GetBattlerTree(battlerAtk);
-    enum Type treeType;
+    const struct BoxPokemon *boxMon = GetBattlerBoxMon(battlerAtk);
+    enum Type treeType = boxMon->build.treeType;
+    const struct ElementTree *tree;
     u32 bonus = 0;
 
-    if (tree == NULL)
+    if (treeType == TYPE_NONE || treeType >= NUMBER_OF_MON_TYPES)
         return UQ_4_12(1.0);
-    treeType = GetBattlerBoxMon(battlerAtk)->build.treeType;
+    tree = &gElementTrees[treeType];
 
     if (IsBattleMovePhysical(move))
         bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_PHYSICAL_DAMAGE);
