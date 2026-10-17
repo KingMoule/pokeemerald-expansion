@@ -3802,6 +3802,24 @@ BattleScript_TreeWeatherHeal::
 	printstring STRINGID_TREEWEATHERHEAL
 	goto BattleScript_TurnHeal
 
+BattleScript_TreeHeartActivates::
+	printstring STRINGID_TREEHEART
+	waitmessage B_WAIT_TIME_LONG
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER, ASSURANCE_DOUBLE
+	tryfaintmon BS_ATTACKER
+	return
+
+BattleScript_TreeWeatherOnEntry::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_TREEWEATHERENTRY
+	waitmessage B_WAIT_TIME_LONG
+	printfromtable gMoveWeatherChangeStringIds
+	waitmessage B_WAIT_TIME_LONG
+	playanimation_var BS_BATTLER_0, sB_ANIM_ARG1
+	call BattleScript_ActivateWeatherAbilities
+	return
+
 BattleScript_PrintMonIsRooted::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_PKMNANCHOREDITSELF

@@ -26,7 +26,8 @@
 // Branches génériques des éléments autres que le Feu (valeurs provisoires, à valider par Guillaume).
 // Assaut : attaques physiques de l'élément ; Focus : attaques spéciales ; Statut : infliger et
 // exploiter le statut de l'élément ; Météo : profiter de la météo de l'élément ; Garde : encaisser.
-// Comme pour le Feu, les maîtrises finales ouvrent la mutation mais n'ont pas encore d'effet.
+// Maîtrises : Cœur (Assaut) et Aube (Météo) agissent comme celles du Feu ; les autres ouvrent
+// seulement la mutation pour l'instant.
 #define TREE_MASTERY(first)                                                                         \
     [first + 3] = {                                                                                 \
         .name = COMPOUND_STRING("Mastery"),                                                         \
@@ -50,7 +51,11 @@
         .description = COMPOUND_STRING("Below 50% HP, +2% damage\nof its type per rank."),         \
         .effect = TREE_EFFECT_TYPE_DAMAGE_LOW_HP, .maxRank = 10, .valuePerRank = 20,                \
     },                                                                                              \
-    TREE_MASTERY(first)
+    [first + 3] = {                                                                                 \
+        .name = COMPOUND_STRING("Elemental Heart"),                                                 \
+        .description = COMPOUND_STRING("Each hit: +10% damage of\nits type (x3), -5% HP."),  \
+        .effect = TREE_EFFECT_TYPE_DAMAGE_STACK, .maxRank = 1, .valuePerRank = 100,                 \
+    }
 
 #define BRANCH_FOCUS(first)                                                                         \
     [first] = {                                                                                     \
@@ -104,7 +109,11 @@
         .description = COMPOUND_STRING("In its weather, heal 0.5%\nmax HP each turn per rank."),   \
         .effect = TREE_EFFECT_WEATHER_HEAL, .maxRank = 10, .valuePerRank = 5,                       \
     },                                                                                              \
-    TREE_MASTERY(first)
+    [first + 3] = {                                                                                 \
+        .name = COMPOUND_STRING("Herald"),                                                          \
+        .description = COMPOUND_STRING("Once per battle, calls\nits weather on first entry."),    \
+        .effect = TREE_EFFECT_WEATHER_ON_ENTRY, .maxRank = 1, .valuePerRank = 1,                    \
+    }
 
 #define BRANCH_GUARD(first)                                                                         \
     [first] = {                                                                                     \
@@ -208,7 +217,7 @@ const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES] =
             },
             [7] = {
                 .name = COMPOUND_STRING("Incandescent Heart"),
-                .description = COMPOUND_STRING("Mastery. Rules not yet\ndefined (inactive)."),
+                .description = COMPOUND_STRING("Each Fire hit: +10% Fire\ndamage (x3), costs 5% HP."),
                 .effect = TREE_EFFECT_TYPE_DAMAGE_STACK, .maxRank = 1, .valuePerRank = 100,
             },
             // Combustion : infliger une brûlure et exploiter les cibles brûlées.
@@ -250,7 +259,7 @@ const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES] =
             },
             [15] = {
                 .name = COMPOUND_STRING("Inner Dawn"),
-                .description = COMPOUND_STRING("Mastery. Sun on first\nswitch-in (inactive)."),
+                .description = COMPOUND_STRING("Once per battle, calls\nthe sun on first entry."),
                 .effect = TREE_EFFECT_WEATHER_ON_ENTRY, .maxRank = 1, .valuePerRank = 3,
             },
         },

@@ -280,6 +280,14 @@ static bool32 FirstEventBlockEvents(struct BattleCalcValues *calcValues)
             effect = TRUE;
         gBattleStruct->eventState.battlerSwitchIn++;
         break;
+    case FIRST_EVENT_BLOCK_TREE_MASTERY:
+        if (TryTreeWeatherOnEntry(battler))
+        {
+            BattleScriptCall(BattleScript_TreeWeatherOnEntry);
+            effect = TRUE;
+        }
+        gBattleStruct->eventState.battlerSwitchIn++;
+        break;
     case FIRST_EVENT_BLOCK_IMMUNITY_ABILITIES:
         if (AbilityBattleEffects(ABILITYEFFECT_IMMUNITY, battler, calcValues->abilities[battler], MOVE_NONE, TRUE))
             effect = TRUE;

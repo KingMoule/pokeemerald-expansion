@@ -4699,9 +4699,23 @@ static enum MoveEndResult MoveEndFormChange(struct BattleCalcValues *cv)
     return result;
 }
 
+// Mod : la maîtrise Cœur passe juste avant l'Orbe Vie, une fois par attaque.
+static EWRAM_DATA bool8 sTreeHeartChecked = FALSE;
+
 static enum MoveEndResult MoveEndLifeOrbShellBell(struct BattleCalcValues *cv)
 {
     enum MoveEndResult result = MOVEEND_RESULT_CONTINUE;
+
+    if (!sTreeHeartChecked)
+    {
+        sTreeHeartChecked = TRUE;
+        if (TryTreeHeartActivation(cv->battlerAtk, gCurrentMove))
+        {
+            BattleScriptCall(BattleScript_TreeHeartActivates);
+            return MOVEEND_RESULT_RUN_SCRIPT;
+        }
+    }
+    sTreeHeartChecked = FALSE;
 
     if (ItemBattleEffects(cv->battlerAtk, 0, cv->holdEffects[cv->battlerAtk], IsLifeOrbShellBellActivation))
         result = MOVEEND_RESULT_RUN_SCRIPT;

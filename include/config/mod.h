@@ -40,6 +40,10 @@
 #define MOD_TREE_BRANCH_UNLOCK_POINTS 15   // Points dans le tronc pour ouvrir les branches.
 #define MOD_TREE_PARENT_RANKS         5    // Rangs requis dans le nœud parent pour ouvrir le suivant.
 #define MOD_TREE_POINTS_PER_LEVEL     1    // Points d'arbre gagnés par niveau (provisoire, question ouverte du wiki).
+// Maîtrises finales (wiki section 5, maquette Feu, étendue aux autres éléments).
+#define MOD_TREE_HEART_MAX_STACKS     3    // Cœur : cumuls de +10 % aux dégâts de l'élément au plus...
+#define MOD_TREE_HEART_HP_COST        5    // ...chaque activation coûte N % des PV max.
+#define MOD_TREE_ENTRY_WEATHER_TURNS  3    // Aube : tours de météo invoqués à la première entrée (+ tours de la branche).
 
 // EV
 #define MOD_BATTLE_EV_GAINS           FALSE // Les combats normaux ne donnent plus d'EV (donjon d'entraînement à la place).

@@ -2759,6 +2759,7 @@ static void BattleStartClearSetData(void)
 
     TurnValuesCleanUp(FALSE);
     memset(&gSpecialStatuses, 0, sizeof(gSpecialStatuses));
+    ResetTreeBattleState(); // Mod : cumuls et maîtrises « une fois par combat »
 
     memset(&gFieldTimers, 0, sizeof(gFieldTimers));
     memset(&gSideStatuses, 0, sizeof(gSideStatuses));

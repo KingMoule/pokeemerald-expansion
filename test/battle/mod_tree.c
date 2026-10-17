@@ -239,3 +239,55 @@ SINGLE_BATTLE_TEST("Mod: Toxin's Exploit boosts damage against poisoned targets"
         EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.2), results[1].damage);
     }
 }
+
+SINGLE_BATTLE_TEST("Mod: Incandescent Heart stacks Fire damage after each Fire hit, at a cost", s16 damage)
+{
+    u32 rank;
+    PARAMETRIZE { rank = 0; }
+    PARAMETRIZE { rank = 1; }
+    GIVEN {
+        PLAYER(SPECIES_CHARMANDER) { TreeRank(TYPE_FIRE, 7, rank); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_EMBER, criticalHit: FALSE); }
+        TURN { MOVE(player, MOVE_EMBER, criticalHit: FALSE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
+        if (rank == 1)
+        {
+            MESSAGE("Charmander's mastery grows stronger, at a cost!");
+            HP_BAR(player);
+        }
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_EMBER, player);
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.1), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Incandescent Heart does nothing without the mastery")
+{
+    GIVEN {
+        PLAYER(SPECIES_CHARMANDER);
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_EMBER); }
+    } SCENE {
+        NOT MESSAGE("Charmander's mastery grows stronger, at a cost!");
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Herald calls the tree's weather on first entry")
+{
+    GIVEN {
+        PLAYER(SPECIES_SQUIRTLE) { TreeRank(TYPE_WATER, 15, 1); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { }
+    } SCENE {
+        MESSAGE("Squirtle's mastery calls the weather!");
+        MESSAGE("It started to rain!");
+    } THEN {
+        EXPECT(gBattleWeather & B_WEATHER_RAIN);
+    }
+}

@@ -905,6 +905,8 @@ const u8 *const gBattleStringsTable[STRINGID_COUNT] =
     [STRINGID_LOSTSOMEOFITSHP]                      = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX} lost some of its HP!"),
     [STRINGID_BELCHCANTUSE]                         = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX} hasn't eaten any held Berries, so it can't possibly belch!\p"),
     [STRINGID_TREEWEATHERHEAL]                      = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX} restored HP using the weather!"),
+    [STRINGID_TREEHEART]                            = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX}'s mastery grows stronger, at a cost!"),
+    [STRINGID_TREEWEATHERENTRY]                     = COMPOUND_STRING("{B_SCR_NAME_WITH_PREFIX}'s mastery calls the weather!"),
 };
 
 const u16 gTrainerUsedItemStringIds[] =

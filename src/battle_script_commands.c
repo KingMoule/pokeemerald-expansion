@@ -3240,6 +3240,7 @@ static void Cmd_switchindataupdate(void)
     gBattleMons[battler].types[0] = GetBattlerMutatedType(battler, 0);
     gBattleMons[battler].types[1] = GetBattlerMutatedType(battler, 1);
     gBattleMons[battler].types[2] = TYPE_MYSTERY;
+    ResetTreeHeartStacks(battler); // Mod : le Cœur se perd au changement
     gBattleMons[battler].ability = GetAbilityBySpecies(gBattleMons[battler].species, gBattleMons[battler].abilityNum);
     #if TESTING
     if (gTestRunnerEnabled)

@@ -71,11 +71,11 @@ enum TreeEffect
     TREE_EFFECT_WEATHER_HEAL,         // ‰ des PV max récupérés en fin de tour sous la météo.
     TREE_EFFECT_TYPE_SPECIAL_DAMAGE,  // ‰ de dégâts des attaques spéciales de l'élément.
     TREE_EFFECT_WEAKNESS_GUARD,       // ‰ de dégâts en moins contre les attaques super efficaces.
-    // Maîtrises dont les règles restent à préciser dans le wiki : sans effet pour l'instant.
-    TREE_EFFECT_TYPE_DAMAGE_STACK,
+    TREE_EFFECT_TYPE_DAMAGE_STACK,    // ‰ de dégâts de l'élément par cumul, gagné après chaque attaque de l'élément.
+    TREE_EFFECT_WEATHER_ON_ENTRY,     // Invoque la météo de l'élément à la première entrée.
+    // Effets dont les règles restent à préciser dans le wiki : sans effet pour l'instant.
     TREE_EFFECT_STATUS_DAMAGE,
     TREE_EFFECT_LINGERING_STATUS,
-    TREE_EFFECT_WEATHER_ON_ENTRY,
     TREE_EFFECT_INACTIVE_MASTERY,     // Maîtrise générique des autres éléments.
 };
 
@@ -126,5 +126,10 @@ u32 GetTreeStatusMoveEffect(u32 status);
 u32 GetTreeStatusChanceBonus(enum BattlerId battlerAtk, u32 moveEffect);
 u32 GetTreeWeatherTurnsBonus(enum BattlerId battler, u32 weatherFlag);
 u32 GetTreeWeatherHealAmount(enum BattlerId battler);
+void ResetTreeBattleState(void);
+void ResetTreeHeartStacks(enum BattlerId battler);
+u32 GetTreeHeartStacks(enum BattlerId battler);
+bool32 TryTreeHeartActivation(enum BattlerId battlerAtk, enum Move move);
+bool32 TryTreeWeatherOnEntry(enum BattlerId battler);
 
 #endif // GUARD_POKEMON_BUILD_H

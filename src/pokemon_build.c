@@ -586,6 +586,7 @@ uq4_12_t GetTreeDamageModifier(enum BattlerId battlerAtk, enum BattlerId battler
             bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_DAMAGE_LOW_HP);
         if (tree->weather != 0 && HasWeatherEffect() && (gBattleWeather & tree->weather))
             bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_DAMAGE_WEATHER);
+        bonus += GetTreeHeartStacks(battlerAtk) * GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_DAMAGE_STACK);
     }
 
     if (tree->status != 0 && (gBattleMons[battlerDef].status1 & tree->status))
@@ -664,4 +665,80 @@ u32 GetTreeWeatherHealAmount(enum BattlerId battler)
     if (heal == 0)
         return 0;
     return max(GetNonDynamaxMaxHP(battler) * heal / 1000, 1);
+}
+
+// Maîtrises finales actives (wiki section 5) : Cœur (branche Assaut) et Aube (branche Météo).
+// Cœur : cumuls perdus au changement de Pokémon. Aube : une fois par combat et par Pokémon.
+static EWRAM_DATA u8 sTreeHeartStacks[MAX_BATTLERS_COUNT] = {0};
+static EWRAM_DATA u8 sTreeEntryWeatherUsed[NUM_BATTLE_SIDES] = {0}; // Un bit par place dans l'équipe.
+
+void ResetTreeBattleState(void)
+{
+    memset(sTreeHeartStacks, 0, sizeof(sTreeHeartStacks));
+    memset(sTreeEntryWeatherUsed, 0, sizeof(sTreeEntryWeatherUsed));
+}
+
+void ResetTreeHeartStacks(enum BattlerId battler)
+{
+    sTreeHeartStacks[battler] = 0;
+}
+
+u32 GetTreeHeartStacks(enum BattlerId battler)
+{
+    return sTreeHeartStacks[battler];
+}
+
+// Après une attaque réussie de l'élément de l'arbre : un cumul de plus, contre une part des PV max.
+// Une activation par attaque, attaques à coups multiples comprises. Garde Magik évite le coût... et le cumul.
+bool32 TryTreeHeartActivation(enum BattlerId battlerAtk, enum Move move)
+{
+    if (sTreeHeartStacks[battlerAtk] >= MOD_TREE_HEART_MAX_STACKS
+     || GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_DAMAGE_STACK) == 0
+     || GetBattlerBoxMon(battlerAtk)->build.treeType != GetBattleMoveType(move)
+     || gBattleStruct->unableToUseMove
+     || !IsBattlerAlive(battlerAtk)
+     || !IsAnyTargetTurnDamaged(battlerAtk, INCLUDING_SUBSTITUTES)
+     || GetBattlerAbility(battlerAtk) == ABILITY_MAGIC_GUARD)
+        return FALSE;
+
+    sTreeHeartStacks[battlerAtk]++;
+    SetPassiveDamageAmount(battlerAtk, max(GetNonDynamaxMaxHP(battlerAtk) * MOD_TREE_HEART_HP_COST / 100, 1));
+    return TRUE;
+}
+
+static u32 GetTreeBattleWeather(u32 weatherFlags)
+{
+    if (weatherFlags & B_WEATHER_SUN)
+        return BATTLE_WEATHER_SUN;
+    if (weatherFlags & B_WEATHER_RAIN)
+        return BATTLE_WEATHER_RAIN;
+    if (weatherFlags & B_WEATHER_SANDSTORM)
+        return BATTLE_WEATHER_SANDSTORM;
+    if (weatherFlags & (B_WEATHER_HAIL | B_WEATHER_SNOW))
+        return GetConfig(B_SNOW_WARNING) >= GEN_9 ? BATTLE_WEATHER_SNOW : BATTLE_WEATHER_HAIL;
+    return BATTLE_WEATHER_COUNT;
+}
+
+bool32 TryTreeWeatherOnEntry(enum BattlerId battler)
+{
+    const struct ElementTree *tree = GetBattlerTree(battler);
+    enum BattleSide side = GetBattlerSide(battler);
+    u32 slotBit = 1u << gBattlerPartyIndexes[battler];
+    u32 weather;
+
+    if (tree == NULL || tree->weather == 0 || (sTreeEntryWeatherUsed[side] & slotBit)
+     || GetBattlerTreeEffect(battler, TREE_EFFECT_WEATHER_ON_ENTRY) == 0 || !IsBattlerAlive(battler))
+        return FALSE;
+    sTreeEntryWeatherUsed[side] |= slotBit;
+
+    weather = GetTreeBattleWeather(tree->weather);
+    if (weather == BATTLE_WEATHER_COUNT || (gBattleWeather & gBattleWeatherInfo[weather].flag))
+        return FALSE;
+    if (TryChangeBattleWeather(battler, weather, ABILITY_NONE) != WEATHER_FAILURE_SUCCESS)
+        return FALSE;
+
+    gBattleStruct->weatherDuration = MOD_TREE_ENTRY_WEATHER_TURNS + GetTreeWeatherTurnsBonus(battler, gBattleWeather);
+    gBattleScripting.battler = battler;
+    gBattleScripting.animArg1 = gBattleWeatherInfo[weather].animation;
+    return TRUE;
 }
