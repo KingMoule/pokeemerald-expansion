@@ -7331,9 +7331,9 @@ const struct ItemInfo gItemsInfo[] =
         .name = ITEM_NAME("Lineage Charm"),
         .price = 0,
         .description = COMPOUND_STRING(
-            "Held by a parent, it\n"
-            "passes a compatible\n"
-            "mutation to the Egg."),
+            "Held by a parent,\n"
+            "it passes on its\n"
+            "mutation to Eggs."),
         .pocket = POCKET_ITEMS,
         .sortType = ITEM_TYPE_HELD_ITEM,
         .type = ITEM_USE_BAG_MENU,
