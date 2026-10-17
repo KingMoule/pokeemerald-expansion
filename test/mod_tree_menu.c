@@ -61,3 +61,27 @@ TEST("Mod: tree menu does nothing for an egg")
     TreeMenu_Begin();
     EXPECT_EQ(gSpecialVar_Result, 0);
 }
+
+TEST("Mod: build menu gives a permanent variant to a damaging move only")
+{
+    struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][0];
+    CreateRandomMonWithIVs(mon, SPECIES_CHARMANDER, 30, 0);
+    SetMonMoveSlot(mon, MOVE_FLAMETHROWER, 0);
+    SetMonMoveSlot(mon, MOVE_GROWL, 1);
+    gSpecialVar_0x8004 = 0;
+    BuildMenu_Begin();
+    EXPECT_EQ(gSpecialVar_Result, TRUE);
+
+    gSpecialVar_0x8007 = 1; // Growl
+    VariantMenu_CheckMove();
+    EXPECT_NE(gSpecialVar_Result, 0);
+
+    gSpecialVar_0x8007 = 0; // Flamethrower
+    VariantMenu_CheckMove();
+    EXPECT_EQ(gSpecialVar_Result, 0);
+    gSpecialVar_0x8008 = MOVE_VARIANT_VOLATILE;
+    VariantMenu_Apply();
+    EXPECT_EQ(GetBoxMonMoveVariant(&mon->box, 0), MOVE_VARIANT_VOLATILE);
+    VariantMenu_CheckMove();
+    EXPECT_NE(gSpecialVar_Result, 0);
+}

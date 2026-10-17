@@ -24,5 +24,12 @@
 
 // Variantes d'attaques
 #define MOD_MOVE_VARIANT_BITS         2    // Bits par attaque : 0 = standard, 1 à 3 = variantes.
+// Valeurs en % de la valeur normale de l'attaque (wiki : avantage et contrepartie, chiffres à fixer).
+#define MOD_VARIANT_FOCUSED_POWER     120  // Concentrée : plus de puissance...
+#define MOD_VARIANT_FOCUSED_PP        60   // ...moins de PP.
+#define MOD_VARIANT_THRIFTY_POWER     85   // Économe : moins de puissance...
+#define MOD_VARIANT_THRIFTY_PP        150  // ...plus de PP.
+#define MOD_VARIANT_VOLATILE_POWER    85   // Incendiaire, généralisée : moins de puissance...
+#define MOD_VARIANT_VOLATILE_CHANCE   200  // ...plus de chances d'effet secondaire (brûlure, gel, recul...).
 
 #endif // GUARD_CONFIG_MOD_H

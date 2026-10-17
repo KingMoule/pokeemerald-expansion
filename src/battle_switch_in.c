@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_build.h"
 #include "battle.h"
 #include "battle_hold_effects.h"
 #include "battle_stat_change.h"
@@ -195,10 +196,10 @@ static bool32 CanBattlerBeHealed(enum BattlerId battler)
         return TRUE;
 
     if (gBattleStruct->battlerState[battler].storedLunarDance
-     && (gBattleMons[battler].pp[0] < CalculatePPWithBonus(gBattleMons[battler].moves[0], gBattleMons[battler].ppBonuses, 0)
-      || gBattleMons[battler].pp[1] < CalculatePPWithBonus(gBattleMons[battler].moves[1], gBattleMons[battler].ppBonuses, 1)
-      || gBattleMons[battler].pp[2] < CalculatePPWithBonus(gBattleMons[battler].moves[2], gBattleMons[battler].ppBonuses, 2)
-      || gBattleMons[battler].pp[3] < CalculatePPWithBonus(gBattleMons[battler].moves[3], gBattleMons[battler].ppBonuses, 3)))
+     && (gBattleMons[battler].pp[0] < CalculateBattlerMovePP(battler, gBattleMons[battler].moves[0], gBattleMons[battler].ppBonuses, 0)
+      || gBattleMons[battler].pp[1] < CalculateBattlerMovePP(battler, gBattleMons[battler].moves[1], gBattleMons[battler].ppBonuses, 1)
+      || gBattleMons[battler].pp[2] < CalculateBattlerMovePP(battler, gBattleMons[battler].moves[2], gBattleMons[battler].ppBonuses, 2)
+      || gBattleMons[battler].pp[3] < CalculateBattlerMovePP(battler, gBattleMons[battler].moves[3], gBattleMons[battler].ppBonuses, 3)))
     {
         return TRUE;
     }

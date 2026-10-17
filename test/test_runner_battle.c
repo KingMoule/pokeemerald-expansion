@@ -2757,6 +2757,15 @@ void TreeRank_(u32 sourceLine, enum Type treeType, u32 node, u32 rank)
     CalculateMonStats(DATA.currentMon);
 }
 
+// À placer après Moves(...) : la variante s'attache à l'attaque de cet emplacement.
+void MoveVariant_(u32 sourceLine, u32 slot, u32 variant)
+{
+    INVALID_IF(!DATA.currentMon, "MoveVariant outside of PLAYER/OPPONENT");
+    INVALID_IF(slot >= MAX_MON_MOVES, "Illegal move slot: %d", slot);
+    SetBoxMonMoveVariant(&DATA.currentMon->box, slot, variant);
+    BoxMonRestorePP(&DATA.currentMon->box);
+}
+
 void TeraType_(u32 sourceLine, enum Type teraType)
 {
     INVALID_IF(!DATA.currentMon, "TeraType outside of PLAYER/OPPONENT");

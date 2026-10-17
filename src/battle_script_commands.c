@@ -9464,7 +9464,7 @@ void BS_ItemRestorePP(void)
     {
         pp = GetMonData(mon, MON_DATA_PP1 + i);
         moveId = GetMonData(mon, MON_DATA_MOVE1 + i);
-        maxPP = CalculatePPWithBonus(moveId, GetMonData(mon, MON_DATA_PP_BONUSES), i);
+        maxPP = CalculateMonMovePP(mon, moveId, GetMonData(mon, MON_DATA_PP_BONUSES), i);
         if (pp != maxPP)
         {
             pp += effect[6];
@@ -10947,7 +10947,7 @@ void BS_RestoreMovePp(void)
     u32 data[MAX_MON_MOVES + 1];
     for (moveIndex = 0; moveIndex < MAX_MON_MOVES; moveIndex++)
     {
-        gBattleMons[battler].pp[moveIndex] = CalculatePPWithBonus(gBattleMons[battler].moves[moveIndex], gBattleMons[battler].ppBonuses, moveIndex);
+        gBattleMons[battler].pp[moveIndex] = CalculateBattlerMovePP(battler, gBattleMons[battler].moves[moveIndex], gBattleMons[battler].ppBonuses, moveIndex);
         data[moveIndex] = gBattleMons[battler].pp[moveIndex];
     }
     data[moveIndex] = gBattleMons[battler].ppBonuses;

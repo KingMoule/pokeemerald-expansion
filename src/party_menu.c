@@ -49,6 +49,7 @@
 #include "party_menu.h"
 #include "player_pc.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "pokemon_icon.h"
 #include "pokemon_jump.h"
 #include "pokemon_storage_system.h"
@@ -111,7 +112,7 @@ enum {
     MENU_CATALOG_MOWER,
     MENU_CHANGE_FORM,
     MENU_CHANGE_ABILITY,
-    MENU_TREE,
+    MENU_BUILD,
     MENU_FIELD_MOVES
 };
 
@@ -187,7 +188,7 @@ struct PartyMenuInternal
     u32 spriteIdCancelPokeball:7;
     u32 messageId:14;
     u8 windowId[3];
-    u8 actions[9]; // 8 + TREE (mod) : la fenêtre de 9 lignes tient encore à l'écran.
+    u8 actions[9]; // 8 + BUILD (mod) : la fenêtre de 9 lignes tient encore à l'écran.
     u8 numActions;
     // In vanilla Emerald, only the first 0xB0 hwords (0x160 bytes) are actually used.
     // However, a full 0x100 hwords (0x200 bytes) are allocated.
@@ -476,8 +477,8 @@ static void CursorCb_Trade1(u8);
 static void CursorCb_Trade2(u8);
 static void CursorCb_Toss(u8);
 static void CursorCb_FieldMove(u8);
-static void CursorCb_Tree(u8);
-static void FieldCallback_TreeMenu(void);
+static void CursorCb_Build(u8);
+static void FieldCallback_BuildMenu(void);
 static void CursorCb_CatalogBulb(u8);
 static void CursorCb_CatalogOven(u8);
 static void CursorCb_CatalogWashing(u8);
@@ -2958,7 +2959,7 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
     sPartyMenuInternal->numActions = 0;
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SUMMARY);
     if (!GetMonData(&mons[slotId], MON_DATA_IS_EGG))
-        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_TREE);
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_BUILD);
 
     // Add field moves to action list
     for (i = 0; i < MAX_MON_MOVES; i++)
@@ -4091,22 +4092,22 @@ static void Task_HandleSpinTradeYesNoInput(u8 taskId)
     }
 }
 
-// Ouvre l'écran d'investissement des points d'arbre (data/scripts/mod_tree.inc).
-static void CursorCb_Tree(u8 taskId)
+// Ouvre l'écran BUILD : arbre élémentaire et variantes d'attaques (data/scripts/mod_tree.inc).
+static void CursorCb_Build(u8 taskId)
 {
     PlaySE(SE_SELECT);
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
     gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
-    gPostMenuFieldCallback = FieldCallback_TreeMenu;
+    gPostMenuFieldCallback = FieldCallback_BuildMenu;
     gPartyMenu.exitCallback = CB2_ReturnToField;
     Task_ClosePartyMenu(taskId);
 }
 
-static void FieldCallback_TreeMenu(void)
+static void FieldCallback_BuildMenu(void)
 {
     gSpecialVar_0x8004 = gPartyMenu.slotId;
-    ScriptContext_SetupScript(EventScript_TreeMenu);
+    ScriptContext_SetupScript(EventScript_BuildMenu);
 }
 
 static void CursorCb_FieldMove(u8 taskId)
@@ -8244,6 +8245,7 @@ void MoveDeleterForgetMove(void)
     u8 ppBonuses = GetBoxMonData(boxmon, MON_DATA_PP_BONUSES);
     ppBonuses &= gPPUpClearMask[gSpecialVar_0x8005];
     SetBoxMonData(boxmon, MON_DATA_PP_BONUSES, &ppBonuses);
+    SetBoxMonMoveVariant(boxmon, gSpecialVar_0x8005, MOVE_VARIANT_STANDARD);
     for (u32 i = gSpecialVar_0x8005; i < MAX_MON_MOVES - 1; i++)
         ShiftMoveSlot(boxmon, i, i + 1);
 }
@@ -8267,6 +8269,7 @@ static void ShiftMoveSlot(struct BoxPokemon *mon, u8 slotTo, u8 slotFrom)
     SetBoxMonData(mon, MON_DATA_PP1 + slotTo, &pp0);
     SetBoxMonData(mon, MON_DATA_PP1 + slotFrom, &pp1);
     SetBoxMonData(mon, MON_DATA_PP_BONUSES, &ppBonuses);
+    SwapBoxMonMoveVariants(mon, slotTo, slotFrom);
 }
 
 void IsSelectedMonEgg(void)

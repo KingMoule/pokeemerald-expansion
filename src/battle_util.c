@@ -6783,6 +6783,8 @@ static inline u32 CalcMoveBasePowerAfterModifiers(struct DamageContext *ctx)
         break;
     }
 
+    modifier = uq4_12_multiply(modifier, GetMoveVariantPowerModifier(battlerAtk, move));
+
     // Terastallization boosts weak, non-priority, non-multi hit moves after modifiers to 60 BP.
     if (GetActiveGimmick(battlerAtk) == GIMMICK_TERA
         && (moveType == GetBattlerTeraType(battlerAtk)
@@ -9659,6 +9661,7 @@ u32 CalcSecondaryEffectChance(enum BattlerId battler, enum Ability battlerAbilit
 
     if (secondaryEffectChance != 0)
         secondaryEffectChance += GetTreeStatusChanceBonus(battler, additionalEffect->moveEffect);
+    secondaryEffectChance = ApplyMoveVariantEffectChance(battler, additionalEffect, secondaryEffectChance);
 
     if (hasRainbow && hasSereneGrace && additionalEffect->moveEffect == MOVE_EFFECT_FLINCH)
         return secondaryEffectChance * 2;

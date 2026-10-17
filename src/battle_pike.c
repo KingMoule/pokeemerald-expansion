@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_build.h"
 #include "battle_pike.h"
 #include "event_data.h"
 #include "frontier_util.h"
@@ -786,7 +787,7 @@ static void HealMon(struct Pokemon *mon)
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
         enum Move move = GetMonData(mon, MON_DATA_MOVE1 + i);
-        data[0] = CalculatePPWithBonus(move, ppBonuses, i);
+        data[0] = CalculateMonMovePP(mon, move, ppBonuses, i);
         SetMonData(mon, MON_DATA_PP1 + i, data);
     }
 
@@ -1281,7 +1282,7 @@ static void TryHealMons(u8 healCount)
             for (j = 0; j < MAX_MON_MOVES; j++)
             {
                 enum Move move = GetMonData(mon, MON_DATA_MOVE1 + j);
-                max = CalculatePPWithBonus(move, ppBonuses, j);
+                max = CalculateMonMovePP(mon, move, ppBonuses, j);
                 curr = GetMonData(mon, MON_DATA_PP1 + j);
                 if (curr < max)
                 {
@@ -1547,7 +1548,7 @@ static void IsPartyFullHealed(void)
             for (j = 0; j < MAX_MON_MOVES; j++)
             {
                 enum Move move = GetMonData(mon, MON_DATA_MOVE1 + j);
-                max = CalculatePPWithBonus(move, ppBonuses, j);
+                max = CalculateMonMovePP(mon, move, ppBonuses, j);
                 curr = GetMonData(mon, MON_DATA_PP1 + j);
                 if (curr < max)
                 {

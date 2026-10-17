@@ -644,3 +644,9 @@ gSpecials::
 	def_special TreeMenu_PushNodes
 	def_special TreeMenu_CheckNode
 	def_special TreeMenu_Invest
+	def_special BuildMenu_Begin
+	def_special VariantMenu_PushMoves
+	def_special VariantMenu_CheckMove
+	def_special VariantMenu_PushVariants
+	def_special VariantMenu_BufferVariant
+	def_special VariantMenu_Apply

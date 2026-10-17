@@ -1060,6 +1060,7 @@ struct moveWithPP {
 #define TeraType(teraType) TeraType_(__LINE__, teraType)
 #define Mutation(mutationType, mutationSlot) Mutation_(__LINE__, mutationType, mutationSlot)
 #define TreeRank(treeType, node, rank) TreeRank_(__LINE__, treeType, node, rank)
+#define MoveVariant(slot, variant) MoveVariant_(__LINE__, slot, variant)
 #define Shadow(isShadow) Shadow_(__LINE__, isShadow)
 #define Shiny(isShiny) Shiny_(__LINE__, isShiny)
 #define Environment(environment) Environment_(__LINE__, environment)
@@ -1106,6 +1107,7 @@ void GigantamaxFactor_(u32 sourceLine, bool32 gigantamaxFactor);
 void TeraType_(u32 sourceLine, enum Type teraType);
 void Mutation_(u32 sourceLine, enum Type mutationType, u32 mutationSlot);
 void TreeRank_(u32 sourceLine, enum Type treeType, u32 node, u32 rank);
+void MoveVariant_(u32 sourceLine, u32 slot, u32 variant);
 void Shadow_(u32 sourceLine, bool32 isShadow);
 void Shiny_(u32 sourceLine, bool32 isShiny);
 void Environment_(u32 sourceLine, u32 environment);

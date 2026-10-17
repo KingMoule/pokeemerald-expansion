@@ -30,6 +30,7 @@
 #include "palette.h"
 #include "pokeball.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "pokemon_sprite_visualizer.h"
 #include "pokemon_storage_system.h"
 #include "pokemon_summary_screen.h"
@@ -2556,6 +2557,7 @@ static void SwapMonMoves(struct Pokemon *mon, u8 moveIndex1, u8 moveIndex2)
     SetMonData(mon, MON_DATA_PP1 + moveIndex1, &move2pp);
     SetMonData(mon, MON_DATA_PP1 + moveIndex2, &move1pp);
     SetMonData(mon, MON_DATA_PP_BONUSES, &ppBonuses);
+    SwapBoxMonMoveVariants(&mon->box, moveIndex1, moveIndex2);
 
     summary->moves[moveIndex1] = move2;
     summary->moves[moveIndex2] = move1;
@@ -2591,6 +2593,7 @@ static void SwapBoxMonMoves(struct BoxPokemon *mon, u8 moveIndex1, u8 moveIndex2
     SetBoxMonData(mon, MON_DATA_PP1 + moveIndex1, &move2pp);
     SetBoxMonData(mon, MON_DATA_PP1 + moveIndex2, &move1pp);
     SetBoxMonData(mon, MON_DATA_PP_BONUSES, &ppBonuses);
+    SwapBoxMonMoveVariants(mon, moveIndex1, moveIndex2);
 
     summary->moves[moveIndex1] = move2;
     summary->moves[moveIndex2] = move1;
@@ -4083,7 +4086,10 @@ static void PrintMoveNameAndPP(u8 moveIndex)
 
     if (move != 0)
     {
-        pp = CalculatePPWithBonus(move, summary->ppBonuses, moveIndex);
+        if (moveIndex < MAX_MON_MOVES)
+            pp = CalculateBoxMonMovePP(GetCurrentBoxmon(), move, summary->ppBonuses, moveIndex);
+        else
+            pp = CalculatePPWithBonus(move, summary->ppBonuses, moveIndex);
         PrintTextOnWindowToFit(moveNameWindowId, GetMoveName(move), 0, moveIndex * 16 + 1, 0, 1);
         ConvertIntToDecimalStringN(gStringVar1, summary->pp[moveIndex], STR_CONV_MODE_RIGHT_ALIGN, 2);
         ConvertIntToDecimalStringN(gStringVar2, pp, STR_CONV_MODE_RIGHT_ALIGN, 2);

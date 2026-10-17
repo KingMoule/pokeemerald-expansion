@@ -36,6 +36,7 @@
 #include "party_menu.h"
 #include "pokeblock.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "script.h"
 #include "sound.h"
 #include "strings.h"
@@ -1301,13 +1302,13 @@ bool32 CannotUseItemsInBattle(enum Item itemId, struct Pokemon *mon)
         {
             for (i = 0; i < MAX_MON_MOVES; i++)
             {
-                if (GetMonData(mon, MON_DATA_PP1 + i) < CalculatePPWithBonus(GetMonData(mon, MON_DATA_MOVE1 + i), GetMonData(mon, MON_DATA_PP_BONUSES), i))
+                if (GetMonData(mon, MON_DATA_PP1 + i) < CalculateMonMovePP(mon, GetMonData(mon, MON_DATA_MOVE1 + i), GetMonData(mon, MON_DATA_PP_BONUSES), i))
                     break;
             }
             if (i == MAX_MON_MOVES)
                 cannotUse = TRUE;
         }
-        else if (GetMonData(mon, MON_DATA_PP1 + gPartyMenu.data1) == CalculatePPWithBonus(GetMonData(mon, MON_DATA_MOVE1 + gPartyMenu.data1), GetMonData(mon, MON_DATA_PP_BONUSES), gPartyMenu.data1))
+        else if (GetMonData(mon, MON_DATA_PP1 + gPartyMenu.data1) == CalculateMonMovePP(mon, GetMonData(mon, MON_DATA_MOVE1 + gPartyMenu.data1), GetMonData(mon, MON_DATA_PP_BONUSES), gPartyMenu.data1))
         {
             cannotUse = TRUE;
         }

@@ -9,6 +9,32 @@ u32 GetBoxMonTreePointsSpent(const struct BoxPokemon *boxMon);
 u32 GetBoxMonMoveVariant(const struct BoxPokemon *boxMon, u32 moveSlot);
 void SetBoxMonMoveVariant(struct BoxPokemon *boxMon, u32 moveSlot, u32 variant);
 
+struct AdditionalEffect;
+
+// Variantes d'attaques : une seule active par attaque, attachée à l'emplacement de l'attaque.
+// Elle est remise à zéro quand l'attaque est oubliée ou remplacée, et suit l'attaque quand on la déplace.
+enum MoveVariant
+{
+    MOVE_VARIANT_STANDARD,
+    MOVE_VARIANT_FOCUSED,  // Plus de puissance, moins de PP.
+    MOVE_VARIANT_THRIFTY,  // Plus de PP, moins de puissance.
+    MOVE_VARIANT_VOLATILE, // Plus de chances d'effet secondaire, moins de puissance.
+    MOVE_VARIANT_COUNT,
+};
+
+void SwapBoxMonMoveVariants(struct BoxPokemon *boxMon, u32 slot1, u32 slot2);
+bool32 CanMoveHaveVariant(enum Move move, enum MoveVariant variant);
+const u8 *GetMoveVariantName(enum MoveVariant variant);
+u32 ApplyMoveVariantToPP(u32 pp, enum MoveVariant variant);
+u32 CalculateBoxMonMovePP(const struct BoxPokemon *boxMon, enum Move move, u32 ppBonuses, u32 slot);
+u32 CalculateMonMovePP(struct Pokemon *mon, enum Move move, u32 ppBonuses, u32 slot);
+bool32 TrySetBoxMonMoveVariant(struct BoxPokemon *boxMon, u32 slot, enum MoveVariant variant);
+enum MoveVariant GetBattlerMoveSlotVariant(enum BattlerId battler, u32 slot);
+enum MoveVariant GetBattlerMoveVariant(enum BattlerId battler, enum Move move);
+u32 CalculateBattlerMovePP(enum BattlerId battler, enum Move move, u32 ppBonuses, u32 slot);
+uq4_12_t GetMoveVariantPowerModifier(enum BattlerId battler, enum Move move);
+u32 ApplyMoveVariantEffectChance(enum BattlerId battler, const struct AdditionalEffect *additionalEffect, u32 chance);
+
 // Mutations : types effectifs et type portant la pénalité sur les faiblesses.
 enum Type GetBoxMonMutatedType(const struct BoxPokemon *boxMon, enum Species species, u32 slot);
 enum Type GetBoxMonMutationPenaltyType(const struct BoxPokemon *boxMon, enum Species species);

@@ -84,6 +84,107 @@ void SetBoxMonMoveVariant(struct BoxPokemon *boxMon, u32 moveSlot, u32 variant)
     boxMon->build.moveVariants |= variant << shift;
 }
 
+void SwapBoxMonMoveVariants(struct BoxPokemon *boxMon, u32 slot1, u32 slot2)
+{
+    u32 variant1 = GetBoxMonMoveVariant(boxMon, slot1);
+    SetBoxMonMoveVariant(boxMon, slot1, GetBoxMonMoveVariant(boxMon, slot2));
+    SetBoxMonMoveVariant(boxMon, slot2, variant1);
+}
+
+static bool32 MoveHasChanceEffect(enum Move move)
+{
+    u32 i;
+    for (i = 0; i < GetMoveAdditionalEffectCount(move); i++)
+    {
+        if (GetMoveAdditionalEffectById(move, i)->chance != 0)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+// Seules les attaques offensives ont des variantes. Incendiaire exige un effet secondaire aléatoire.
+bool32 CanMoveHaveVariant(enum Move move, enum MoveVariant variant)
+{
+    if (move == MOVE_NONE || GetMovePower(move) == 0 || IsBattleMoveStatus(move))
+        return FALSE;
+    switch (variant)
+    {
+    case MOVE_VARIANT_FOCUSED:
+    case MOVE_VARIANT_THRIFTY:
+        return TRUE;
+    case MOVE_VARIANT_VOLATILE:
+        return MoveHasChanceEffect(move);
+    default:
+        return FALSE;
+    }
+}
+
+const u8 *GetMoveVariantName(enum MoveVariant variant)
+{
+    static const u8 *const sNames[MOVE_VARIANT_COUNT] =
+    {
+        [MOVE_VARIANT_STANDARD] = COMPOUND_STRING("Standard"),
+        [MOVE_VARIANT_FOCUSED]  = COMPOUND_STRING("Focused"),
+        [MOVE_VARIANT_THRIFTY]  = COMPOUND_STRING("Thrifty"),
+        [MOVE_VARIANT_VOLATILE] = COMPOUND_STRING("Volatile"),
+    };
+    if (variant >= MOVE_VARIANT_COUNT)
+        variant = MOVE_VARIANT_STANDARD;
+    return sNames[variant];
+}
+
+u32 ApplyMoveVariantToPP(u32 pp, enum MoveVariant variant)
+{
+    u32 percent;
+
+    switch (variant)
+    {
+    case MOVE_VARIANT_FOCUSED:
+        percent = MOD_VARIANT_FOCUSED_PP;
+        break;
+    case MOVE_VARIANT_THRIFTY:
+        percent = MOD_VARIANT_THRIFTY_PP;
+        break;
+    default:
+        return pp;
+    }
+    if (pp == 0)
+        return 0;
+    pp = pp * percent / 100;
+    return min(max(pp, 1), 255);
+}
+
+u32 CalculateBoxMonMovePP(const struct BoxPokemon *boxMon, enum Move move, u32 ppBonuses, u32 slot)
+{
+    return ApplyMoveVariantToPP(CalculatePPWithBonus(move, ppBonuses, slot), GetBoxMonMoveVariant(boxMon, slot));
+}
+
+u32 CalculateMonMovePP(struct Pokemon *mon, enum Move move, u32 ppBonuses, u32 slot)
+{
+    return CalculateBoxMonMovePP(&mon->box, move, ppBonuses, slot);
+}
+
+// Choix définitif : refusé si l'attaque a déjà une variante ou ne peut pas l'avoir.
+// Les PP actuels sont ramenés sous le nouveau maximum.
+bool32 TrySetBoxMonMoveVariant(struct BoxPokemon *boxMon, u32 slot, enum MoveVariant variant)
+{
+    enum Move move;
+    u32 pp, maxPP;
+
+    if (slot >= MAX_MON_MOVES || GetBoxMonMoveVariant(boxMon, slot) != MOVE_VARIANT_STANDARD)
+        return FALSE;
+    move = GetBoxMonData(boxMon, MON_DATA_MOVE1 + slot);
+    if (!CanMoveHaveVariant(move, variant))
+        return FALSE;
+
+    SetBoxMonMoveVariant(boxMon, slot, variant);
+    maxPP = CalculateBoxMonMovePP(boxMon, move, GetBoxMonData(boxMon, MON_DATA_PP_BONUSES), slot);
+    pp = GetBoxMonData(boxMon, MON_DATA_PP1 + slot);
+    if (pp > maxPP)
+        SetBoxMonData(boxMon, MON_DATA_PP1 + slot, &maxPP);
+    return TRUE;
+}
+
 // Une mutation remplace le type mutationSlot de l'espèce actuelle.
 // Un Pokémon à un seul type prend le nouveau type comme unique type.
 enum Type GetBoxMonMutatedType(const struct BoxPokemon *boxMon, enum Species species, u32 slot)
@@ -121,6 +222,82 @@ static const struct BoxPokemon *GetBattlerBoxMon(enum BattlerId battler)
 enum Type GetBattlerMutatedType(enum BattlerId battler, u32 slot)
 {
     return GetBoxMonMutatedType(GetBattlerBoxMon(battler), gBattleMons[battler].species, slot);
+}
+
+// La variante ne compte que si l'attaque du combat est bien celle du Pokémon
+// (pas après Morphing, Copie ou Gribouille en combat).
+enum MoveVariant GetBattlerMoveSlotVariant(enum BattlerId battler, u32 slot)
+{
+    const struct BoxPokemon *boxMon;
+
+    if (slot >= MAX_MON_MOVES)
+        return MOVE_VARIANT_STANDARD;
+    boxMon = GetBattlerBoxMon(battler);
+    if (boxMon->build.moveVariants == 0 || gBattleMons[battler].volatiles.transformed)
+        return MOVE_VARIANT_STANDARD;
+    if (GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MOVE1 + slot) != gBattleMons[battler].moves[slot])
+        return MOVE_VARIANT_STANDARD;
+    return GetBoxMonMoveVariant(boxMon, slot);
+}
+
+enum MoveVariant GetBattlerMoveVariant(enum BattlerId battler, enum Move move)
+{
+    u32 slot;
+
+    // Sortie rapide : appelé à chaque calcul de dégâts, IA comprise.
+    if (GetBattlerBoxMon(battler)->build.moveVariants == 0 || move == MOVE_NONE)
+        return MOVE_VARIANT_STANDARD;
+    for (slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        if (gBattleMons[battler].moves[slot] == move)
+            return GetBattlerMoveSlotVariant(battler, slot);
+    }
+    return MOVE_VARIANT_STANDARD;
+}
+
+u32 CalculateBattlerMovePP(enum BattlerId battler, enum Move move, u32 ppBonuses, u32 slot)
+{
+    return ApplyMoveVariantToPP(CalculatePPWithBonus(move, ppBonuses, slot), GetBattlerMoveSlotVariant(battler, slot));
+}
+
+uq4_12_t GetMoveVariantPowerModifier(enum BattlerId battler, enum Move move)
+{
+    switch (GetBattlerMoveVariant(battler, move))
+    {
+    case MOVE_VARIANT_FOCUSED:
+        return UQ_4_12(MOD_VARIANT_FOCUSED_POWER / 100.0);
+    case MOVE_VARIANT_THRIFTY:
+        return UQ_4_12(MOD_VARIANT_THRIFTY_POWER / 100.0);
+    case MOVE_VARIANT_VOLATILE:
+        return UQ_4_12(MOD_VARIANT_VOLATILE_POWER / 100.0);
+    default:
+        return UQ_4_12(1.0);
+    }
+}
+
+// L'effet appartient à l'une des attaques du Pokémon : on retrouve laquelle par son adresse.
+u32 ApplyMoveVariantEffectChance(enum BattlerId battler, const struct AdditionalEffect *additionalEffect, u32 chance)
+{
+    u32 slot;
+
+    if (chance == 0 || GetBattlerBoxMon(battler)->build.moveVariants == 0)
+        return chance;
+    for (slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        enum Move move = gBattleMons[battler].moves[slot];
+        const struct AdditionalEffect *first;
+
+        if (move == MOVE_NONE || GetMoveAdditionalEffectCount(move) == 0)
+            continue;
+        first = GetMoveAdditionalEffectById(move, 0);
+        if (additionalEffect >= first && additionalEffect < first + GetMoveAdditionalEffectCount(move))
+        {
+            if (GetBattlerMoveSlotVariant(battler, slot) == MOVE_VARIANT_VOLATILE)
+                return chance * MOD_VARIANT_VOLATILE_CHANCE / 100;
+            return chance;
+        }
+    }
+    return chance;
 }
 
 // ×1,25 lorsque l'attaque est super efficace contre le type pénalisé et
