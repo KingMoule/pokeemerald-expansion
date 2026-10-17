@@ -1,4 +1,6 @@
 #include "global.h"
+#include "item.h"
+#include "item_use.h"
 #include "pokemon.h"
 #include "pokemon_build.h"
 #include "test/test.h"
@@ -67,4 +69,11 @@ TEST("Mod: move variants follow their move when moves are swapped")
     SwapBoxMonMoveVariants(&mon.box, 0, 3);
     EXPECT_EQ(GetBoxMonMoveVariant(&mon.box, 0), MOVE_VARIANT_STANDARD);
     EXPECT_EQ(GetBoxMonMoveVariant(&mon.box, 3), MOVE_VARIANT_FOCUSED);
+}
+
+TEST("Mod: the Mastery Scroll is a party-use item")
+{
+    EXPECT_EQ(GetItemPocket(ITEM_MASTERY_SCROLL), POCKET_ITEMS);
+    EXPECT_EQ(GetItemType(ITEM_MASTERY_SCROLL), ITEM_USE_PARTY_MENU);
+    EXPECT(GetItemFieldFunc(ITEM_MASTERY_SCROLL) == ItemUseOutOfBattle_MasteryScroll);
 }

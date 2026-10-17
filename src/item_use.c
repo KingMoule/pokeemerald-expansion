@@ -858,6 +858,12 @@ void ItemUseOutOfBattle_AbilityCapsule(u8 taskId)
     SetUpItemUseCallback(taskId);
 }
 
+void ItemUseOutOfBattle_MasteryScroll(u8 taskId)
+{
+    gItemUseCB = ItemUseCB_MasteryScroll;
+    SetUpItemUseCallback(taskId);
+}
+
 void ItemUseOutOfBattle_AbilityPatch(u8 taskId)
 {
     gItemUseCB = ItemUseCB_AbilityPatch;

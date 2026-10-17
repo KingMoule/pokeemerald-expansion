@@ -6,6 +6,7 @@ RustboroCity_Gym_EventScript_Roxanne::
 	specialvar VAR_RESULT, ShouldTryRematchBattle
 	goto_if_eq VAR_RESULT, TRUE, RustboroCity_Gym_EventScript_RoxanneRematch
 	goto_if_unset FLAG_RECEIVED_TM_ROCK_TOMB, RustboroCity_Gym_EventScript_GiveRockTomb
+	goto_if_unset FLAG_RECEIVED_MASTERY_SCROLL, RustboroCity_Gym_EventScript_GiveMasteryScroll
 	msgbox RustboroCity_Gym_Text_RoxannePostBattle, MSGBOX_DEFAULT
 	release
 	end
@@ -30,6 +31,17 @@ RustboroCity_Gym_EventScript_GiveRockTomb::
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
 	setflag FLAG_RECEIVED_TM_ROCK_TOMB
 	msgbox RustboroCity_Gym_Text_ExplainRockTomb, MSGBOX_DEFAULT
+	goto_if_unset FLAG_RECEIVED_MASTERY_SCROLL, RustboroCity_Gym_EventScript_GiveMasteryScroll
+	release
+	end
+
+@ Mod : premier Mastery Scroll, pour faire découvrir les variantes d'attaques.
+RustboroCity_Gym_EventScript_GiveMasteryScroll::
+	msgbox RustboroCity_Gym_Text_MasteryScrollIntro, MSGBOX_DEFAULT
+	giveitem ITEM_MASTERY_SCROLL
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag FLAG_RECEIVED_MASTERY_SCROLL
+	msgbox RustboroCity_Gym_Text_ExplainMasteryScroll, MSGBOX_DEFAULT
 	release
 	end
 
@@ -281,3 +293,20 @@ RustboroCity_Gym_Text_RoxanneRematchNeedTwoMons:
 	.string "You only have one POKéMON with you?\p"
 	.string "Please return with at least one more\n"
 	.string "POKéMON.$"
+
+RustboroCity_Gym_Text_MasteryScrollIntro:
+	.string "One more thing, {PLAYER}.\n"
+	.string "Please take this as well.$"
+
+RustboroCity_Gym_Text_ExplainMasteryScroll:
+	.string "A MASTERY SCROLL teaches a\n"
+	.string "POKéMON a new way to use\l"
+	.string "one of its moves.\p"
+	.string "Use it from your BAG. The move\n"
+	.string "gains a variant: more power,\l"
+	.string "more PP or a stronger effect.\p"
+	.string "Choose carefully, though.\n"
+	.string "A variant can't be undone.\p"
+	.string "Scrolls like this one are found\n"
+	.string "deep in ancient ruins whose\l"
+	.string "halls change on every visit.$"

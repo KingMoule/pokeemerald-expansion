@@ -4110,6 +4110,23 @@ static void FieldCallback_BuildMenu(void)
     ScriptContext_SetupScript(EventScript_BuildMenu);
 }
 
+// Mastery Scroll : le choix de l'attaque et de la variante se fait sur le terrain
+// (data/scripts/mod_tree.inc), et l'objet n'est retiré qu'une fois la variante appliquée.
+static void FieldCallback_MasteryScroll(void)
+{
+    gSpecialVar_0x8004 = gPartyMenu.slotId;
+    ScriptContext_SetupScript(EventScript_MasteryScroll);
+}
+
+void ItemUseCB_MasteryScroll(u8 taskId, TaskFunc task)
+{
+    PlaySE(SE_SELECT);
+    gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
+    gPostMenuFieldCallback = FieldCallback_MasteryScroll;
+    gPartyMenu.exitCallback = CB2_ReturnToField;
+    Task_ClosePartyMenu(taskId);
+}
+
 static void CursorCb_FieldMove(u8 taskId)
 {
     u8 fieldMove = sPartyMenuInternal->actions[Menu_GetCursorPos()] - MENU_FIELD_MOVES;

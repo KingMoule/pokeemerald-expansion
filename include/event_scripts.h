@@ -428,6 +428,7 @@ extern const u8 EventScript_UseDig[];
 extern const u8 EventScript_UseCutGrass[];
 extern const u8 EventScript_UseDefog[];
 extern const u8 EventScript_BuildMenu[];
+extern const u8 EventScript_MasteryScroll[];
 
 //player pc
 extern const u8 EventScript_PalletTown_PlayersHouse_2F_ShutDownPC[];
