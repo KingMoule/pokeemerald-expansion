@@ -3790,6 +3790,10 @@ BattleScript_AquaRingHeal::
 	printstring STRINGID_AQUARINGHEAL
 	goto BattleScript_TurnHeal
 
+BattleScript_TreeWeatherHeal::
+	printstring STRINGID_TREEWEATHERHEAL
+	goto BattleScript_TurnHeal
+
 BattleScript_PrintMonIsRooted::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_PKMNANCHOREDITSELF

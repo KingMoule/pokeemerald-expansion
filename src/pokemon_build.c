@@ -1,8 +1,13 @@
 #include "global.h"
 #include "battle.h"
+#include "battle_dynamax.h"
 #include "battle_util.h"
 #include "pokemon.h"
 #include "pokemon_build.h"
+#include "constants/battle.h"
+#include "constants/battle_set_effect.h"
+
+#include "data/pokemon_trees.h"
 
 #define TREE_RANK_MAX ((1 << MOD_TREE_RANK_BITS) - 1)
 #define MOVE_VARIANT_MAX ((1 << MOD_MOVE_VARIANT_BITS) - 1)
@@ -135,4 +140,224 @@ uq4_12_t ApplyMutationWeaknessPenalty(enum BattlerId battlerDef, enum Type moveT
         return modifier;
 
     return uq4_12_multiply(modifier, UQ_4_12((double)MOD_MUTATION_WEAKNESS_NUM / MOD_MUTATION_WEAKNESS_DEN));
+}
+
+const struct TreeNode *GetTreeNode(enum Type treeType, u32 node)
+{
+    if (treeType == TYPE_NONE || treeType >= NUMBER_OF_MON_TYPES || node >= MOD_TREE_NODE_COUNT)
+        return NULL;
+    if (gElementTrees[treeType].nodes[node].maxRank == 0)
+        return NULL;
+    return &gElementTrees[treeType].nodes[node];
+}
+
+// Les points proviennent du niveau, plus d'éventuels points bonus (treePoints), dans la limite du budget.
+u32 GetBoxMonTreePointsEarned(struct BoxPokemon *boxMon)
+{
+    u32 points = GetLevelFromBoxMonExp(boxMon) * MOD_TREE_POINTS_PER_LEVEL + boxMon->build.treePoints;
+    return min(points, MOD_TREE_POINT_BUDGET);
+}
+
+u32 GetBoxMonTreePointsAvailable(struct BoxPokemon *boxMon)
+{
+    u32 earned = GetBoxMonTreePointsEarned(boxMon);
+    u32 spent = GetBoxMonTreePointsSpent(boxMon);
+    return earned > spent ? earned - spent : 0;
+}
+
+static bool32 BoxMonHasType(const struct BoxPokemon *boxMon, enum Type type)
+{
+    enum Species species = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_SPECIES);
+    return GetBoxMonMutatedType(boxMon, species, 0) == type || GetBoxMonMutatedType(boxMon, species, 1) == type;
+}
+
+static u32 GetTrunkPointsSpent(const struct BoxPokemon *boxMon)
+{
+    u32 node, total = 0;
+    for (node = 0; node < TREE_TRUNK_NODES; node++)
+        total += GetBoxMonTreeRank(boxMon, node);
+    return total;
+}
+
+enum TreeInvestResult CanBoxMonInvestInNode(struct BoxPokemon *boxMon, enum Type treeType, u32 node)
+{
+    const struct TreeNode *treeNode;
+
+    // Un seul arbre par Pokémon pour l'instant (doubles types : question ouverte du wiki).
+    if (boxMon->build.treeType != TYPE_NONE && boxMon->build.treeType != treeType)
+        return TREE_INVEST_WRONG_TREE;
+    if (boxMon->build.treeType == TYPE_NONE && !BoxMonHasType(boxMon, treeType))
+        return TREE_INVEST_WRONG_TREE;
+
+    treeNode = GetTreeNode(treeType, node);
+    if (treeNode == NULL)
+        return TREE_INVEST_NO_NODE;
+    if (GetBoxMonTreeRank(boxMon, node) >= treeNode->maxRank)
+        return TREE_INVEST_MAX_RANK;
+    if (GetBoxMonTreePointsAvailable(boxMon) == 0)
+        return TREE_INVEST_NO_POINTS;
+
+    if (node >= TREE_TRUNK_NODES)
+    {
+        u32 indexInBranch = (node - TREE_TRUNK_NODES) % TREE_BRANCH_NODES;
+        if (indexInBranch == 0)
+        {
+            if (GetTrunkPointsSpent(boxMon) < MOD_TREE_BRANCH_UNLOCK_POINTS)
+                return TREE_INVEST_LOCKED;
+        }
+        else if (GetBoxMonTreeRank(boxMon, node - 1) < min(MOD_TREE_PARENT_RANKS, GetTreeNode(treeType, node - 1)->maxRank))
+        {
+            return TREE_INVEST_LOCKED;
+        }
+    }
+    return TREE_INVEST_OK;
+}
+
+// Investissement définitif : il n'existe pas de fonction de redistribution.
+enum TreeInvestResult TryBoxMonInvestInNode(struct BoxPokemon *boxMon, enum Type treeType, u32 node)
+{
+    enum TreeInvestResult result = CanBoxMonInvestInNode(boxMon, treeType, node);
+    if (result != TREE_INVEST_OK)
+        return result;
+
+    boxMon->build.treeType = treeType;
+    SetBoxMonTreeRank(boxMon, node, GetBoxMonTreeRank(boxMon, node) + 1);
+    return TREE_INVEST_OK;
+}
+
+// Acquisition individuelle : MOD_MUTATION_TREE_POINTS points investis et une maîtrise finale.
+bool32 CanBoxMonAcquireMutation(const struct BoxPokemon *boxMon)
+{
+    u32 branch;
+
+    if (boxMon->build.mutationType != TYPE_NONE)
+        return FALSE;
+    if (GetBoxMonTreePointsSpent(boxMon) < MOD_MUTATION_TREE_POINTS)
+        return FALSE;
+    for (branch = 0; branch < TREE_BRANCH_COUNT; branch++)
+    {
+        if (GetBoxMonTreeRank(boxMon, TREE_TRUNK_NODES + branch * TREE_BRANCH_NODES + TREE_BRANCH_NODES - 1) > 0)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+u32 GetBoxMonTreeEffect(const struct BoxPokemon *boxMon, enum TreeEffect effect)
+{
+    u32 node, total = 0;
+    enum Type treeType = boxMon->build.treeType;
+
+    if (treeType == TYPE_NONE || treeType >= NUMBER_OF_MON_TYPES)
+        return 0;
+
+    for (node = 0; node < MOD_TREE_NODE_COUNT; node++)
+    {
+        const struct TreeNode *treeNode = &gElementTrees[treeType].nodes[node];
+        if (treeNode->maxRank != 0 && treeNode->effect == effect)
+            total += min(GetBoxMonTreeRank(boxMon, node), treeNode->maxRank) * treeNode->valuePerRank;
+    }
+    return total;
+}
+
+u32 GetBattlerTreeEffect(enum BattlerId battler, enum TreeEffect effect)
+{
+    return GetBoxMonTreeEffect(GetBattlerBoxMon(battler), effect);
+}
+
+const struct ElementTree *GetBattlerTree(enum BattlerId battler)
+{
+    enum Type treeType = GetBattlerBoxMon(battler)->build.treeType;
+    if (treeType == TYPE_NONE || treeType >= NUMBER_OF_MON_TYPES)
+        return NULL;
+    return &gElementTrees[treeType];
+}
+
+// Les bonus de dégâts des arbres s'additionnent entre eux (proposition du wiki, ordre encore ouvert).
+uq4_12_t GetTreeDamageModifier(enum BattlerId battlerAtk, enum BattlerId battlerDef, enum Move move, enum Type moveType)
+{
+    const struct ElementTree *tree = GetBattlerTree(battlerAtk);
+    enum Type treeType;
+    u32 bonus = 0;
+
+    if (tree == NULL)
+        return UQ_4_12(1.0);
+    treeType = GetBattlerBoxMon(battlerAtk)->build.treeType;
+
+    if (IsBattleMovePhysical(move))
+        bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_PHYSICAL_DAMAGE);
+    else if (IsBattleMoveSpecial(move))
+        bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_SPECIAL_DAMAGE);
+
+    if (moveType == treeType)
+    {
+        if (IsBattleMovePhysical(move))
+            bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_PHYSICAL_DAMAGE);
+        if (gBattleMons[battlerAtk].hp * 2 < gBattleMons[battlerAtk].maxHP)
+            bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_DAMAGE_LOW_HP);
+        if (tree->weather != 0 && HasWeatherEffect() && (gBattleWeather & tree->weather))
+            bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_DAMAGE_WEATHER);
+    }
+
+    if (tree->status != 0 && (gBattleMons[battlerDef].status1 & tree->status))
+        bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_DAMAGE_VS_STATUS);
+
+    return UQ_4_12(1.0) + (bonus * UQ_4_12(1.0)) / 1000;
+}
+
+u32 ApplyTreeRecoilReduction(enum BattlerId battlerAtk, enum Type moveType, u32 recoil)
+{
+    u32 reduction;
+
+    if (GetBattlerBoxMon(battlerAtk)->build.treeType != moveType)
+        return recoil;
+    reduction = min(GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_RECOIL), 1000);
+    if (reduction == 0)
+        return recoil;
+    recoil = recoil * (1000 - reduction) / 1000;
+    return max(recoil, 1);
+}
+
+static u32 GetStatusMoveEffect(u32 status)
+{
+    switch (status)
+    {
+    case STATUS1_BURN:      return MOVE_EFFECT_BURN;
+    case STATUS1_POISON:    return MOVE_EFFECT_POISON;
+    case STATUS1_PARALYSIS: return MOVE_EFFECT_PARALYSIS;
+    case STATUS1_FREEZE:    return MOVE_EFFECT_FREEZE;
+    case STATUS1_SLEEP:     return MOVE_EFFECT_SLEEP;
+    default:                return MOVE_EFFECT_NONE;
+    }
+}
+
+// En points de pourcentage entiers : deux rangs à 0,5 point donnent 1 point.
+u32 GetTreeStatusChanceBonus(enum BattlerId battlerAtk, u32 moveEffect)
+{
+    const struct ElementTree *tree = GetBattlerTree(battlerAtk);
+
+    if (tree == NULL || tree->status == 0 || GetStatusMoveEffect(tree->status) != moveEffect)
+        return 0;
+    return GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_STATUS_CHANCE) / 10;
+}
+
+u32 GetTreeWeatherTurnsBonus(enum BattlerId battler, u32 weatherFlag)
+{
+    const struct ElementTree *tree = GetBattlerTree(battler);
+
+    if (tree == NULL || !(tree->weather & weatherFlag))
+        return 0;
+    return GetBattlerTreeEffect(battler, TREE_EFFECT_WEATHER_TURNS);
+}
+
+u32 GetTreeWeatherHealAmount(enum BattlerId battler)
+{
+    const struct ElementTree *tree = GetBattlerTree(battler);
+    u32 heal;
+
+    if (tree == NULL || tree->weather == 0 || !HasWeatherEffect() || !(gBattleWeather & tree->weather))
+        return 0;
+    heal = GetBattlerTreeEffect(battler, TREE_EFFECT_WEATHER_HEAL);
+    if (heal == 0)
+        return 0;
+    return max(GetNonDynamaxMaxHP(battler) * heal / 1000, 1);
 }

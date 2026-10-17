@@ -10,6 +10,7 @@
 #include "battle_stat_change.h"
 #include "battle_scripts.h"
 #include "battle_z_move.h"
+#include "pokemon_build.h"
 #include "battle_anim_scripts.h"
 #include "item.h"
 #include "battle_controllers.h"
@@ -4160,7 +4161,8 @@ static enum MoveEndResult MoveEndMoveBlockRecoil(struct BattleCalcValues *cv)
             }
             else
             {
-                SetPassiveDamageAmount(cv->battlerAtk, gBattleScripting.savedDmg * max(1, GetMoveRecoil(cv->move)) / 100);
+                u32 recoil = gBattleScripting.savedDmg * max(1, GetMoveRecoil(cv->move)) / 100;
+                SetPassiveDamageAmount(cv->battlerAtk, ApplyTreeRecoilReduction(cv->battlerAtk, GetBattleMoveType(cv->move), recoil));
             }
             TryUpdateEvolutionTracker(IF_RECOIL_DAMAGE_GE, gBattleStruct->passiveHpUpdate[cv->battlerAtk], MOVE_NONE);
             BattleScriptCall(BattleScript_MoveEffectRecoil);

@@ -15,4 +15,80 @@ enum Type GetBoxMonMutationPenaltyType(const struct BoxPokemon *boxMon, enum Spe
 enum Type GetBattlerMutatedType(enum BattlerId battler, u32 slot);
 uq4_12_t ApplyMutationWeaknessPenalty(enum BattlerId battlerDef, enum Type moveType, uq4_12_t modifier);
 
+// Arbres élémentaires.
+// Nœuds 0 à 3 : tronc commun. Nœuds 4 à 7, 8 à 11 et 12 à 15 : trois branches
+// de quatre nœuds, chacun exigeant MOD_TREE_PARENT_RANKS rangs dans le précédent.
+// Le premier nœud d'une branche exige MOD_TREE_BRANCH_UNLOCK_POINTS points dans le tronc.
+#define TREE_TRUNK_NODES     4
+#define TREE_BRANCH_COUNT    3
+#define TREE_BRANCH_NODES    4
+
+enum TreeEffect
+{
+    TREE_EFFECT_NONE,
+    TREE_EFFECT_PHYSICAL_DAMAGE,      // ‰ de dégâts des attaques physiques.
+    TREE_EFFECT_SPECIAL_DAMAGE,       // ‰ de dégâts des attaques spéciales.
+    TREE_EFFECT_MAX_HP,               // ‰ de PV max.
+    TREE_EFFECT_SPEED,                // ‰ de Vitesse.
+    TREE_EFFECT_TYPE_PHYSICAL_DAMAGE, // ‰ de dégâts des attaques physiques de l'élément.
+    TREE_EFFECT_TYPE_RECOIL,          // ‰ de recul en moins pour les attaques de l'élément.
+    TREE_EFFECT_TYPE_DAMAGE_LOW_HP,   // ‰ de dégâts de l'élément sous 50 % des PV.
+    TREE_EFFECT_STATUS_CHANCE,        // ‰ (en points) de chance d'infliger le statut de l'élément.
+    TREE_EFFECT_DAMAGE_VS_STATUS,     // ‰ de dégâts contre une cible portant le statut de l'élément.
+    TREE_EFFECT_TYPE_DAMAGE_WEATHER,  // ‰ de dégâts de l'élément sous la météo de l'élément.
+    TREE_EFFECT_WEATHER_TURNS,        // Tours de météo en plus quand ce Pokémon l'invoque.
+    TREE_EFFECT_WEATHER_HEAL,         // ‰ des PV max récupérés en fin de tour sous la météo.
+    // Maîtrises dont les règles restent à préciser dans le wiki : sans effet pour l'instant.
+    TREE_EFFECT_TYPE_DAMAGE_STACK,
+    TREE_EFFECT_STATUS_DAMAGE,
+    TREE_EFFECT_LINGERING_STATUS,
+    TREE_EFFECT_WEATHER_ON_ENTRY,
+};
+
+struct TreeNode
+{
+    const u8 *name;
+    const u8 *description;
+    enum TreeEffect effect;
+    u8 maxRank; // 0 = nœud absent.
+    u16 valuePerRank;
+};
+
+struct ElementTree
+{
+    const u8 *branchNames[TREE_BRANCH_COUNT];
+    u32 status;  // Statut associé à l'élément (STATUS1_*), 0 si aucun.
+    u32 weather; // Météo associée à l'élément (B_WEATHER_*), 0 si aucune.
+    struct TreeNode nodes[MOD_TREE_NODE_COUNT];
+};
+
+enum TreeInvestResult
+{
+    TREE_INVEST_OK,
+    TREE_INVEST_WRONG_TREE,    // L'élément n'est pas un type du Pokémon, ou un autre arbre est déjà suivi.
+    TREE_INVEST_NO_NODE,       // Ce nœud n'existe pas dans cet arbre.
+    TREE_INVEST_MAX_RANK,
+    TREE_INVEST_NO_POINTS,
+    TREE_INVEST_LOCKED,        // Prérequis non remplis.
+};
+
+extern const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES];
+
+const struct TreeNode *GetTreeNode(enum Type treeType, u32 node);
+u32 GetBoxMonTreePointsEarned(struct BoxPokemon *boxMon);
+u32 GetBoxMonTreePointsAvailable(struct BoxPokemon *boxMon);
+enum TreeInvestResult CanBoxMonInvestInNode(struct BoxPokemon *boxMon, enum Type treeType, u32 node);
+enum TreeInvestResult TryBoxMonInvestInNode(struct BoxPokemon *boxMon, enum Type treeType, u32 node);
+bool32 CanBoxMonAcquireMutation(const struct BoxPokemon *boxMon);
+u32 GetBoxMonTreeEffect(const struct BoxPokemon *boxMon, enum TreeEffect effect);
+u32 GetBattlerTreeEffect(enum BattlerId battler, enum TreeEffect effect);
+const struct ElementTree *GetBattlerTree(enum BattlerId battler);
+
+// Effets des arbres en combat.
+uq4_12_t GetTreeDamageModifier(enum BattlerId battlerAtk, enum BattlerId battlerDef, enum Move move, enum Type moveType);
+u32 ApplyTreeRecoilReduction(enum BattlerId battlerAtk, enum Type moveType, u32 recoil);
+u32 GetTreeStatusChanceBonus(enum BattlerId battlerAtk, u32 moveEffect);
+u32 GetTreeWeatherTurnsBonus(enum BattlerId battler, u32 weatherFlag);
+u32 GetTreeWeatherHealAmount(enum BattlerId battler);
+
 #endif // GUARD_POKEMON_BUILD_H

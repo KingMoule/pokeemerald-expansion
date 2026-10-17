@@ -8,6 +8,7 @@
 #include "battle_stat_change.h"
 #include "battle_gimmick.h"
 #include "battle_scripts.h"
+#include "pokemon_build.h"
 #include "constants/battle.h"
 #include "constants/battle_string_ids.h"
 #include "constants/abilities.h"
@@ -184,6 +185,17 @@ static bool32 HandleEndTurnWeatherDamage(enum BattlerId battler)
     case BATTLE_WEATHER_NONE:
     case BATTLE_WEATHER_COUNT:
         break;
+    }
+
+    if (!effect && !gBattleMons[battler].volatiles.healBlockTimer && !IsBattlerAtMaxHp(battler))
+    {
+        u32 heal = GetTreeWeatherHealAmount(battler);
+        if (heal != 0)
+        {
+            SetHealAmount(battler, heal);
+            BattleScriptCall(BattleScript_TreeWeatherHeal);
+            effect = TRUE;
+        }
     }
 
     return effect;

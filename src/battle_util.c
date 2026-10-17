@@ -2090,6 +2090,8 @@ enum WeatherFailure TryChangeBattleWeather(enum BattlerId battler, u32 battleWea
             gBattleStruct->weatherDuration = 8;
         else
             gBattleStruct->weatherDuration = 5;
+        if (gBattleStruct->weatherDuration != 0)
+            gBattleStruct->weatherDuration += GetTreeWeatherTurnsBonus(battler, gBattleWeather);
     }
 
     if (ability != ABILITY_NONE) // Weather started by Ability
@@ -7677,6 +7679,7 @@ static inline uq4_12_t GetOtherModifiers(struct DamageContext *ctx)
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(ctx));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(ctx->battlerAtk, ctx->typeEffectivenessModifier, ctx->holdEffects[ctx->battlerAtk]));
     }
+    DAMAGE_MULTIPLY_MODIFIER(GetTreeDamageModifier(ctx->battlerAtk, ctx->battlerDef, ctx->move, ctx->moveType));
     return finalModifier;
 }
 
@@ -9653,6 +9656,9 @@ u32 CalcSecondaryEffectChance(enum BattlerId battler, enum Ability battlerAbilit
     bool8 hasSereneGrace = (battlerAbility == ABILITY_SERENE_GRACE);
     bool8 hasRainbow = (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_RAINBOW) != 0;
     u16 secondaryEffectChance = additionalEffect->chance;
+
+    if (secondaryEffectChance != 0)
+        secondaryEffectChance += GetTreeStatusChanceBonus(battler, additionalEffect->moveEffect);
 
     if (hasRainbow && hasSereneGrace && additionalEffect->moveEffect == MOVE_EFFECT_FLINCH)
         return secondaryEffectChance * 2;

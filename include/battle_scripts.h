@@ -243,6 +243,7 @@ extern const u8 BattleScript_TelekinesisEndTurn[];
 extern const u8 BattleScript_HealBlockEndTurn[];
 extern const u8 BattleScript_BufferEndTurn[];
 extern const u8 BattleScript_AquaRingHeal[];
+extern const u8 BattleScript_TreeWeatherHeal[];
 extern const u8 BattleScript_LuckyChantEnds[];
 extern const u8 BattleScript_TailwindEnds[];
 extern const u8 BattleScript_TrickRoomEnds[];

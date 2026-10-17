@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_build.h"
 #include "battle.h"
 #include "battle_ai_util.h"
 #include "battle_anim.h"
@@ -2745,6 +2746,15 @@ void Mutation_(u32 sourceLine, enum Type mutationType, u32 mutationSlot)
     INVALID_IF(!DATA.currentMon, "Mutation outside of PLAYER/OPPONENT");
     SetMonData(DATA.currentMon, MON_DATA_MUTATION_TYPE, &mutationType);
     SetMonData(DATA.currentMon, MON_DATA_MUTATION_SLOT, &mutationSlot);
+}
+
+// Fixe directement un rang d'arbre, sans passer par les règles d'investissement.
+void TreeRank_(u32 sourceLine, enum Type treeType, u32 node, u32 rank)
+{
+    INVALID_IF(!DATA.currentMon, "TreeRank outside of PLAYER/OPPONENT");
+    SetMonData(DATA.currentMon, MON_DATA_TREE_TYPE, &treeType);
+    SetBoxMonTreeRank(&DATA.currentMon->box, node, rank);
+    CalculateMonStats(DATA.currentMon);
 }
 
 void TeraType_(u32 sourceLine, enum Type teraType)
