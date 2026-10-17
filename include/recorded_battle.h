@@ -5,7 +5,7 @@
 #include "link.h"
 #include "random.h"
 
-#define BATTLER_RECORD_SIZE 388
+#define BATTLER_RECORD_SIZE 292 // 388 dans le jeu de base, réduit pour compenser struct PokemonBuild dans les parties enregistrées.
 
 struct RecordedBattleSave
 {

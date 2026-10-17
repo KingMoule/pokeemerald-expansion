@@ -2492,6 +2492,21 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
         case MON_DATA_DAYS_SINCE_FORM_CHANGE:
             retVal = boxMon->daysSinceFormChange;
             break;
+        case MON_DATA_TREE_TYPE:
+            retVal = boxMon->build.treeType;
+            break;
+        case MON_DATA_TREE_POINTS:
+            retVal = boxMon->build.treePoints;
+            break;
+        case MON_DATA_MUTATION_TYPE:
+            retVal = boxMon->build.mutationType;
+            break;
+        case MON_DATA_MUTATION_SLOT:
+            retVal = boxMon->build.mutationSlot;
+            break;
+        case MON_DATA_MOVE_VARIANTS:
+            retVal = boxMon->build.moveVariants;
+            break;
         default:
             break;
         }
@@ -2925,6 +2940,21 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
         }
         case MON_DATA_DAYS_SINCE_FORM_CHANGE:
             SET8(boxMon->daysSinceFormChange);
+            break;
+        case MON_DATA_TREE_TYPE:
+            SET8(boxMon->build.treeType);
+            break;
+        case MON_DATA_TREE_POINTS:
+            SET8(boxMon->build.treePoints);
+            break;
+        case MON_DATA_MUTATION_TYPE:
+            SET8(boxMon->build.mutationType);
+            break;
+        case MON_DATA_MUTATION_SLOT:
+            SET8(boxMon->build.mutationSlot);
+            break;
+        case MON_DATA_MOVE_VARIANTS:
+            SET8(boxMon->build.moveVariants);
             break;
         }
     }
