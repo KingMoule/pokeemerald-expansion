@@ -100,7 +100,7 @@ WILD_BATTLE_TEST("Large exp gains are supported", s32 exp) // #1455
 
     PARAMETRIZE { level = 10; }
     PARAMETRIZE { level = 50; }
-    PARAMETRIZE { level = MAX_LEVEL; }
+    PARAMETRIZE { level = 100; } // Mod : MAX_LEVEL vaut 250 ; le gain serait alors tronqué par le plafond de 100.
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Level(1); Item(ITEM_LUCKY_EGG); OTName("Test"); } // OT Name is different so it gets more exp as a traded mon

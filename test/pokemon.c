@@ -681,7 +681,10 @@ TEST("BoxPokemon encryption works")
     };
 
     struct Pokemon mon;
-    BoxMonToMon((struct BoxPokemon *)&raw, &mon);
+    // Mod : BoxPokemon contient en plus PokemonBuild (non chiffré), laissé à zéro.
+    struct BoxPokemon boxMon = {0};
+    memcpy(&boxMon, raw, sizeof(raw));
+    BoxMonToMon(&boxMon, &mon);
 
     EXPECT_EQ(GetMonData(&mon, MON_DATA_SANITY_IS_BAD_EGG), 0);
     EXPECT_EQ(GetMonData(&mon, MON_DATA_SPECIES), SPECIES_TORCHIC);
