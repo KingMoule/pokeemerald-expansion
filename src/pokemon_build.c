@@ -2,7 +2,9 @@
 #include "battle.h"
 #include "battle_dynamax.h"
 #include "battle_util.h"
+#include "item.h"
 #include "pokemon.h"
+#include "random.h"
 #include "pokemon_build.h"
 #include "constants/battle.h"
 #include "constants/battle_set_effect.h"
@@ -322,6 +324,95 @@ uq4_12_t ApplyMutationWeaknessPenalty(enum BattlerId battlerDef, enum Type moveT
         return modifier;
 
     return uq4_12_multiply(modifier, UQ_4_12((double)MOD_MUTATION_WEAKNESS_NUM / MOD_MUTATION_WEAKNESS_DEN));
+}
+
+// Type d'origine remplacé par la mutation (celui de l'espèce actuelle à mutationSlot).
+enum Type GetBoxMonReplacedType(const struct BoxPokemon *boxMon)
+{
+    enum Species species;
+
+    if (boxMon->build.mutationType == TYPE_NONE)
+        return TYPE_NONE;
+    species = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_SPECIES);
+    return GetSpeciesType(species, GetSpeciesType(species, 0) == GetSpeciesType(species, 1) ? 0 : boxMon->build.mutationSlot);
+}
+
+// Applique « replacedType → newType » si l'espèce possède replacedType et pas déjà newType
+// (pas de double type identique : cas encore ouvert dans le wiki, refusé pour l'instant).
+bool32 SetBoxMonMutation(struct BoxPokemon *boxMon, enum Type replacedType, enum Type newType)
+{
+    enum Species species = GetBoxMonData(boxMon, MON_DATA_SPECIES);
+    enum Type type1 = GetSpeciesType(species, 0);
+    enum Type type2 = GetSpeciesType(species, 1);
+
+    if (replacedType == TYPE_NONE || newType == TYPE_NONE || boxMon->build.mutationType != TYPE_NONE)
+        return FALSE;
+    if (type1 != replacedType && type2 != replacedType)
+        return FALSE;
+    if (type1 == newType || type2 == newType)
+        return FALSE;
+    boxMon->build.mutationType = newType;
+    boxMon->build.mutationSlot = (type1 == replacedType) ? 0 : 1;
+    return TRUE;
+}
+
+static bool32 CanEggInheritMutation(struct BoxPokemon *egg, struct BoxPokemon *parent)
+{
+    struct BoxPokemon copy = *egg;
+    copy.build.mutationType = TYPE_NONE;
+    return SetBoxMonMutation(&copy, GetBoxMonReplacedType(parent), parent->build.mutationType);
+}
+
+static bool32 HasSameMutation(struct BoxPokemon *a, struct BoxPokemon *b)
+{
+    return a->build.mutationType == b->build.mutationType
+        && GetBoxMonReplacedType(a) == GetBoxMonReplacedType(b);
+}
+
+// Une seule mutation est transmise, avec sa pénalité ; ni points d'arbre ni maîtrises.
+// Même mutation chez les deux parents : garantie. Lineage Charm : garantie, et le parent qui le
+// tient l'emporte quand les deux mutations diffèrent. Sinon : MOD_MUTATION_INHERIT_CHANCE %.
+void InheritMutation(struct BoxPokemon *egg, struct BoxPokemon *parent1, struct BoxPokemon *parent2)
+{
+    struct BoxPokemon *parents[2] = {parent1, parent2};
+    bool32 compatible[2], charm[2];
+    struct BoxPokemon *chosen = NULL;
+    u32 i, count = 0;
+
+    for (i = 0; i < 2; i++)
+    {
+        compatible[i] = CanEggInheritMutation(egg, parents[i]);
+        charm[i] = GetBoxMonData(parents[i], MON_DATA_HELD_ITEM) == ITEM_LINEAGE_CHARM;
+        count += compatible[i];
+    }
+    if (count == 0)
+        return;
+
+    if (count == 2 && HasSameMutation(parent1, parent2))
+        chosen = parent1;
+    else if (compatible[0] && charm[0] && !(compatible[1] && charm[1]))
+        chosen = parent1;
+    else if (compatible[1] && charm[1] && !(compatible[0] && charm[0]))
+        chosen = parent2;
+    else if (count == 2 && (charm[0] || charm[1]))
+        chosen = parents[RandomUniform(RNG_DAYCARE_MUTATION_PICK, 0, 1)];
+    else if (charm[0] || charm[1])
+        chosen = compatible[0] ? parent1 : parent2;
+    else if (RandomPercentage(RNG_DAYCARE_MUTATION_INHERITANCE, MOD_MUTATION_INHERIT_CHANCE))
+        chosen = (count == 2) ? parents[RandomUniform(RNG_DAYCARE_MUTATION_PICK, 0, 1)] : (compatible[0] ? parent1 : parent2);
+
+    if (chosen != NULL)
+        SetBoxMonMutation(egg, GetBoxMonReplacedType(chosen), chosen->build.mutationType);
+
+    if (MOD_LINEAGE_CHARM_CONSUMED)
+    {
+        enum Item none = ITEM_NONE;
+        for (i = 0; i < 2; i++)
+        {
+            if (charm[i])
+                SetBoxMonData(parents[i], MON_DATA_HELD_ITEM, &none);
+        }
+    }
 }
 
 const struct TreeNode *GetTreeNode(enum Type treeType, u32 node)

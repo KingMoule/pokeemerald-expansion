@@ -41,6 +41,11 @@ enum Type GetBoxMonMutationPenaltyType(const struct BoxPokemon *boxMon, enum Spe
 enum Type GetBattlerMutatedType(enum BattlerId battler, u32 slot);
 uq4_12_t ApplyMutationWeaknessPenalty(enum BattlerId battlerDef, enum Type moveType, uq4_12_t modifier);
 
+// Héritage : une mutation passe à l'œuf si le bébé possède naturellement le type remplacé.
+enum Type GetBoxMonReplacedType(const struct BoxPokemon *boxMon);
+bool32 SetBoxMonMutation(struct BoxPokemon *boxMon, enum Type replacedType, enum Type newType);
+void InheritMutation(struct BoxPokemon *egg, struct BoxPokemon *parent1, struct BoxPokemon *parent2);
+
 // Arbres élémentaires.
 // Nœuds 0 à 3 : tronc commun. Nœuds 4 à 7, 8 à 11 et 12 à 15 : trois branches
 // de quatre nœuds, chacun exigeant MOD_TREE_PARENT_RANKS rangs dans le précédent.

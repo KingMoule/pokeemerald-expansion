@@ -1,5 +1,6 @@
 #include "global.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "battle.h"
 #include "daycare.h"
 #include "string_util.h"
@@ -1009,6 +1010,7 @@ static void _GiveEggFromDaycare(struct DayCare *daycare)
     InheritPokeball(&egg, daycare);
     BuildEggMoveset(&egg, &daycare->mons[parentSlots[1]].mon, &daycare->mons[parentSlots[0]].mon);
     InheritAbility(&egg, daycare);
+    InheritMutation(&egg.box, &daycare->mons[0].mon, &daycare->mons[1].mon);
 
     isEgg = TRUE;
     SetMonData(&egg, MON_DATA_IS_EGG, &isEgg);

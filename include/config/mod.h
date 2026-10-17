@@ -23,6 +23,8 @@
 #define MOD_MUTATION_TREE_POINTS      50   // Points investis requis pour acquérir soi-même une mutation.
 #define MOD_MUTATION_WEAKNESS_NUM     125  // Pénalité sur les faiblesses : NUM / DEN, soit ×1,25.
 #define MOD_MUTATION_WEAKNESS_DEN     100
+#define MOD_MUTATION_INHERIT_CHANCE   30   // % de transmission sans Lineage Charm (un parent muté compatible).
+#define MOD_LINEAGE_CHARM_CONSUMED    FALSE // Le Lineage Charm est-il consommé à la ponte ? (question ouverte du wiki)
 
 // Variantes d'attaques
 #define MOD_MOVE_VARIANT_BITS         2    // Bits par attaque : 0 = standard, 1 à 3 = variantes.

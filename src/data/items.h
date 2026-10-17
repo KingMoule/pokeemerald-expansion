@@ -7324,6 +7324,25 @@ const struct ItemInfo gItemsInfo[] =
         .iconPalette = gItemIconPalette_ScrollOfWaters,
     },
 
+    // Mod : objet de contrôle de l'héritage, tenu par un parent à la pension.
+    // Icône provisoire reprise de l'Oval Charm.
+    [ITEM_LINEAGE_CHARM] =
+    {
+        .name = ITEM_NAME("Lineage Charm"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Held by a parent, it\n"
+            "passes a compatible\n"
+            "mutation to the Egg."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_HELD_ITEM,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .flingPower = 10,
+        .iconPic = gItemIcon_OvalCharm,
+        .iconPalette = gItemIconPalette_OvalCharm,
+    },
+
 // Gems
 #if I_PRICE >= GEN_9
     #define GEM_PRICE 15000
