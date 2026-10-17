@@ -49,7 +49,7 @@ EventScript_TreeMenu_Refused:
 	msgbox gStringVar4, MSGBOX_DEFAULT
 	goto EventScript_TreeMenu_Loop
 
-@ Variantes d'attaques, consultation depuis BUILD : seul le Mastery Scroll en donne une.
+@ Variantes d'attaques, consultation depuis BUILD : seul le Technique Codex en donne une.
 EventScript_VariantMenu:
 	message Text_VariantMenu_ViewMoves
 	waitmessage
@@ -59,19 +59,19 @@ EventScript_VariantMenu:
 	copyvar VAR_0x8007, VAR_RESULT
 	special VariantMenu_CheckMove
 	goto_if_ne VAR_RESULT, 0, EventScript_VariantMenu_Info
-	msgbox Text_VariantMenu_NeedScroll, MSGBOX_DEFAULT
+	msgbox Text_VariantMenu_NeedCodex, MSGBOX_DEFAULT
 	goto EventScript_VariantMenu
 
 EventScript_VariantMenu_Info:
 	msgbox gStringVar4, MSGBOX_DEFAULT
 	goto EventScript_VariantMenu
 
-@ Mastery Scroll utilisé depuis le sac. L'objet n'est retiré qu'après confirmation.
-EventScript_MasteryScroll::
+@ Technique Codex utilisé depuis le sac. L'objet n'est retiré qu'après confirmation.
+EventScript_TechniqueCodex::
 	lockall
 	special BuildMenu_Begin
-	goto_if_eq VAR_RESULT, FALSE, EventScript_MasteryScroll_NoEffect
-EventScript_MasteryScroll_ChooseMove:
+	goto_if_eq VAR_RESULT, FALSE, EventScript_TechniqueCodex_NoEffect
+EventScript_TechniqueCodex_ChooseMove:
 	message Text_VariantMenu_ChooseMove
 	waitmessage
 	special VariantMenu_PushMoves
@@ -79,28 +79,28 @@ EventScript_MasteryScroll_ChooseMove:
 	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_BuildMenu_End
 	copyvar VAR_0x8007, VAR_RESULT
 	special VariantMenu_CheckMove
-	goto_if_ne VAR_RESULT, 0, EventScript_MasteryScroll_Refused
+	goto_if_ne VAR_RESULT, 0, EventScript_TechniqueCodex_Refused
 	message Text_VariantMenu_ChooseVariant
 	waitmessage
 	special VariantMenu_PushVariants
 	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
-	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_MasteryScroll_ChooseMove
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_TechniqueCodex_ChooseMove
 	copyvar VAR_0x8008, VAR_RESULT
 	special VariantMenu_BufferVariant
 	msgbox gStringVar4, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, EventScript_MasteryScroll_ChooseMove
+	goto_if_eq VAR_RESULT, NO, EventScript_TechniqueCodex_ChooseMove
 	special VariantMenu_Apply
-	removeitem ITEM_MASTERY_SCROLL
+	removeitem ITEM_TECHNIQUE_CODEX
 	playse SE_SUCCESS
 	waitse
 	msgbox Text_VariantMenu_Learned, MSGBOX_DEFAULT
 	goto EventScript_BuildMenu_End
 
-EventScript_MasteryScroll_Refused:
+EventScript_TechniqueCodex_Refused:
 	msgbox gStringVar4, MSGBOX_DEFAULT
-	goto EventScript_MasteryScroll_ChooseMove
+	goto EventScript_TechniqueCodex_ChooseMove
 
-EventScript_MasteryScroll_NoEffect:
+EventScript_TechniqueCodex_NoEffect:
 	msgbox Text_VariantMenu_NoEffect, MSGBOX_DEFAULT
 	goto EventScript_BuildMenu_End
 
@@ -126,9 +126,9 @@ Text_VariantMenu_ViewMoves:
 	.string "Check the variant of\n"
 	.string "which move?$"
 
-Text_VariantMenu_NeedScroll:
-	.string "No variant yet. A Mastery\n"
-	.string "Scroll can give it one.$"
+Text_VariantMenu_NeedCodex:
+	.string "No variant yet. A Technique\n"
+	.string "Codex can give it one.$"
 
 Text_VariantMenu_Learned:
 	.string "{STR_VAR_1} mastered a new\n"

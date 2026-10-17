@@ -7307,10 +7307,10 @@ const struct ItemInfo gItemsInfo[] =
         .iconPalette = gItemIconPalette_Glimmoranite,
     },
 
-    // Mod : objet du donjon rogue-lite. Icône provisoire reprise du Rouleau de l'Eau.
-    [ITEM_MASTERY_SCROLL] =
+    // Mod : objet du donjon rogue-lite. Icône provisoire reprise du Scroll of Waters.
+    [ITEM_TECHNIQUE_CODEX] =
     {
-        .name = ITEM_NAME("Mastery Scroll"),
+        .name = ITEM_NAME("Technique Codex"),
         .price = 0,
         .description = COMPOUND_STRING(
             "Gives one move a\n"
@@ -7319,7 +7319,7 @@ const struct ItemInfo gItemsInfo[] =
         .pocket = POCKET_ITEMS,
         .sortType = ITEM_TYPE_FIELD_USE,
         .type = ITEM_USE_PARTY_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_MasteryScroll,
+        .fieldUseFunc = ItemUseOutOfBattle_TechniqueCodex,
         .iconPic = gItemIcon_ScrollOfWaters,
         .iconPalette = gItemIconPalette_ScrollOfWaters,
     },

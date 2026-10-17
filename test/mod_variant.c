@@ -71,9 +71,9 @@ TEST("Mod: move variants follow their move when moves are swapped")
     EXPECT_EQ(GetBoxMonMoveVariant(&mon.box, 3), MOVE_VARIANT_FOCUSED);
 }
 
-TEST("Mod: the Mastery Scroll is a party-use item")
+TEST("Mod: the Technique Codex is a party-use item")
 {
-    EXPECT_EQ(GetItemPocket(ITEM_MASTERY_SCROLL), POCKET_ITEMS);
-    EXPECT_EQ(GetItemType(ITEM_MASTERY_SCROLL), ITEM_USE_PARTY_MENU);
-    EXPECT(GetItemFieldFunc(ITEM_MASTERY_SCROLL) == ItemUseOutOfBattle_MasteryScroll);
+    EXPECT_EQ(GetItemPocket(ITEM_TECHNIQUE_CODEX), POCKET_ITEMS);
+    EXPECT_EQ(GetItemType(ITEM_TECHNIQUE_CODEX), ITEM_USE_PARTY_MENU);
+    EXPECT(GetItemFieldFunc(ITEM_TECHNIQUE_CODEX) == ItemUseOutOfBattle_TechniqueCodex);
 }

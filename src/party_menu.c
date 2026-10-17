@@ -4110,19 +4110,19 @@ static void FieldCallback_BuildMenu(void)
     ScriptContext_SetupScript(EventScript_BuildMenu);
 }
 
-// Mastery Scroll : le choix de l'attaque et de la variante se fait sur le terrain
+// Technique Codex : le choix de l'attaque et de la variante se fait sur le terrain
 // (data/scripts/mod_tree.inc), et l'objet n'est retiré qu'une fois la variante appliquée.
-static void FieldCallback_MasteryScroll(void)
+static void FieldCallback_TechniqueCodex(void)
 {
     gSpecialVar_0x8004 = gPartyMenu.slotId;
-    ScriptContext_SetupScript(EventScript_MasteryScroll);
+    ScriptContext_SetupScript(EventScript_TechniqueCodex);
 }
 
-void ItemUseCB_MasteryScroll(u8 taskId, TaskFunc task)
+void ItemUseCB_TechniqueCodex(u8 taskId, TaskFunc task)
 {
     PlaySE(SE_SELECT);
     gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
-    gPostMenuFieldCallback = FieldCallback_MasteryScroll;
+    gPostMenuFieldCallback = FieldCallback_TechniqueCodex;
     gPartyMenu.exitCallback = CB2_ReturnToField;
     Task_ClosePartyMenu(taskId);
 }
