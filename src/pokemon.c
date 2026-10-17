@@ -38,6 +38,7 @@
 #include "pokedex.h"
 #include "pokeblock.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "pokemon_animation.h"
 #include "pokemon_icon.h"
 #include "pokemon_summary_screen.h"
@@ -3427,8 +3428,8 @@ void PokemonToBattleMon(struct Pokemon *src, struct BattlePokemon *dst)
     dst->spDefense = GetMonData(src, MON_DATA_SPDEF);
     dst->abilityNum = GetMonData(src, MON_DATA_ABILITY_NUM);
     dst->otId = GetMonData(src, MON_DATA_OT_ID);
-    dst->types[0] = GetSpeciesType(dst->species, 0);
-    dst->types[1] = GetSpeciesType(dst->species, 1);
+    dst->types[0] = GetBoxMonMutatedType(&src->box, dst->species, 0);
+    dst->types[1] = GetBoxMonMutatedType(&src->box, dst->species, 1);
     dst->types[2] = TYPE_MYSTERY;
     dst->isShiny = IsMonShiny(src);
     dst->affectionHearts = GetMonAffectionHearts(src);

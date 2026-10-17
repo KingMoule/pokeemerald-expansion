@@ -16,6 +16,7 @@
 #include "config_changes.h"
 #include "party_menu.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "international_string_util.h"
 #include "item.h"
 #include "util.h"
@@ -8268,6 +8269,7 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(struct DamageCont
         MulByTypeEffectiveness(ctx, &modifier, types[1]);
     if (types[2] != TYPE_MYSTERY && types[2] != types[1] && types[2] != types[0])
         MulByTypeEffectiveness(ctx, &modifier, types[2]);
+    modifier = ApplyMutationWeaknessPenalty(ctx->battlerDef, ctx->moveType, modifier);
     if (ctx->moveType == TYPE_FIRE && gBattleMons[ctx->battlerDef].volatiles.tarShot)
         modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
 
@@ -9586,8 +9588,8 @@ void CopyMonAbilityAndTypesToBattleMon(enum BattlerId battler, struct Pokemon *m
             gBattleMons[battler].ability = TestRunner_Battle_GetForcedAbility(array, partyIndex);
     }
     #endif
-    gBattleMons[battler].types[0] = GetSpeciesType(gBattleMons[battler].species, 0);
-    gBattleMons[battler].types[1] = GetSpeciesType(gBattleMons[battler].species, 1);
+    gBattleMons[battler].types[0] = GetBoxMonMutatedType(&mon->box, gBattleMons[battler].species, 0);
+    gBattleMons[battler].types[1] = GetBoxMonMutatedType(&mon->box, gBattleMons[battler].species, 1);
     gBattleMons[battler].types[2] = TYPE_MYSTERY;
 }
 
@@ -9766,7 +9768,7 @@ bool32 CanMonParticipateInSkyBattle(struct Pokemon *mon)
     enum Ability ability = GetSpeciesAbility(species, monAbilityNum);
 
     bool32 hasLevitateAbility = (ability == ABILITY_LEVITATE || ability == ABILITY_EELEVATE);
-    bool32 isFlyingType = GetSpeciesType(species, 0) == TYPE_FLYING || GetSpeciesType(species, 1) == TYPE_FLYING;
+    bool32 isFlyingType = GetBoxMonMutatedType(&mon->box, species, 0) == TYPE_FLYING || GetBoxMonMutatedType(&mon->box, species, 1) == TYPE_FLYING;
     bool32 monIsValidAndNotEgg = GetMonData(mon, MON_DATA_SANITY_HAS_SPECIES) && !GetMonData(mon, MON_DATA_IS_EGG);
 
     if (monIsValidAndNotEgg)

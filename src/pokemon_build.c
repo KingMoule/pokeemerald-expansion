@@ -1,4 +1,6 @@
 #include "global.h"
+#include "battle.h"
+#include "battle_util.h"
 #include "pokemon.h"
 #include "pokemon_build.h"
 
@@ -75,4 +77,62 @@ void SetBoxMonMoveVariant(struct BoxPokemon *boxMon, u32 moveSlot, u32 variant)
     shift = moveSlot * MOD_MOVE_VARIANT_BITS;
     boxMon->build.moveVariants &= ~(MOVE_VARIANT_MAX << shift);
     boxMon->build.moveVariants |= variant << shift;
+}
+
+// Une mutation remplace le type mutationSlot de l'espèce actuelle.
+// Un Pokémon à un seul type prend le nouveau type comme unique type.
+enum Type GetBoxMonMutatedType(const struct BoxPokemon *boxMon, enum Species species, u32 slot)
+{
+    enum Type type1 = GetSpeciesType(species, 0);
+    enum Type type2 = GetSpeciesType(species, 1);
+    enum Type mutationType = boxMon->build.mutationType;
+
+    if (mutationType == TYPE_NONE)
+        return slot == 0 ? type1 : type2;
+    if (type1 == type2 || slot == boxMon->build.mutationSlot)
+        return mutationType;
+    return slot == 0 ? type1 : type2;
+}
+
+// Double type : la pénalité porte sur les faiblesses du type conservé.
+// Type unique : elle porte sur les faiblesses du nouveau type.
+enum Type GetBoxMonMutationPenaltyType(const struct BoxPokemon *boxMon, enum Species species)
+{
+    enum Type type1 = GetSpeciesType(species, 0);
+    enum Type type2 = GetSpeciesType(species, 1);
+
+    if (boxMon->build.mutationType == TYPE_NONE)
+        return TYPE_NONE;
+    if (type1 == type2)
+        return boxMon->build.mutationType;
+    return boxMon->build.mutationSlot == 0 ? type2 : type1;
+}
+
+static const struct BoxPokemon *GetBattlerBoxMon(enum BattlerId battler)
+{
+    return &GetBattlerParty(battler)[gBattlerPartyIndexes[battler]].box;
+}
+
+enum Type GetBattlerMutatedType(enum BattlerId battler, u32 slot)
+{
+    return GetBoxMonMutatedType(GetBattlerBoxMon(battler), gBattleMons[battler].species, slot);
+}
+
+// ×1,25 lorsque l'attaque est super efficace contre le type pénalisé et
+// que l'efficacité totale reste supérieure à ×1. Si l'autre type compense
+// la faiblesse, aucune pénalité (cas encore à définir dans le wiki).
+uq4_12_t ApplyMutationWeaknessPenalty(enum BattlerId battlerDef, enum Type moveType, uq4_12_t modifier)
+{
+    enum Type penaltyType;
+
+    if (gBattleMons[battlerDef].volatiles.transformed)
+        return modifier;
+
+    penaltyType = GetBoxMonMutationPenaltyType(GetBattlerBoxMon(battlerDef), gBattleMons[battlerDef].species);
+    if (penaltyType == TYPE_NONE || !IS_BATTLER_OF_TYPE(battlerDef, penaltyType))
+        return modifier;
+    if (GetTypeModifier(moveType, penaltyType) <= UQ_4_12(1.0) || modifier <= UQ_4_12(1.0))
+        return modifier;
+
+    return uq4_12_multiply(modifier, UQ_4_12((double)MOD_MUTATION_WEAKNESS_NUM / MOD_MUTATION_WEAKNESS_DEN));
 }

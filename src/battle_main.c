@@ -43,6 +43,7 @@
 #include "pokeball.h"
 #include "pokedex.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "pokerus.h"
 #include "random.h"
 #include "recorded_battle.h"
@@ -3134,8 +3135,8 @@ static void DoBattleIntro(void)
             else
             {
                 memcpy(&gBattleMons[battler], &gBattleResources->bufferB[battler][4], sizeof(struct BattlePokemon));
-                gBattleMons[battler].types[0] = GetSpeciesType(gBattleMons[battler].species, 0);
-                gBattleMons[battler].types[1] = GetSpeciesType(gBattleMons[battler].species, 1);
+                gBattleMons[battler].types[0] = GetBattlerMutatedType(battler, 0);
+                gBattleMons[battler].types[1] = GetBattlerMutatedType(battler, 1);
                 gBattleMons[battler].types[2] = TYPE_MYSTERY;
                 gBattleMons[battler].ability = GetAbilityBySpecies(gBattleMons[battler].species, gBattleMons[battler].abilityNum);
                 gBattleStruct->battlerState[battler].hpOnSwitchout = gBattleMons[battler].hp;
@@ -5542,8 +5543,8 @@ enum Type GetDynamicMoveType(struct Pokemon *mon, enum Move move, enum BattlerId
         heldItem = GetMonData(mon, MON_DATA_HELD_ITEM, 0);
         holdEffect = GetItemHoldEffect(heldItem);
         ability = GetMonAbility(mon);
-        types[0] = GetSpeciesType(species, 0);
-        types[1] = GetSpeciesType(species, 1);
+        types[0] = GetBoxMonMutatedType(&mon->box, species, 0);
+        types[1] = GetBoxMonMutatedType(&mon->box, species, 1);
         types[2] = TYPE_MYSTERY;
         gimmick = GIMMICK_NONE;
     }

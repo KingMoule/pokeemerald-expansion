@@ -2740,6 +2740,13 @@ void GigantamaxFactor_(u32 sourceLine, bool32 gigantamaxFactor)
     SetGimmick(sourceLine, DATA.battlerParty, DATA.currentPartyIndex, GIMMICK_DYNAMAX);
 }
 
+void Mutation_(u32 sourceLine, enum Type mutationType, u32 mutationSlot)
+{
+    INVALID_IF(!DATA.currentMon, "Mutation outside of PLAYER/OPPONENT");
+    SetMonData(DATA.currentMon, MON_DATA_MUTATION_TYPE, &mutationType);
+    SetMonData(DATA.currentMon, MON_DATA_MUTATION_SLOT, &mutationSlot);
+}
+
 void TeraType_(u32 sourceLine, enum Type teraType)
 {
     INVALID_IF(!DATA.currentMon, "TeraType outside of PLAYER/OPPONENT");

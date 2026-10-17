@@ -17,6 +17,7 @@
 #include "item_menu.h"
 #include "util.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "random.h"
 #include "battle_controllers.h"
 #include "battle_interface.h"
@@ -3236,8 +3237,8 @@ static void Cmd_switchindataupdate(void)
         return;
     }
 
-    gBattleMons[battler].types[0] = GetSpeciesType(gBattleMons[battler].species, 0);
-    gBattleMons[battler].types[1] = GetSpeciesType(gBattleMons[battler].species, 1);
+    gBattleMons[battler].types[0] = GetBattlerMutatedType(battler, 0);
+    gBattleMons[battler].types[1] = GetBattlerMutatedType(battler, 1);
     gBattleMons[battler].types[2] = TYPE_MYSTERY;
     gBattleMons[battler].ability = GetAbilityBySpecies(gBattleMons[battler].species, gBattleMons[battler].abilityNum);
     #if TESTING
