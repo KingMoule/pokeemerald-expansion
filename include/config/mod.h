@@ -26,6 +26,18 @@
 #define MOD_EV_CAP_PER_STAT           252   // Plafond par statistique (exemple du wiki, 255 au plus).
 #define MOD_EV_CAP_TOTAL              510   // Plafond total (exemple du wiki).
 
+// Donjon d'entraînement des EV (« Training Depths », wiki section 10). Valeurs provisoires.
+#define MOD_EVDJ_REQUIRED_BADGES      4    // Badges requis pour entrer (milieu de campagne).
+#define MOD_EVDJ_REST_EVERY           3    // Un palier de repos (sortie possible, soins) tous les N étages.
+#define MOD_EVDJ_GAIN_BASE            8    // EV en attente gagnés par étage au départ...
+#define MOD_EVDJ_GAIN_STEP            4    // ...plus ce bonus à chaque palier franchi (profondeur = meilleurs gains).
+#define MOD_EVDJ_DEFEAT_KEPT_PCT      50   // % des gains non sécurisés conservés en cas de défaite.
+#define MOD_EVDJ_LEVEL_OFFSET         5    // Niveau adverse à l'étage 1 : plus haut niveau de l'équipe moins N...
+#define MOD_EVDJ_LEVELS_PER_FLOOR     1    // ...puis +N niveaux par étage.
+#define MOD_EVDJ_PARTY_SIZE_BASE      2    // Pokémon adverses à l'étage 1, +1 à chaque palier (6 au plus).
+#define MOD_EVDJ_ENEMY_IV_BASE        10   // IV adverses : base + étage (31 au plus).
+#define MOD_EVDJ_MAX_FLOOR            99   // Profondeur maximale.
+
 // Mutations
 #define MOD_MUTATION_TREE_POINTS      50   // Points investis requis pour acquérir soi-même une mutation.
 #define MOD_MUTATION_WEAKNESS_NUM     125  // Pénalité sur les faiblesses : NUM / DEN, soit ×1,25.

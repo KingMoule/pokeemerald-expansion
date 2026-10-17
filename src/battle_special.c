@@ -8,6 +8,7 @@
 #include "battle_tower.h"
 #include "battle_transition.h"
 #include "event_data.h"
+#include "ev_dungeon.h"
 #include "frontier_util.h"
 #include "new_game.h"
 #include "overworld.h"
@@ -54,6 +55,9 @@ void CB2_EndSpecialTrainerBattle(void)
         }
         gSpecialVar_Result = gBattleOutcome;
         break;
+    case SPECIAL_BATTLE_EV_DUNGEON:
+        gSpecialVar_Result = gBattleOutcome;
+        break;
     }
 
     SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
@@ -97,6 +101,12 @@ void DoSpecialTrainerBattle(void)
         PlayMapChosenOrBattleBGM(0);
         BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_E_READER));
     #endif //FREE_BATTLE_TOWER_E_READER
+        break;
+    case SPECIAL_BATTLE_EV_DUNGEON:
+        EvDungeon_SetupBattle();
+        CreateTask(Task_StartBattleAfterTransition, 1);
+        PlayMapChosenOrBattleBGM(0);
+        BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_TRAINER_HILL));
         break;
     case SPECIAL_BATTLE_MULTI:
     default:

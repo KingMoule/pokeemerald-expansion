@@ -52,7 +52,7 @@
 #else
 
 #define FLAG_RECEIVED_TECHNIQUE_CODEX 0x20 // Mod : Technique Codex offert par Roxanne
-#define FLAG_UNUSED_0x021    0x21 // Unused Flag
+#define FLAG_MOD_EV_DUNGEON_EXPLAINED 0x21 // Mod : règles des Training Depths déjà expliquées
 #define FLAG_UNUSED_0x022    0x22 // Unused Flag
 #define FLAG_UNUSED_0x023    0x23 // Unused Flag
 #define FLAG_UNUSED_0x024    0x24 // Unused Flag

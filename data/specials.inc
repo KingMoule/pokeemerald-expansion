@@ -650,3 +650,11 @@ gSpecials::
 	def_special VariantMenu_PushVariants
 	def_special VariantMenu_BufferVariant
 	def_special VariantMenu_Apply
+	def_special EvDungeon_CheckAccess
+	def_special EvDungeon_SetBeneficiary
+	def_special EvDungeon_PushPaths
+	def_special EvDungeon_PushStartFloors
+	def_special EvDungeon_Start
+	def_special EvDungeon_BeginFloor
+	def_special EvDungeon_EndFloor
+	def_special EvDungeon_Leave
