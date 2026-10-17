@@ -3,23 +3,23 @@
 
 #define TREE_TRUNK                                                                                  \
     [0] = {                                                                                         \
-        .name = COMPOUND_STRING("Force physique"),                                                  \
-        .description = COMPOUND_STRING("+1 % aux dégâts\nphysiques par rang."),                     \
+        .name = COMPOUND_STRING("Physical Strength"),                                                  \
+        .description = COMPOUND_STRING("+1% physical damage\nper rank."),                     \
         .effect = TREE_EFFECT_PHYSICAL_DAMAGE, .maxRank = 20, .valuePerRank = 10,                   \
     },                                                                                              \
     [1] = {                                                                                         \
-        .name = COMPOUND_STRING("Force spéciale"),                                                  \
-        .description = COMPOUND_STRING("+1 % aux dégâts\nspéciaux par rang."),                      \
+        .name = COMPOUND_STRING("Special Strength"),                                                  \
+        .description = COMPOUND_STRING("+1% special damage\nper rank."),                      \
         .effect = TREE_EFFECT_SPECIAL_DAMAGE, .maxRank = 20, .valuePerRank = 10,                    \
     },                                                                                              \
     [2] = {                                                                                         \
-        .name = COMPOUND_STRING("Vitalité"),                                                        \
-        .description = COMPOUND_STRING("+1 % aux PV max\npar rang."),                               \
+        .name = COMPOUND_STRING("Vitality"),                                                        \
+        .description = COMPOUND_STRING("+1% max HP\nper rank."),                               \
         .effect = TREE_EFFECT_MAX_HP, .maxRank = 20, .valuePerRank = 10,                            \
     },                                                                                              \
     [3] = {                                                                                         \
-        .name = COMPOUND_STRING("Vivacité"),                                                        \
-        .description = COMPOUND_STRING("+0,5 % à la Vitesse\npar rang."),                           \
+        .name = COMPOUND_STRING("Swiftness"),                                                        \
+        .description = COMPOUND_STRING("+0.5% Speed\nper rank."),                           \
         .effect = TREE_EFFECT_SPEED, .maxRank = 20, .valuePerRank = 5,                              \
     }
 
@@ -48,9 +48,9 @@ const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES] =
     [TYPE_FIRE] =
     {
         .branchNames = {
-            COMPOUND_STRING("Assaut"),
+            COMPOUND_STRING("Assault"),
             COMPOUND_STRING("Combustion"),
-            COMPOUND_STRING("Solaire"),
+            COMPOUND_STRING("Solar"),
         },
         .status = STATUS1_BURN,
         .weather = B_WEATHER_SUN,
@@ -59,65 +59,65 @@ const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES] =
             TREE_TRUNK,
             // Assaut : attaques physiques Feu, recul et prise de risque.
             [4] = {
-                .name = COMPOUND_STRING("Impact ardent"),
-                .description = COMPOUND_STRING("+1 % aux dégâts physiques\nFeu par rang."),
+                .name = COMPOUND_STRING("Searing Impact"),
+                .description = COMPOUND_STRING("+1% physical Fire\ndamage per rank."),
                 .effect = TREE_EFFECT_TYPE_PHYSICAL_DAMAGE, .maxRank = 20, .valuePerRank = 10,
             },
             [5] = {
-                .name = COMPOUND_STRING("Corps de braise"),
-                .description = COMPOUND_STRING("-3 % au recul des\nattaques Feu par rang."),
+                .name = COMPOUND_STRING("Ember Body"),
+                .description = COMPOUND_STRING("-3% recoil from Fire\nmoves per rank."),
                 .effect = TREE_EFFECT_TYPE_RECOIL, .maxRank = 10, .valuePerRank = 30,
             },
             [6] = {
-                .name = COMPOUND_STRING("Fournaise"),
-                .description = COMPOUND_STRING("Sous 50 % des PV, +2 %\naux dégâts Feu par rang."),
+                .name = COMPOUND_STRING("Furnace"),
+                .description = COMPOUND_STRING("Below 50% HP, +2% Fire\ndamage per rank."),
                 .effect = TREE_EFFECT_TYPE_DAMAGE_LOW_HP, .maxRank = 10, .valuePerRank = 20,
             },
             [7] = {
-                .name = COMPOUND_STRING("Cœur incandescent"),
-                .description = COMPOUND_STRING("Maîtrise. Règles encore\nà préciser (inactif)."),
+                .name = COMPOUND_STRING("Incandescent Heart"),
+                .description = COMPOUND_STRING("Mastery. Rules not yet\ndefined (inactive)."),
                 .effect = TREE_EFFECT_TYPE_DAMAGE_STACK, .maxRank = 1, .valuePerRank = 100,
             },
             // Combustion : infliger une brûlure et exploiter les cibles brûlées.
             [8] = {
-                .name = COMPOUND_STRING("Étincelle persistante"),
-                .description = COMPOUND_STRING("+0,5 point de chance\nde brûlure par rang."),
+                .name = COMPOUND_STRING("Lingering Spark"),
+                .description = COMPOUND_STRING("+0.5% burn chance\nper rank."),
                 .effect = TREE_EFFECT_STATUS_CHANCE, .maxRank = 20, .valuePerRank = 5,
             },
             [9] = {
-                .name = COMPOUND_STRING("Attiser les flammes"),
-                .description = COMPOUND_STRING("+2 % aux dégâts des\nbrûlures infligées par rang."),
+                .name = COMPOUND_STRING("Fan the Flames"),
+                .description = COMPOUND_STRING("+2% damage from burns\nyou inflict per rank."),
                 .effect = TREE_EFFECT_STATUS_DAMAGE, .maxRank = 10, .valuePerRank = 20,
             },
             [10] = {
-                .name = COMPOUND_STRING("Chasseur de cendres"),
-                .description = COMPOUND_STRING("+1 % aux dégâts contre\nune cible brûlée par rang."),
+                .name = COMPOUND_STRING("Ash Hunter"),
+                .description = COMPOUND_STRING("+1% damage against\nburned targets per rank."),
                 .effect = TREE_EFFECT_DAMAGE_VS_STATUS, .maxRank = 10, .valuePerRank = 10,
             },
             [11] = {
-                .name = COMPOUND_STRING("Braises tenaces"),
-                .description = COMPOUND_STRING("Maîtrise. Règles encore\nà préciser (inactif)."),
+                .name = COMPOUND_STRING("Stubborn Embers"),
+                .description = COMPOUND_STRING("Mastery. Rules not yet\ndefined (inactive)."),
                 .effect = TREE_EFFECT_LINGERING_STATUS, .maxRank = 1, .valuePerRank = 1,
             },
             // Solaire : soleil, puissance conditionnelle et survie.
             [12] = {
-                .name = COMPOUND_STRING("Rayonnement"),
-                .description = COMPOUND_STRING("Sous le soleil, +1 %\naux dégâts Feu par rang."),
+                .name = COMPOUND_STRING("Radiance"),
+                .description = COMPOUND_STRING("In sun, +1% Fire\ndamage per rank."),
                 .effect = TREE_EFFECT_TYPE_DAMAGE_WEATHER, .maxRank = 20, .valuePerRank = 10,
             },
             [13] = {
-                .name = COMPOUND_STRING("Été prolongé"),
-                .description = COMPOUND_STRING("+1 tour de soleil\ninvoqué par rang."),
+                .name = COMPOUND_STRING("Long Summer"),
+                .description = COMPOUND_STRING("+1 turn to the sun you\nsummon per rank."),
                 .effect = TREE_EFFECT_WEATHER_TURNS, .maxRank = 5, .valuePerRank = 1,
             },
             [14] = {
-                .name = COMPOUND_STRING("Chaleur vitale"),
-                .description = COMPOUND_STRING("Sous le soleil, +0,5 %\ndes PV max par tour par rang."),
+                .name = COMPOUND_STRING("Vital Warmth"),
+                .description = COMPOUND_STRING("In sun, heal 0.5% max HP\neach turn per rank."),
                 .effect = TREE_EFFECT_WEATHER_HEAL, .maxRank = 10, .valuePerRank = 5,
             },
             [15] = {
-                .name = COMPOUND_STRING("Aube intérieure"),
-                .description = COMPOUND_STRING("Maîtrise. Soleil à la première\nentrée (pas encore actif)."),
+                .name = COMPOUND_STRING("Inner Dawn"),
+                .description = COMPOUND_STRING("Mastery. Sun on first\nswitch-in (inactive)."),
                 .effect = TREE_EFFECT_WEATHER_ON_ENTRY, .maxRank = 1, .valuePerRank = 3,
             },
         },

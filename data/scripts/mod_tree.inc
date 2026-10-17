@@ -38,9 +38,9 @@ EventScript_TreeMenu_End:
 	end
 
 Text_TreeMenu_ChooseTree:
-	.string "Quel arbre {STR_VAR_1} doit-il suivre ?\n"
-	.string "Ce choix est définitif.$"
+	.string "Which tree should {STR_VAR_1}\n"
+	.string "follow? This is permanent.$"
 
 Text_TreeMenu_Header:
-	.string "{STR_VAR_1} · Arbre {STR_VAR_2}\n"
-	.string "Points disponibles : {STR_VAR_3}$"
+	.string "{STR_VAR_1} · {STR_VAR_2} Tree\n"
+	.string "Available points: {STR_VAR_3}$"

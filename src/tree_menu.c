@@ -123,12 +123,12 @@ void TreeMenu_CheckNode(void)
 {
     static const u8 *const sRefusals[] =
     {
-        [TREE_INVEST_OK]          = COMPOUND_STRING("Investir 1 point ?\nC'est définitif."),
-        [TREE_INVEST_WRONG_TREE]  = COMPOUND_STRING("Ce Pokémon suit\ndéjà un autre arbre."),
-        [TREE_INVEST_NO_NODE]     = COMPOUND_STRING("Ce nœud n'existe pas."),
-        [TREE_INVEST_MAX_RANK]    = COMPOUND_STRING("Ce nœud est déjà\nau rang maximal."),
-        [TREE_INVEST_NO_POINTS]   = COMPOUND_STRING("Aucun point d'arbre\ndisponible."),
-        [TREE_INVEST_LOCKED]      = COMPOUND_STRING("Ce nœud est encore\nverrouillé."),
+        [TREE_INVEST_OK]          = COMPOUND_STRING("Invest 1 point?\nThis is permanent."),
+        [TREE_INVEST_WRONG_TREE]  = COMPOUND_STRING("This Pokémon already\nfollows another tree."),
+        [TREE_INVEST_NO_NODE]     = COMPOUND_STRING("This node doesn't exist."),
+        [TREE_INVEST_MAX_RANK]    = COMPOUND_STRING("This node is already\nat max rank."),
+        [TREE_INVEST_NO_POINTS]   = COMPOUND_STRING("No tree points\navailable."),
+        [TREE_INVEST_LOCKED]      = COMPOUND_STRING("This node is\nstill locked."),
     };
     const struct TreeNode *treeNode = GetTreeNode(sTreeType, sNode);
     enum TreeInvestResult result = CanBoxMonInvestInNode(GetTreeMenuBoxMon(), sTreeType, sNode);
@@ -139,7 +139,7 @@ void TreeMenu_CheckNode(void)
         if (sNode >= TREE_TRUNK_NODES)
         {
             end = StringCopy(end, gElementTrees[sTreeType].branchNames[(sNode - TREE_TRUNK_NODES) / TREE_BRANCH_NODES]);
-            end = StringCopy(end, COMPOUND_STRING(" :"));
+            end = StringCopy(end, COMPOUND_STRING(":"));
             *end++ = CHAR_NEWLINE;
         }
         end = StringCopy(end, treeNode->name);

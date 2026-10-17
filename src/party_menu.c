@@ -187,7 +187,7 @@ struct PartyMenuInternal
     u32 spriteIdCancelPokeball:7;
     u32 messageId:14;
     u8 windowId[3];
-    u8 actions[9]; // 8 + ARBRE (mod) : la fenêtre de 9 lignes tient encore à l'écran.
+    u8 actions[9]; // 8 + TREE (mod) : la fenêtre de 9 lignes tient encore à l'écran.
     u8 numActions;
     // In vanilla Emerald, only the first 0xB0 hwords (0x160 bytes) are actually used.
     // However, a full 0x100 hwords (0x200 bytes) are allocated.

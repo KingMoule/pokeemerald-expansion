@@ -36,7 +36,7 @@ SINGLE_BATTLE_TEST("Mod: Physical Strength does not boost special moves", s16 da
     }
 }
 
-SINGLE_BATTLE_TEST("Mod: tree damage bonuses add up (Physical Strength + Burning Impact)", s16 damage)
+SINGLE_BATTLE_TEST("Mod: tree damage bonuses add up (Physical Strength + Searing Impact)", s16 damage)
 {
     u32 rank;
     PARAMETRIZE { rank = 0; }

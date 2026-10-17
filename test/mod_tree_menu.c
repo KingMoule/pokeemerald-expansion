@@ -37,7 +37,7 @@ TEST("Mod: tree menu invests one point and reports locked nodes")
     gSpecialVar_0x8004 = 0;
     gSpecialVar_0x8005 = TYPE_FIRE;
 
-    gSpecialVar_0x8006 = 2; // Vitalité
+    gSpecialVar_0x8006 = 2; // Vitality
     TreeMenu_CheckNode();
     EXPECT_EQ(gSpecialVar_Result, TREE_INVEST_OK);
     TreeMenu_Invest();
@@ -45,7 +45,7 @@ TEST("Mod: tree menu invests one point and reports locked nodes")
     EXPECT_EQ(GetBoxMonTreePointsAvailable(&gParties[B_TRAINER_PLAYER][0].box), 19);
     EXPECT_EQ(GetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_MAX_HP), hp + hp / 100);
 
-    gSpecialVar_0x8006 = 4; // Impact ardent : il faut 15 points dans le tronc.
+    gSpecialVar_0x8006 = 4; // Searing Impact : il faut 15 points dans le tronc.
     TreeMenu_CheckNode();
     EXPECT_EQ(gSpecialVar_Result, TREE_INVEST_LOCKED);
     TreeMenu_Invest();
