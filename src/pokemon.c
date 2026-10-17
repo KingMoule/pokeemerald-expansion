@@ -4936,6 +4936,9 @@ void MonGainEVs(struct Pokemon *mon, enum Species defeatedSpecies)
     u8 bonus;
     u32 currentEVCap = GetCurrentEVCap();
 
+    if (!MOD_BATTLE_EV_GAINS)
+        return;
+
     heldItem = GetMonData(mon, MON_DATA_HELD_ITEM, 0);
     holdEffect = GetItemHoldEffect(heldItem);
 

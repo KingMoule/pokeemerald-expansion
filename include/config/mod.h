@@ -11,6 +11,11 @@
 #define MOD_TREE_BRANCH_UNLOCK_POINTS 15   // Points dans le tronc pour ouvrir les branches.
 #define MOD_TREE_PARENT_RANKS         5    // Rangs requis dans le nœud parent pour ouvrir le suivant.
 
+// EV
+#define MOD_BATTLE_EV_GAINS           FALSE // Les combats normaux ne donnent plus d'EV (donjon d'entraînement à la place).
+#define MOD_EV_CAP_PER_STAT           252   // Plafond par statistique (exemple du wiki, 255 au plus).
+#define MOD_EV_CAP_TOTAL              510   // Plafond total (exemple du wiki).
+
 // Mutations
 #define MOD_MUTATION_TREE_POINTS      50   // Points investis requis pour acquérir soi-même une mutation.
 #define MOD_MUTATION_WEAKNESS_NUM     125  // Pénalité sur les faiblesses : NUM / DEN, soit ×1,25.

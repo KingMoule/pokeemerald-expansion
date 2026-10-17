@@ -8,6 +8,8 @@
 STATIC_ASSERT(sizeof(struct PokemonBuild) == 16, PokemonBuildSize);
 STATIC_ASSERT(NUMBER_OF_MON_TYPES <= 32, PokemonBuildTypeBits);
 STATIC_ASSERT(MOD_MOVE_VARIANT_BITS * MAX_MON_MOVES <= 8, PokemonBuildMoveVariantBits);
+STATIC_ASSERT(MOD_EV_CAP_PER_STAT <= 255, EvCapPerStatFitsInU8);
+STATIC_ASSERT(MOD_EV_CAP_TOTAL <= MOD_EV_CAP_PER_STAT * NUM_STATS, EvCapTotalReachable);
 
 // Les rangs sont compactés à MOD_TREE_RANK_BITS bits par nœud, bit de poids faible en premier.
 u32 GetBoxMonTreeRank(const struct BoxPokemon *boxMon, u32 node)

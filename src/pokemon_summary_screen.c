@@ -1884,6 +1884,8 @@ static void ShowMonSkillsInfo(u8 taskId, s16 mode)
     PrintLeftColumnStats();
     BufferRightColumnStats();
     PrintRightColumnStats();
+    if (sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS)
+        PrintExpPointsNextLevel();
     gTasks[taskId].func = Task_HandleInput;
 }
 
@@ -3950,12 +3952,44 @@ static void PrintRightColumnStats(void)
     PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_RIGHT), gStringVar4, x, 1, 0, 0);
 }
 
+// En mode EV, la zone de l'expérience affiche le total d'EV et les plafonds.
+static void PrintEvTotals(u8 windowId)
+{
+    static const u8 sText_TotalEvs[] = _("TOTAL EVS");
+    static const u8 sText_MaxPerStat[] = _("MAX PER STAT");
+    u8 *txtPtr;
+    int x;
+
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, sText_TotalEvs, 6, 1, 0, 1);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, sText_MaxPerStat, 6, 17, 0, 1);
+
+    txtPtr = ConvertIntToDecimalStringN(gStringVar1, GetMonEVCount(&sMonSummaryScreen->currentMon), STR_CONV_MODE_LEFT_ALIGN, 4);
+    txtPtr = StringCopy(txtPtr, gText_Slash);
+    ConvertIntToDecimalStringN(txtPtr, MAX_TOTAL_EVS, STR_CONV_MODE_LEFT_ALIGN, 4);
+    x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 42) + 2;
+    PrintTextOnWindow(windowId, gStringVar1, x, 1, 0, 0);
+
+    ConvertIntToDecimalStringN(gStringVar1, MAX_PER_STAT_EVS, STR_CONV_MODE_LEFT_ALIGN, 3);
+    x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 42) + 2;
+    PrintTextOnWindow(windowId, gStringVar1, x, 17, 0, 0);
+}
+
 static void PrintExpPointsNextLevel(void)
 {
     struct PokeSummary *sum = &sMonSummaryScreen->summary;
     u8 windowId = AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_EXP);
     int x;
     u32 expToNextLevel;
+
+    FillWindowPixelBuffer(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, PIXEL_FILL(0));
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
+    if (sMonSummaryScreen->skillsPageMode == SUMMARY_SKILLS_MODE_EVS)
+    {
+        PrintEvTotals(windowId);
+        return;
+    }
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, gText_ExpPoints, 6, 1, 0, 1);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, gText_NextLv, 6, 17, 0, 1);
 
     ConvertIntToDecimalStringN(gStringVar1, sum->exp, STR_CONV_MODE_RIGHT_ALIGN, 7);
     x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 42) + 2;
