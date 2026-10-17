@@ -4384,10 +4384,13 @@ static void SetMonTypeIcons(void)
     }
     else
     {
-        SetTypeSpritePosAndPal(GetSpeciesType(summary->species, 0), 120, 48, SPRITE_ARR_ID_TYPE);
-        if (GetSpeciesType(summary->species, 0) != GetSpeciesType(summary->species, 1))
+        // Mod : types après mutation.
+        enum Type type1 = GetBoxMonMutatedType(&sMonSummaryScreen->currentMon.box, summary->species, 0);
+        enum Type type2 = GetBoxMonMutatedType(&sMonSummaryScreen->currentMon.box, summary->species, 1);
+        SetTypeSpritePosAndPal(type1, 120, 48, SPRITE_ARR_ID_TYPE);
+        if (type1 != type2)
         {
-            SetTypeSpritePosAndPal(GetSpeciesType(summary->species, 1), 160, 48, SPRITE_ARR_ID_TYPE + 1);
+            SetTypeSpritePosAndPal(type2, 160, 48, SPRITE_ARR_ID_TYPE + 1);
             SetSpriteInvisibility(SPRITE_ARR_ID_TYPE + 1, FALSE);
         }
         else

@@ -216,9 +216,23 @@ enum Type GetBoxMonMutationPenaltyType(const struct BoxPokemon *boxMon, enum Spe
     return boxMon->build.mutationSlot == 0 ? type2 : type1;
 }
 
+// L'IA simule parfois un autre Pokémon de l'équipe dans gBattleMons sans changer
+// gBattlerPartyIndexes (remplaçant prévu, Pokémon qui gênent le blocage de PP) :
+// on retrouve alors le bon Pokémon par sa personnalité, que Morphing ne change pas.
 static const struct BoxPokemon *GetBattlerBoxMon(enum BattlerId battler)
 {
-    return &GetBattlerParty(battler)[gBattlerPartyIndexes[battler]].box;
+    struct Pokemon *party = GetBattlerParty(battler);
+    u32 i, index = gBattlerPartyIndexes[battler];
+    u32 personality = gBattleMons[battler].personality;
+
+    if (party[index].box.personality == personality)
+        return &party[index].box;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (party[i].box.personality == personality && GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE)
+            return &party[i].box;
+    }
+    return &party[index].box;
 }
 
 enum Type GetBattlerMutatedType(enum BattlerId battler, u32 slot)
