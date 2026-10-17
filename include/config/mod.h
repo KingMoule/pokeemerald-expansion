@@ -25,6 +25,20 @@
 #define MOD_RUINS_EXTRA_MON_EVERY     10   // Un Pokémon de départ de plus par tranche de N étages de record...
 #define MOD_RUINS_MAX_START_MONS      3    // ...dans cette limite.
 #define MOD_RUINS_TIER_EVERY          10   // Un vivier de départ plus fort par tranche de N étages de record.
+// Gardiens (boss) : ils barrent l'escalier tous les N étages ; les vaincre donne un Mutation Seal.
+#define MOD_RUINS_BOSS_EVERY          10
+#define MOD_RUINS_BOSS_LEVEL_BONUS    3    // Niveau du gardien : niveau des dresseurs + N.
+#define MOD_RUINS_BOSS_EXTRA_MONS     2    // Pokémon du gardien : équipe des dresseurs + N (6 au plus).
+#define MOD_RUINS_SEAL_CHANCE         1    // % qu'un objet au sol soit un Mutation Seal, dès le 2e palier franchi.
+// Embranchements : à l'escalier d'un étage ordinaire, deux passages au choix pour l'étage suivant.
+#define MOD_RUINS_BRANCH_CHANCE       50   // % des escaliers ordinaires qui se divisent.
+#define MOD_RUINS_OVERGROWN_BONUS     15   // Passage « Overgrown » : sauvages tirés comme N niveaux plus bas dans les ruines...
+#define MOD_RUINS_OVERGROWN_IV        20   // ...avec au moins N IV dans chaque statistique.
+#define MOD_RUINS_PERILOUS_LEVELS     4    // Passage « Perilous » : sauvages et dresseurs +N niveaux...
+#define MOD_RUINS_PERILOUS_RELICS     2    // ...et chances d'objets rares ×N.
+// Recruteur : un éclaireur se tient parfois à la place d'un objet ; il ajoute une espèce aux départs
+// (une fois sorti vivant).
+#define MOD_RUINS_RECRUITER_CHANCE    10   // % des étages (hors gardiens) où il apparaît.
 
 // Niveaux au-delà de 100 : chaque sceau rapporté du donjon relève le plafond de toute la sauvegarde.
 // Désactivé pour l'instant (décision de Guillaume) : niveau 100 maximal et pas d'Ascension Seal en jeu.
@@ -69,6 +83,8 @@
 #define MOD_MUTATION_TREE_POINTS      50   // Points investis requis pour acquérir soi-même une mutation.
 #define MOD_MUTATION_WEAKNESS_NUM     125  // Pénalité sur les faiblesses : NUM / DEN, soit ×1,25.
 #define MOD_MUTATION_WEAKNESS_DEN     100
+// Types ouverts à la mutation dès le départ ; chaque Mutation Seal en ouvre un autre, pour toute la sauvegarde.
+#define MOD_MUTATION_BASE_TYPES       ((1 << TYPE_FIRE) | (1 << TYPE_WATER) | (1 << TYPE_GRASS))
 #define MOD_MUTATION_INHERIT_CHANCE   30   // % de transmission sans Lineage Charm (un parent muté compatible).
 #define MOD_LINEAGE_CHARM_CONSUMED    FALSE // Le Lineage Charm est-il consommé à la ponte ? (question ouverte du wiki)
 

@@ -15,5 +15,13 @@
 #define RUINS_STAIRS_NEXT    0 // Étage suivant.
 #define RUINS_STAIRS_LANDING 1 // Palier : sortir ou continuer.
 #define RUINS_STAIRS_BOTTOM  2 // Fond des ruines : sortie forcée et sécurisée.
+#define RUINS_STAIRS_BOSS    3 // Un gardien barre l'escalier : combat avant de pouvoir descendre ou sortir.
+
+// Passages proposés par un escalier qui se divise (ShiftingRuins_PushPaths), pour l'étage suivant.
+#define RUINS_PATH_PLAIN     0 // Escalier ordinaire.
+#define RUINS_PATH_OVERGROWN 1 // Sauvages plus rares et de meilleure qualité (captures).
+#define RUINS_PATH_SPRING    2 // Équipe soignée en descendant.
+#define RUINS_PATH_PERILOUS  3 // Adversaires plus forts, objets rares plus fréquents.
+#define RUINS_PATH_COUNT     4
 
 #endif // GUARD_CONSTANTS_SHIFTING_RUINS_H

@@ -10,6 +10,7 @@
 #include "event_data.h"
 #include "ev_dungeon.h"
 #include "mod_challenge.h"
+#include "shifting_ruins.h"
 #include "frontier_util.h"
 #include "new_game.h"
 #include "overworld.h"
@@ -58,6 +59,7 @@ void CB2_EndSpecialTrainerBattle(void)
         break;
     case SPECIAL_BATTLE_EV_DUNGEON:
     case SPECIAL_BATTLE_MOD_CHALLENGE:
+    case SPECIAL_BATTLE_RUINS_BOSS:
         gSpecialVar_Result = gBattleOutcome;
         break;
     }
@@ -112,6 +114,12 @@ void DoSpecialTrainerBattle(void)
         break;
     case SPECIAL_BATTLE_MOD_CHALLENGE:
         ModChallenge_SetupBattle();
+        CreateTask(Task_StartBattleAfterTransition, 1);
+        PlayMapChosenOrBattleBGM(0);
+        BattleTransition_StartOnField(GetTrainerBattleTransition());
+        break;
+    case SPECIAL_BATTLE_RUINS_BOSS:
+        ShiftingRuins_SetupBossBattle();
         CreateTask(Task_StartBattleAfterTransition, 1);
         PlayMapChosenOrBattleBGM(0);
         BattleTransition_StartOnField(GetTrainerBattleTransition());

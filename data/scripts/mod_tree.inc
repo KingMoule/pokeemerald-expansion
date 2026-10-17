@@ -9,9 +9,11 @@ EventScript_BuildMenu_Hub:
 	waitmessage
 	dynmultipush Text_BuildMenu_Tree, 0
 	dynmultipush Text_BuildMenu_Moves, 1
+	dynmultipush Text_BuildMenu_Mutate, 2
 	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
 	goto_if_eq VAR_RESULT, 0, EventScript_TreeMenu
 	goto_if_eq VAR_RESULT, 1, EventScript_VariantMenu
+	goto_if_eq VAR_RESULT, 2, EventScript_MutationMenu
 EventScript_BuildMenu_End:
 	closemessage
 	releaseall
@@ -48,6 +50,43 @@ EventScript_TreeMenu_Loop:
 EventScript_TreeMenu_Refused:
 	msgbox gStringVar4, MSGBOX_DEFAULT
 	goto EventScript_TreeMenu_Loop
+
+@ Mutation volontaire (src/tree_menu.c) : type remplacé, puis nouveau type.
+EventScript_MutationMenu:
+	special MutationMenu_Begin
+	goto_if_eq VAR_RESULT, 0, EventScript_MutationMenu_Refused
+	goto_if_eq VAR_RESULT, 1, EventScript_MutationMenu_ChooseNew
+	message Text_MutationMenu_ChooseReplaced
+	waitmessage
+	special MutationMenu_PushReplacedTypes
+	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_BuildMenu_Hub
+	copyvar VAR_0x8006, VAR_RESULT
+EventScript_MutationMenu_ChooseNew:
+	message Text_MutationMenu_ChooseNew
+	waitmessage
+	special MutationMenu_PushNewTypes
+	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_BuildMenu_Hub
+	copyvar VAR_0x8007, VAR_RESULT
+	special MutationMenu_Check
+	goto_if_eq VAR_RESULT, FALSE, EventScript_MutationMenu_Sealed
+	msgbox gStringVar4, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_BuildMenu_Hub
+	special MutationMenu_Apply
+	goto_if_eq VAR_RESULT, FALSE, EventScript_BuildMenu_Hub
+	playse SE_EXP_MAX
+	waitse
+	msgbox Text_MutationMenu_Done, MSGBOX_DEFAULT
+	goto EventScript_BuildMenu_Hub
+
+EventScript_MutationMenu_Sealed:
+	msgbox gStringVar4, MSGBOX_DEFAULT
+	goto EventScript_MutationMenu_ChooseNew
+
+EventScript_MutationMenu_Refused:
+	msgbox gStringVar4, MSGBOX_DEFAULT
+	goto EventScript_BuildMenu_Hub
 
 @ Variantes d'attaques, consultation depuis BUILD : seul le Technique Codex en donne une.
 EventScript_VariantMenu:
@@ -113,6 +152,20 @@ Text_BuildMenu_Tree:
 
 Text_BuildMenu_Moves:
 	.string "Moves$"
+
+Text_BuildMenu_Mutate:
+	.string "Mutate$"
+
+Text_MutationMenu_ChooseReplaced:
+	.string "Which type will {STR_VAR_1}\n"
+	.string "give up?$"
+
+Text_MutationMenu_ChooseNew:
+	.string "Which type will it gain?$"
+
+Text_MutationMenu_Done:
+	.string "{STR_VAR_1} mutated!\n"
+	.string "It is now part {STR_VAR_3}.$"
 
 Text_TreeMenu_ChooseTree:
 	.string "Which tree should {STR_VAR_1}\n"

@@ -650,6 +650,11 @@ gSpecials::
 	def_special VariantMenu_PushVariants
 	def_special VariantMenu_BufferVariant
 	def_special VariantMenu_Apply
+	def_special MutationMenu_Begin
+	def_special MutationMenu_PushReplacedTypes
+	def_special MutationMenu_PushNewTypes
+	def_special MutationMenu_Check
+	def_special MutationMenu_Apply
 	def_special ModChallenge_PushList
 	def_special ModChallenge_BufferRules
 	def_special ModChallenge_CheckParty
@@ -670,7 +675,13 @@ gSpecials::
 	def_special ShiftingRuins_IsActive
 	def_special ShiftingRuins_OnFloorResume
 	def_special ShiftingRuins_CheckStairs
+	def_special ShiftingRuins_HasBranches
+	def_special ShiftingRuins_PushPaths
+	def_special ShiftingRuins_TakePath
 	def_special ShiftingRuins_GoDeeper
+	def_special ShiftingRuins_StartBossBattle
+	def_special ShiftingRuins_EndBossBattle
+	def_special ShiftingRuins_MeetRecruiter
 	def_special ShiftingRuins_TakeRelic
 	def_special ShiftingRuins_EndRun
 	def_special ShiftingRuins_CheckDebrief

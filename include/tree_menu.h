@@ -14,5 +14,10 @@ void VariantMenu_CheckMove(void);
 void VariantMenu_PushVariants(void);
 void VariantMenu_BufferVariant(void);
 void VariantMenu_Apply(void);
+void MutationMenu_Begin(void);
+void MutationMenu_PushReplacedTypes(void);
+void MutationMenu_PushNewTypes(void);
+void MutationMenu_Check(void);
+void MutationMenu_Apply(void);
 
 #endif // GUARD_TREE_MENU_H

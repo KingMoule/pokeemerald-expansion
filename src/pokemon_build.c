@@ -3,6 +3,7 @@
 #include "battle_dynamax.h"
 #include "battle_controllers.h"
 #include "battle_util.h"
+#include "event_data.h"
 #include "item.h"
 #include "pokemon.h"
 #include "random.h"
@@ -528,6 +529,35 @@ bool32 CanBoxMonAcquireMutation(const struct BoxPokemon *boxMon)
             return TRUE;
     }
     return FALSE;
+}
+
+// Types vers lesquels on peut muter : les 18 types réels.
+bool32 IsMutationTargetType(enum Type type)
+{
+    return type != TYPE_NONE && type != TYPE_MYSTERY && type < TYPE_STELLAR;
+}
+
+// Types ouverts à la mutation : MOD_MUTATION_BASE_TYPES dès le départ, puis un par Mutation Seal
+// (VAR_MOD_MUTATION_TYPES pour les types 0 à 15, VAR_MOD_MUTATION_TYPES_2 pour la suite).
+bool32 IsMutationTypeOpen(enum Type type)
+{
+    if (!IsMutationTargetType(type))
+        return FALSE;
+    if (MOD_MUTATION_BASE_TYPES & (1u << type))
+        return TRUE;
+    if (type < 16)
+        return (VarGet(VAR_MOD_MUTATION_TYPES) >> type) & 1;
+    return (VarGet(VAR_MOD_MUTATION_TYPES_2) >> (type - 16)) & 1;
+}
+
+void OpenMutationType(enum Type type)
+{
+    if (!IsMutationTargetType(type))
+        return;
+    if (type < 16)
+        VarSet(VAR_MOD_MUTATION_TYPES, VarGet(VAR_MOD_MUTATION_TYPES) | (1u << type));
+    else
+        VarSet(VAR_MOD_MUTATION_TYPES_2, VarGet(VAR_MOD_MUTATION_TYPES_2) | (1u << (type - 16)));
 }
 
 u32 GetBoxMonTreeEffect(const struct BoxPokemon *boxMon, enum TreeEffect effect)

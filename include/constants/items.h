@@ -1054,8 +1054,9 @@ enum __attribute__((packed)) Item
     ITEM_TECHNIQUE_CODEX = 874, // Mod : donne une variante à une attaque.
     ITEM_LINEAGE_CHARM = 875,   // Mod : garantit ou choisit la mutation transmise à l'œuf (nom provisoire).
     ITEM_ESCAPE_ORB = 876,      // Mod : quitte les Shifting Ruins en gardant les trouvailles (nom provisoire).
+    ITEM_MUTATION_SEAL = 877,   // Mod : ouvre un nouveau type à la mutation (nom provisoire).
 #if MOD_LEVELS_BEYOND_100
-    ITEM_ASCENSION_SEAL = 877,  // Mod : relève le plafond de niveau de toute la sauvegarde (nom provisoire).
+    ITEM_ASCENSION_SEAL = 878,  // Mod : relève le plafond de niveau de toute la sauvegarde (nom provisoire).
 #endif
 
     ITEMS_COUNT,

@@ -94,8 +94,11 @@ ShiftingRuins_EventScript_KeptToPC:
 ShiftingRuins_EventScript_KeptNoRoom:
 	msgbox ShiftingRuins_Text_KeptNoRoom, MSGBOX_DEFAULT
 ShiftingRuins_EventScript_Record:
-	goto_if_eq VAR_0x8005, FALSE, ShiftingRuins_EventScript_Bye
+	goto_if_eq VAR_0x8005, FALSE, ShiftingRuins_EventScript_Recruits
 	msgbox ShiftingRuins_Text_NewStart, MSGBOX_DEFAULT
+ShiftingRuins_EventScript_Recruits:
+	goto_if_eq VAR_0x8006, FALSE, ShiftingRuins_EventScript_Bye
+	msgbox ShiftingRuins_Text_NewRecruits, MSGBOX_DEFAULT
 ShiftingRuins_EventScript_Bye:
 	msgbox ShiftingRuins_Text_Bye, MSGBOX_DEFAULT
 	releaseall
@@ -131,11 +134,24 @@ ShiftingRuins_EventScript_WarpOut:
 
 ShiftingRuins_EventScript_Stairs::
 	lockall
+ShiftingRuins_EventScript_CheckStairs:
 	special ShiftingRuins_CheckStairs
+	goto_if_eq VAR_RESULT, RUINS_STAIRS_BOSS, ShiftingRuins_EventScript_Guardian
 	goto_if_eq VAR_RESULT, RUINS_STAIRS_BOTTOM, ShiftingRuins_EventScript_Bottom
 	goto_if_eq VAR_RESULT, RUINS_STAIRS_LANDING, ShiftingRuins_EventScript_Landing
+ShiftingRuins_EventScript_StairsDown:
+	special ShiftingRuins_HasBranches
+	goto_if_eq VAR_RESULT, TRUE, ShiftingRuins_EventScript_Branches
 ShiftingRuins_EventScript_GoDeeper:
 	special ShiftingRuins_GoDeeper
+	goto_if_ne VAR_RESULT, RUINS_PATH_SPRING, ShiftingRuins_EventScript_Descend
+	playfanfare MUS_HEAL
+	message ShiftingRuins_Text_Spring
+	waitmessage
+	waitfanfare
+	waitbuttonpress
+	closemessage
+ShiftingRuins_EventScript_Descend:
 	setvar VAR_RESULT, 0
 	warp MAP_BATTLE_FRONTIER_BATTLE_PYRAMID_FLOOR, 1, 1
 	waitstate
@@ -145,7 +161,58 @@ ShiftingRuins_EventScript_Landing:
 	msgbox ShiftingRuins_Text_Landing, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, YES, ShiftingRuins_EventScript_Secured
 	closemessage
+	goto ShiftingRuins_EventScript_StairsDown
+
+@ Escalier qui se divise : deux passages pour l'étage suivant. B : rester sur l'étage.
+ShiftingRuins_EventScript_Branches:
+	message ShiftingRuins_Text_Branches
+	waitmessage
+	special ShiftingRuins_PushPaths
+	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, ShiftingRuins_EventScript_StayOnFloor
+	copyvar VAR_0x8004, VAR_RESULT
+	special ShiftingRuins_TakePath
+	closemessage
 	goto ShiftingRuins_EventScript_GoDeeper
+
+ShiftingRuins_EventScript_StayOnFloor:
+	closemessage
+	releaseall
+	end
+
+@ Gardien : il barre l'escalier tous les quelques étages, et laisse un Mutation Seal.
+ShiftingRuins_EventScript_Guardian:
+	msgbox ShiftingRuins_Text_Guardian, MSGBOX_DEFAULT
+	closemessage
+	special ShiftingRuins_StartBossBattle
+	setvar VAR_0x8004, SPECIAL_BATTLE_RUINS_BOSS
+	setvar VAR_0x8005, 0
+	special DoSpecialTrainerBattle
+	waitstate
+	special ShiftingRuins_EndBossBattle
+	goto_if_eq VAR_RESULT, FALSE, ShiftingRuins_EventScript_RunLost
+	playfanfare MUS_OBTAIN_ITEM
+	message ShiftingRuins_Text_GuardianRelic
+	waitmessage
+	waitfanfare
+	msgbox ShiftingRuins_Text_RelicPending, MSGBOX_DEFAULT
+	closemessage
+	goto ShiftingRuins_EventScript_CheckStairs
+
+@ Éclaireur : il ajoute une espèce aux départs, une fois sorti vivant.
+ShiftingRuins_EventScript_Recruiter::
+	lock
+	faceplayer
+	special ShiftingRuins_MeetRecruiter
+	goto_if_eq VAR_RESULT, FALSE, ShiftingRuins_EventScript_RecruiterAgain
+	msgbox ShiftingRuins_Text_Recruiter, MSGBOX_DEFAULT
+	release
+	end
+
+ShiftingRuins_EventScript_RecruiterAgain:
+	msgbox ShiftingRuins_Text_RecruiterAgain, MSGBOX_DEFAULT
+	release
+	end
 
 ShiftingRuins_EventScript_Bottom:
 	msgbox ShiftingRuins_Text_Bottom, MSGBOX_DEFAULT
@@ -198,6 +265,13 @@ Text_ShiftingRuins_Intro:
 	.string "When you get out, bring back one\n"
 	.string "POKéMON. It returns to level 5 and\l"
 	.string "forgets what it learned inside.\p"
+	.string "Every 10 floors, a GUARDIAN bars\n"
+	.string "the stairs. Beat it for a\l"
+	.string "MUTATION SEAL.\p"
+	.string "Some stairs split in two. Pick\n"
+	.string "the passage that suits your run.\p"
+	.string "And if you meet a scout down\n"
+	.string "there, hear them out.\p"
 	.string "The deeper you get out from, the\n"
 	.string "better your next start.$"
 
@@ -251,6 +325,12 @@ ShiftingRuins_Text_NewStart:
 	.string "Next time, you'll start with more\n"
 	.string "or stronger POKéMON.$"
 
+ShiftingRuins_Text_NewRecruits:
+	.string "The scouts you met kept their\n"
+	.string "word. From now on, your starts\l"
+	.string "may include:\p"
+	.string "{STR_VAR_3}.$"
+
 ShiftingRuins_Text_Bye:
 	.string "Here is your team. Come back any\n"
 	.string "time. The ruins will have shifted.$"
@@ -270,6 +350,35 @@ ShiftingRuins_Text_Bottom:
 	.string "This is the heart of the ruins.\n"
 	.string "There is nowhere deeper to go.\p"
 	.string "A path leads back to daylight.$"
+
+ShiftingRuins_Text_Branches:
+	.string "The stairs split in two.\n"
+	.string "Which passage will you take?$"
+
+ShiftingRuins_Text_Spring:
+	.string "A cool spring runs along the\n"
+	.string "passage. Your team is healed!$"
+
+ShiftingRuins_Text_Guardian:
+	.string "A GUARDIAN of the ruins bars\n"
+	.string "the stairs!$"
+
+ShiftingRuins_Text_GuardianRelic:
+	.string "The GUARDIAN left behind\n"
+	.string "a {STR_VAR_2}!$"
+
+ShiftingRuins_Text_Recruiter:
+	.string "Oh, a fellow explorer! I scout\n"
+	.string "these ruins for strong partners.\p"
+	.string "I know where to find a\n"
+	.string "{STR_VAR_1}.\p"
+	.string "Make it out alive, and it may\n"
+	.string "join you at the start of your\l"
+	.string "next runs.$"
+
+ShiftingRuins_Text_RecruiterAgain:
+	.string "Make it out alive, and I'll keep\n"
+	.string "my word. Good luck down there!$"
 
 ShiftingRuins_Text_FoundRelic:
 	.string "{PLAYER} found a {STR_VAR_2}!$"

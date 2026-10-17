@@ -1,5 +1,6 @@
 #include "global.h"
 #include "event_data.h"
+#include "item.h"
 #include "pokemon.h"
 #include "pokemon_build.h"
 #include "tree_menu.h"
@@ -84,4 +85,76 @@ TEST("Mod: build menu gives a permanent variant to a damaging move only")
     EXPECT_EQ(GetBoxMonMoveVariant(&mon->box, 0), MOVE_VARIANT_VOLATILE);
     VariantMenu_CheckMove();
     EXPECT_NE(gSpecialVar_Result, 0);
+}
+
+// Remplit l'arbre Feu jusqu'au seuil de mutation, avec la maîtrise finale de la première branche.
+static void TrainForMutation(struct Pokemon *mon)
+{
+    u32 node;
+
+    mon->box.build.treeType = TYPE_FIRE;
+    for (node = 0; node < TREE_TRUNK_NODES; node++)
+        SetBoxMonTreeRank(&mon->box, node, 10);
+    for (node = TREE_TRUNK_NODES; node < TREE_TRUNK_NODES + TREE_BRANCH_NODES - 1; node++)
+        SetBoxMonTreeRank(&mon->box, node, 3);
+    SetBoxMonTreeRank(&mon->box, TREE_TRUNK_NODES + TREE_BRANCH_NODES - 1, 1);
+}
+
+TEST("Mod: mutation menu needs the tree threshold and a final mastery")
+{
+    VarSet(VAR_MOD_MUTATION_TYPES, 0);
+    VarSet(VAR_MOD_MUTATION_TYPES_2, 0);
+    CreateRandomMonWithIVs(&gParties[B_TRAINER_PLAYER][0], SPECIES_CHARMANDER, 100, 0);
+    gSpecialVar_0x8004 = 0;
+    MutationMenu_Begin();
+    EXPECT_EQ(gSpecialVar_Result, 0);
+
+    TrainForMutation(&gParties[B_TRAINER_PLAYER][0]);
+    MutationMenu_Begin();
+    EXPECT_EQ(gSpecialVar_Result, 1);
+    EXPECT_EQ(gSpecialVar_0x8006, TYPE_FIRE);
+
+    // Type ouvert dès le départ : pas besoin de Mutation Seal.
+    gSpecialVar_0x8007 = TYPE_WATER;
+    MutationMenu_Check();
+    EXPECT(gSpecialVar_Result);
+    MutationMenu_Apply();
+    EXPECT(gSpecialVar_Result);
+    EXPECT_EQ(GetBoxMonMutatedType(&gParties[B_TRAINER_PLAYER][0].box, SPECIES_CHARMANDER, 0), TYPE_WATER);
+
+    // Une seule mutation, pour toujours.
+    MutationMenu_Begin();
+    EXPECT_EQ(gSpecialVar_Result, 0);
+}
+
+TEST("Mod: a Mutation Seal opens a sealed type for good")
+{
+    VarSet(VAR_MOD_MUTATION_TYPES, 0);
+    VarSet(VAR_MOD_MUTATION_TYPES_2, 0);
+    RemoveBagItem(ITEM_MUTATION_SEAL, CountTotalItemQuantityInBag(ITEM_MUTATION_SEAL));
+    EXPECT(IsMutationTypeOpen(TYPE_GRASS));
+    EXPECT(!IsMutationTypeOpen(TYPE_DRAGON));
+    EXPECT(!IsMutationTypeOpen(TYPE_FAIRY));
+    EXPECT(!IsMutationTypeOpen(TYPE_STELLAR));
+
+    CreateRandomMonWithIVs(&gParties[B_TRAINER_PLAYER][0], SPECIES_CHARMANDER, 100, 0);
+    TrainForMutation(&gParties[B_TRAINER_PLAYER][0]);
+    gSpecialVar_0x8004 = 0;
+    MutationMenu_Begin();
+    gSpecialVar_0x8007 = TYPE_DRAGON;
+    MutationMenu_Check();
+    EXPECT(!gSpecialVar_Result);
+
+    AddBagItem(ITEM_MUTATION_SEAL, 1);
+    MutationMenu_Check();
+    EXPECT(gSpecialVar_Result);
+    MutationMenu_Apply();
+    EXPECT(gSpecialVar_Result);
+    EXPECT(!CheckBagHasItem(ITEM_MUTATION_SEAL, 1));
+    EXPECT(IsMutationTypeOpen(TYPE_DRAGON));
+    EXPECT_EQ(GetBoxMonMutatedType(&gParties[B_TRAINER_PLAYER][0].box, SPECIES_CHARMANDER, 0), TYPE_DRAGON);
+
+    // Les types au-delà de 15 sont gardés dans la seconde variable.
+    OpenMutationType(TYPE_FAIRY);
+    EXPECT(IsMutationTypeOpen(TYPE_FAIRY));
 }

@@ -38,6 +38,7 @@
 #define SPECIAL_BATTLE_MULTI 3
 #define SPECIAL_BATTLE_EV_DUNGEON 4 // Mod : étage des Training Depths
 #define SPECIAL_BATTLE_MOD_CHALLENGE 5 // Mod : défi à règles annoncées
+#define SPECIAL_BATTLE_RUINS_BOSS    6 // Mod : gardien des Shifting Ruins
 
 // Facility trainer Battles
 #define FACILITY_BATTLE_TOWER           0

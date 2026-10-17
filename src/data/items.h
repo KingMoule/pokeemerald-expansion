@@ -7361,6 +7361,24 @@ const struct ItemInfo gItemsInfo[] =
         .iconPalette = gItemIconPalette_EscapeRope,
     },
 
+    // Mod : sceau de mutation, à rapporter vivant des Shifting Ruins. Il est consommé dans
+    // BUILD > Mutate pour ouvrir un type encore scellé. Icône provisoire reprise de l'Ability Capsule.
+    [ITEM_MUTATION_SEAL] =
+    {
+        .name = ITEM_NAME("Mutation Seal"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Opens a new type\n"
+            "for mutations, for\n"
+            "good. Used up."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_FIELD_USE,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconPic = gItemIcon_AbilityCapsule,
+        .iconPalette = gItemIconPalette_AbilityCapsule,
+    },
+
 #if MOD_LEVELS_BEYOND_100
     // Mod : sceau de dépassement, à rapporter vivant des Shifting Ruins.
     // Icône provisoire reprise du Shiny Charm.

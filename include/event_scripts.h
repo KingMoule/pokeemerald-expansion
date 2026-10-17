@@ -643,6 +643,7 @@ extern const u8 TrainerHill_EventScript_TrainerBattle[];
 // Item Use
 extern const u8 BerryTree_EventScript_ItemUsePlantBerry[];
 extern const u8 ShiftingRuins_EventScript_EscapeOrb[];
+extern const u8 ShiftingRuins_EventScript_Recruiter[];
 extern const u8 BerryTree_EventScript_ItemUseWailmerPail[];
 extern const u8 BattleFrontier_OutsideEast_EventScript_WaterSudowoodo[];
 

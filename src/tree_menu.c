@@ -1,6 +1,7 @@
 #include "global.h"
 #include "battle_main.h"
 #include "event_data.h"
+#include "item.h"
 #include "list_menu.h"
 #include "malloc.h"
 #include "pokemon.h"
@@ -301,4 +302,111 @@ void VariantMenu_BufferVariant(void)
 void VariantMenu_Apply(void)
 {
     TrySetBoxMonMoveVariant(GetTreeMenuBoxMon(), sMoveSlot, sVariant);
+}
+
+// Mutation volontaire, depuis le même écran BUILD : 50 points investis et une maîtrise finale
+// (CanBoxMonAcquireMutation). Seuls les types ouverts sont accessibles ; un type encore scellé
+// demande un Mutation Seal, consommé, qui l'ouvre pour toute la sauvegarde.
+//   VAR_0x8006 : type d'origine remplacé.
+//   VAR_0x8007 : nouveau type.
+
+#define sReplacedType gSpecialVar_0x8006
+#define sNewType      gSpecialVar_0x8007
+
+enum
+{
+    MUTATION_MENU_REFUSED,
+    MUTATION_MENU_READY,
+    MUTATION_MENU_CHOOSE_REPLACED,
+};
+
+static const u8 sText_MutationSealed[] = _(" (sealed)");
+
+// VAR_RESULT : MUTATION_MENU_READY (type remplacé connu), MUTATION_MENU_CHOOSE_REPLACED (double type)
+// ou MUTATION_MENU_REFUSED avec la raison dans gStringVar4.
+void MutationMenu_Begin(void)
+{
+    struct BoxPokemon *boxMon = GetTreeMenuBoxMon();
+    enum Species species = GetBoxMonData(boxMon, MON_DATA_SPECIES);
+    enum Type type1 = GetSpeciesType(species, 0);
+    enum Type type2 = GetSpeciesType(species, 1);
+
+    gSpecialVar_Result = MUTATION_MENU_REFUSED;
+    if (boxMon->build.mutationType != TYPE_NONE)
+    {
+        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("{STR_VAR_1} has already mutated.\nA mutation is forever."));
+        return;
+    }
+    if (!CanBoxMonAcquireMutation(boxMon))
+    {
+        ConvertIntToDecimalStringN(gStringVar2, MOD_MUTATION_TREE_POINTS, STR_CONV_MODE_LEFT_ALIGN, 3);
+        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("To mutate, {STR_VAR_1} needs\n{STR_VAR_2} points in its Tree…\pand a final mastery in one of\nits branches."));
+        return;
+    }
+    sReplacedType = type1;
+    gSpecialVar_Result = (type1 == type2) ? MUTATION_MENU_READY : MUTATION_MENU_CHOOSE_REPLACED;
+}
+
+void MutationMenu_PushReplacedTypes(void)
+{
+    enum Species species = GetBoxMonData(GetTreeMenuBoxMon(), MON_DATA_SPECIES);
+
+    PushTreeMenuItem(gTypesInfo[GetSpeciesType(species, 0)].name, GetSpeciesType(species, 0));
+    PushTreeMenuItem(gTypesInfo[GetSpeciesType(species, 1)].name, GetSpeciesType(species, 1));
+}
+
+// Tous les types réels sauf ceux de l'espèce, les types encore scellés marqués comme tels.
+void MutationMenu_PushNewTypes(void)
+{
+    enum Species species = GetBoxMonData(GetTreeMenuBoxMon(), MON_DATA_SPECIES);
+    enum Type type;
+    u8 text[32];
+
+    for (type = 0; type < NUMBER_OF_MON_TYPES; type++)
+    {
+        if (!IsMutationTargetType(type) || type == GetSpeciesType(species, 0) || type == GetSpeciesType(species, 1))
+            continue;
+        StringCopy(text, gTypesInfo[type].name);
+        if (!IsMutationTypeOpen(type))
+            StringAppend(text, sText_MutationSealed);
+        PushTreeMenuItem(text, type);
+    }
+}
+
+// VAR_RESULT : TRUE si la mutation est possible, gStringVar4 = question ; sinon FALSE et la raison.
+void MutationMenu_Check(void)
+{
+    StringCopy(gStringVar2, gTypesInfo[sReplacedType].name);
+    StringCopy(gStringVar3, gTypesInfo[sNewType].name);
+    gSpecialVar_Result = FALSE;
+    if (!IsMutationTypeOpen(sNewType) && !CheckBagHasItem(ITEM_MUTATION_SEAL, 1))
+    {
+        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("The {STR_VAR_3} type is still sealed.\pA Mutation Seal from the Shifting\nRuins can open it for good."));
+        return;
+    }
+    if (IsMutationTypeOpen(sNewType))
+        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("{STR_VAR_1} will trade {STR_VAR_2}\nfor {STR_VAR_3}.\pIts weaknesses will hurt more.\nThis is forever. Mutate?"));
+    else
+        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("Use a Mutation Seal to open\nthe {STR_VAR_3} type for good?\p{STR_VAR_1} will trade {STR_VAR_2}\nfor {STR_VAR_3}.\pIts weaknesses will hurt more.\nThis is forever. Mutate?"));
+    gSpecialVar_Result = TRUE;
+}
+
+// Applique la mutation ; un type scellé consomme un Mutation Seal et s'ouvre pour de bon.
+void MutationMenu_Apply(void)
+{
+    struct BoxPokemon *boxMon = GetTreeMenuBoxMon();
+    bool32 sealed = !IsMutationTypeOpen(sNewType);
+
+    gSpecialVar_Result = FALSE;
+    if (sealed && !CheckBagHasItem(ITEM_MUTATION_SEAL, 1))
+        return;
+    if (!SetBoxMonMutation(boxMon, sReplacedType, sNewType))
+        return;
+    if (sealed)
+    {
+        RemoveBagItem(ITEM_MUTATION_SEAL, 1);
+        OpenMutationType(sNewType);
+    }
+    CalculateMonStats(&gParties[B_TRAINER_PLAYER][sMonSlot]);
+    gSpecialVar_Result = TRUE;
 }

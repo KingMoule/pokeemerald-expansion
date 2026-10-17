@@ -1861,6 +1861,8 @@ void LoadBattlePyramidObjectEventTemplates(void)
             break;
         }
     }
+    if (InShiftingRuins()) // Mod : éclaireur des Shifting Ruins à la place d'un objet
+        ShiftingRuins_PlaceRecruiter(gSaveBlock1Ptr->objectEventTemplates, OBJECT_EVENT_TEMPLATES_COUNT);
 }
 
 void LoadBattlePyramidFloorObjectEventScripts(void)
@@ -1870,7 +1872,9 @@ void LoadBattlePyramidFloorObjectEventScripts(void)
 
     for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
     {
-        if (events[i].graphicsId != OBJ_EVENT_GFX_ITEM_BALL)
+        if (ShiftingRuins_IsRecruiter(events[i].localId)) // Mod : éclaireur des Shifting Ruins
+            events[i].script = ShiftingRuins_EventScript_Recruiter;
+        else if (events[i].graphicsId != OBJ_EVENT_GFX_ITEM_BALL)
             events[i].script = BattlePyramid_TrainerBattle;
         else
             events[i].script = BattlePyramid_FindItemBall;
