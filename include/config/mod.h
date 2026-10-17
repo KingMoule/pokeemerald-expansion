@@ -4,7 +4,27 @@
 // Valeurs provisoires du mod (wiki v0.2). Tous les chiffres d'équilibrage
 // sont regroupés ici pour être modifiés sans toucher au reste du code.
 
-// Donjon rogue-lite (étape 9, à la Lufia 2) : nom retenu « Shifting Ruins ».
+// Donjon rogue-lite « Shifting Ruins » (wiki section 11, à la Lufia 2), construit sur les étages
+// de la Pyramide de Combat. Valeurs provisoires.
+#define MOD_RUINS_REQUIRED_BADGES     1    // Badges requis (Roxanne en parle en donnant le Technique Codex).
+#define MOD_RUINS_START_LEVEL         5    // Niveau des Pokémon de départ et du Pokémon ramené.
+#define MOD_RUINS_LANDING_EVERY       5    // Un palier de sortie tous les N étages (sortie possible par l'escalier).
+#define MOD_RUINS_MAX_FLOOR           50   // Profondeur maximale : sortie forcée et sécurisée en bas.
+#define MOD_RUINS_LEVEL_BASE          5    // Niveau des sauvages à l'étage 1...
+#define MOD_RUINS_LEVELS_PER_FLOOR    2    // ...puis +N niveaux par étage (100 au plus).
+#define MOD_RUINS_TRAINER_LEVEL_BONUS 1    // Niveau des dresseurs : niveau des sauvages + N.
+#define MOD_RUINS_TRAINER_MONS_BASE   1    // Pokémon par dresseur à l'étage 1, +1 à chaque palier franchi...
+#define MOD_RUINS_TRAINER_MONS_MAX    3    // ...dans cette limite.
+#define MOD_RUINS_START_BALLS         5    // Poké Balls dans le sac au départ.
+#define MOD_RUINS_START_POTIONS       3    // Potions dans le sac au départ.
+#define MOD_RUINS_RELIC_CHANCE        6    // % qu'un objet au sol soit un objet rare (Technique Codex)...
+#define MOD_RUINS_RARE_RELIC_CHANCE   1    // ...ou très rare (Lineage Charm), dès le premier palier franchi.
+#define MOD_RUINS_ESCAPE_ORB_CHANCE   4    // % qu'un objet au sol soit un Escape Orb (sortie sécurisée).
+#define MOD_RUINS_MAX_RELICS          16   // Objets rares en attente au plus pendant une tentative.
+// Progression permanente, gagnée en sortant vivant : record = étage le plus profond d'une sortie réussie.
+#define MOD_RUINS_EXTRA_MON_EVERY     10   // Un Pokémon de départ de plus par tranche de N étages de record...
+#define MOD_RUINS_MAX_START_MONS      3    // ...dans cette limite.
+#define MOD_RUINS_TIER_EVERY          10   // Un vivier de départ plus fort par tranche de N étages de record.
 
 // Niveaux au-delà de 100 : chaque sceau rapporté du donjon relève le plafond de toute la sauvegarde.
 // Désactivé pour l'instant (décision de Guillaume) : niveau 100 maximal et pas d'Ascension Seal en jeu.

@@ -310,4 +310,6 @@ RustboroCity_Gym_Text_ExplainTechniqueCodex:
 	.string "Codices like this one are found\n"
 	.string "deep in the SHIFTING RUINS.\p"
 	.string "They say its halls change\n"
-	.string "on every visit.$"
+	.string "on every visit.\p"
+	.string "A guide waits at the POKéMON\n"
+	.string "CENTER here, if you dare.$"

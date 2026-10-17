@@ -5,6 +5,7 @@
 #include "battle_anim.h"
 #include "battle_stat_change.h"
 #include "battle_pyramid.h"
+#include "shifting_ruins.h"
 #include "battle_pyramid_bag.h"
 #include "berry.h"
 #include "berry_powder.h"
@@ -1124,6 +1125,28 @@ bool8 CanUseDigOrEscapeRopeOnCurMap(void)
         return FALSE;
 }
 
+// Mod : l'Escape Orb fait quitter les Shifting Ruins en gardant les trouvailles.
+static void ItemUseOnFieldCB_EscapeOrb(u8 taskId)
+{
+    RemoveBagItem(gSpecialVar_ItemId, 1);
+    LockPlayerFieldControls();
+    ScriptContext_SetupScript(ShiftingRuins_EventScript_EscapeOrb);
+    DestroyTask(taskId);
+}
+
+void ItemUseOutOfBattle_EscapeOrb(u8 taskId)
+{
+    if (InShiftingRuins())
+    {
+        sItemUseOnFieldCB = ItemUseOnFieldCB_EscapeOrb;
+        SetUpItemUseOnFieldCallback(taskId);
+    }
+    else
+    {
+        DisplayDadsAdviceCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem);
+    }
+}
+
 void ItemUseOutOfBattle_EscapeRope(u8 taskId)
 {
     if (CanUseDigOrEscapeRopeOnCurMap() == TRUE)
@@ -1150,6 +1173,8 @@ static u32 GetBallThrowableState(void)
         return BALL_THROW_UNABLE_TWO_MONS;
     else if (IsPlayerPartyAndPokemonStorageFull() == TRUE)
         return BALL_THROW_UNABLE_NO_ROOM;
+    else if (InShiftingRuins() && CalculatePlayerPartyCount() >= PARTY_SIZE) // Mod : pas de PC dans les ruines
+        return BALL_THROW_UNABLE_NO_ROOM;
     else if (GetConfig(B_SEMI_INVULNERABLE_CATCH) >= GEN_4 &&  IsSemiInvulnerable(GetCatchingBattler(), CHECK_ALL))
         return BALL_THROW_UNABLE_SEMI_INVULNERABLE;
     else if (FlagGet(WE_FLAG_NO_CATCHING) || !IsAllowedToUseBag())
@@ -1166,6 +1191,7 @@ bool32 CanThrowBall(void)
 static const u8 sText_CantThrowPokeBall_TwoMons[] = _("Cannot throw a ball!\nThere are two Pokémon out there!\p");
 static const u8 sText_CantThrowPokeBall_SemiInvulnerable[] = _("Cannot throw a ball!\nThere's no Pokémon in sight!\p");
 static const u8 sText_CantThrowPokeBall_Disabled[] = _("POKé BALLS cannot be used\nright now!\p");
+static const u8 sText_CantThrowPokeBall_RuinsPartyFull[] = _("Your team is full! There's no PC\nin the ruins.\p");
 
 static void ItemUseInBattle_ShowPartyMenu(u8 taskId)
 {
@@ -1269,7 +1295,7 @@ bool32 CannotUseItemsInBattle(enum Item itemId, struct Pokemon *mon)
             cannotUse = TRUE;
             break;
         case BALL_THROW_UNABLE_NO_ROOM:
-            failStr = gText_BoxFull;
+            failStr = InShiftingRuins() ? sText_CantThrowPokeBall_RuinsPartyFull : gText_BoxFull;
             cannotUse = TRUE;
             break;
         case BALL_THROW_UNABLE_SEMI_INVULNERABLE:

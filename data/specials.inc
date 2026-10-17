@@ -658,3 +658,16 @@ gSpecials::
 	def_special EvDungeon_BeginFloor
 	def_special EvDungeon_EndFloor
 	def_special EvDungeon_Leave
+	def_special ShiftingRuins_CheckAccess
+	def_special ShiftingRuins_BufferRecord
+	def_special ShiftingRuins_Start
+	def_special ShiftingRuins_IsActive
+	def_special ShiftingRuins_OnFloorResume
+	def_special ShiftingRuins_CheckStairs
+	def_special ShiftingRuins_GoDeeper
+	def_special ShiftingRuins_TakeRelic
+	def_special ShiftingRuins_EndRun
+	def_special ShiftingRuins_CheckDebrief
+	def_special ShiftingRuins_GiveRelics
+	def_special ShiftingRuins_ChooseKeptMon
+	def_special ShiftingRuins_Finish

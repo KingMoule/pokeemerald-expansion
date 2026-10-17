@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle_pyramid.h"
+#include "shifting_ruins.h"
 #include "bg.h"
 #include "event_data.h"
 #include "field_weather.h"
@@ -580,7 +581,12 @@ static void ShowMapNamePopUpWindow(void)
     const u8 *mapDisplayHeaderSource;
     u8 mapNamePopUpWindowId, secondaryPopUpWindowId;
 
-    if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
+    if (InShiftingRuins())
+    {
+        withoutPrefixPtr = &(mapDisplayHeader[MAP_POPUP_PREFIX_BUFFER_LENGTH]);
+        ShiftingRuins_GetMapName(withoutPrefixPtr);
+    }
+    else if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
     {
         if (gMapHeader.mapLayoutId == LAYOUT_BATTLE_FRONTIER_BATTLE_PYRAMID_TOP)
         {

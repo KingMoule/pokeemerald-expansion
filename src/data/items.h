@@ -7343,6 +7343,24 @@ const struct ItemInfo gItemsInfo[] =
         .iconPalette = gItemIconPalette_OvalCharm,
     },
 
+    // Mod : objet d'évasion des Shifting Ruins, utilisable seulement à l'intérieur.
+    // Icône provisoire reprise de la Corde Sortie.
+    [ITEM_ESCAPE_ORB] =
+    {
+        .name = ITEM_NAME("Escape Orb"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Leaves the Shifting\n"
+            "Ruins at once, with\n"
+            "all your finds."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_FIELD_USE,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_EscapeOrb,
+        .iconPic = gItemIcon_EscapeRope,
+        .iconPalette = gItemIconPalette_EscapeRope,
+    },
+
 #if MOD_LEVELS_BEYOND_100
     // Mod : sceau de dépassement, à rapporter vivant des Shifting Ruins.
     // Icône provisoire reprise du Shiny Charm.
