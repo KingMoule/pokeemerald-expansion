@@ -171,3 +171,71 @@ SINGLE_BATTLE_TEST("Mod: Vital Warmth heals at the end of each turn in the sun")
         HP_BAR(player, damage: -10);
     }
 }
+
+SINGLE_BATTLE_TEST("Mod: Elemental Focus boosts special moves of the tree's type", s16 damage)
+{
+    u32 rank;
+    PARAMETRIZE { rank = 0; }
+    PARAMETRIZE { rank = 20; }
+    GIVEN {
+        PLAYER(SPECIES_SQUIRTLE) { TreeRank(TYPE_WATER, 8, rank); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_WATER_GUN); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.2), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Bulwark reduces super effective damage taken", s16 damage)
+{
+    u32 rank;
+    PARAMETRIZE { rank = 0; }
+    PARAMETRIZE { rank = 20; }
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_MACHOP) { TreeRank(TYPE_FIGHTING, 12, rank); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_CONFUSION); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(0.9), results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Bulwark does not reduce neutral damage", s16 damage)
+{
+    u32 rank;
+    PARAMETRIZE { rank = 0; }
+    PARAMETRIZE { rank = 20; }
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_MACHOP) { TreeRank(TYPE_FIGHTING, 12, rank); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_EQ(results[0].damage, results[1].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Mod: Toxin's Exploit boosts damage against poisoned targets", s16 damage)
+{
+    u32 rank;
+    PARAMETRIZE { rank = 0; }
+    PARAMETRIZE { rank = 20; }
+    GIVEN {
+        PLAYER(SPECIES_EKANS) { TreeRank(TYPE_POISON, 9, rank); }
+        OPPONENT(SPECIES_WOBBUFFET) { Status1(STATUS1_POISON); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(1.2), results[1].damage);
+    }
+}

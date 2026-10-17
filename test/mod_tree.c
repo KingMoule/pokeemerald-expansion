@@ -69,12 +69,14 @@ TEST("Mod: tree nodes stop at their max rank and investing stops without points"
     EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_FIRE, 2), TREE_INVEST_NO_POINTS);
 }
 
-TEST("Mod: elements without written branches only have the trunk")
+TEST("Mod: other elements open their branches like the Fire tree")
 {
     struct Pokemon mon;
     CreateRandomMonWithIVs(&mon, SPECIES_SQUIRTLE, 60, 0);
-    InvestTimes(&mon, TYPE_WATER, TRUNK_PHYSICAL, MOD_TREE_BRANCH_UNLOCK_POINTS);
-    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_WATER, FIRE_IMPACT), TREE_INVEST_NO_NODE);
+    InvestTimes(&mon, TYPE_WATER, TRUNK_PHYSICAL, MOD_TREE_BRANCH_UNLOCK_POINTS - 1);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_WATER, FIRE_IMPACT), TREE_INVEST_LOCKED);
+    InvestTimes(&mon, TYPE_WATER, TRUNK_PHYSICAL, 1);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_WATER, FIRE_IMPACT), TREE_INVEST_OK);
 }
 
 TEST("Mod: a mutation needs enough tree points and a final mastery")
@@ -107,4 +109,21 @@ TEST("Mod: Vitality and Swiftness raise max HP and Speed")
     CalculateMonStats(&trained);
     EXPECT_EQ(GetMonData(&trained, MON_DATA_MAX_HP), GetMonData(&plain, MON_DATA_MAX_HP) * 120 / 100);
     EXPECT_EQ(GetMonData(&trained, MON_DATA_SPEED), GetMonData(&plain, MON_DATA_SPEED) * 110 / 100);
+}
+
+TEST("Mod: every element has three branches")
+{
+    enum Type type;
+    u32 branch;
+    for (type = TYPE_NORMAL; type <= TYPE_FAIRY; type++)
+    {
+        if (type == TYPE_MYSTERY || type == TYPE_STELLAR)
+            continue;
+        for (branch = 0; branch < TREE_BRANCH_COUNT; branch++)
+        {
+            EXPECT(gElementTrees[type].branchNames[branch] != NULL);
+            EXPECT(GetTreeNode(type, TREE_TRUNK_NODES + branch * TREE_BRANCH_NODES) != NULL);
+            EXPECT(GetTreeNode(type, TREE_TRUNK_NODES + branch * TREE_BRANCH_NODES + TREE_BRANCH_NODES - 1) != NULL);
+        }
+    }
 }

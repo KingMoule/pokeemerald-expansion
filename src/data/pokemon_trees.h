@@ -23,28 +23,161 @@
         .effect = TREE_EFFECT_SPEED, .maxRank = 20, .valuePerRank = 5,                              \
     }
 
-// Les éléments sans branches écrites n'ont que le tronc commun.
-#define TRUNK_ONLY_TREE { .nodes = { TREE_TRUNK } }
+// Branches génériques des éléments autres que le Feu (valeurs provisoires, à valider par Guillaume).
+// Assaut : attaques physiques de l'élément ; Focus : attaques spéciales ; Statut : infliger et
+// exploiter le statut de l'élément ; Météo : profiter de la météo de l'élément ; Garde : encaisser.
+// Comme pour le Feu, les maîtrises finales ouvrent la mutation mais n'ont pas encore d'effet.
+#define TREE_MASTERY(first)                                                                         \
+    [first + 3] = {                                                                                 \
+        .name = COMPOUND_STRING("Mastery"),                                                         \
+        .description = COMPOUND_STRING("Mastery. Rules not yet\ndefined (inactive)."),             \
+        .effect = TREE_EFFECT_INACTIVE_MASTERY, .maxRank = 1, .valuePerRank = 0,                    \
+    }
+
+#define BRANCH_ASSAULT(first)                                                                       \
+    [first] = {                                                                                     \
+        .name = COMPOUND_STRING("Elemental Impact"),                                                \
+        .description = COMPOUND_STRING("+1% physical damage\nof its type per rank."),              \
+        .effect = TREE_EFFECT_TYPE_PHYSICAL_DAMAGE, .maxRank = 20, .valuePerRank = 10,              \
+    },                                                                                              \
+    [first + 1] = {                                                                                 \
+        .name = COMPOUND_STRING("Recoil Guard"),                                                    \
+        .description = COMPOUND_STRING("-3% recoil from moves\nof its type per rank."),            \
+        .effect = TREE_EFFECT_TYPE_RECOIL, .maxRank = 10, .valuePerRank = 30,                       \
+    },                                                                                              \
+    [first + 2] = {                                                                                 \
+        .name = COMPOUND_STRING("Desperation"),                                                     \
+        .description = COMPOUND_STRING("Below 50% HP, +2% damage\nof its type per rank."),         \
+        .effect = TREE_EFFECT_TYPE_DAMAGE_LOW_HP, .maxRank = 10, .valuePerRank = 20,                \
+    },                                                                                              \
+    TREE_MASTERY(first)
+
+#define BRANCH_FOCUS(first)                                                                         \
+    [first] = {                                                                                     \
+        .name = COMPOUND_STRING("Elemental Focus"),                                                 \
+        .description = COMPOUND_STRING("+1% special damage\nof its type per rank."),               \
+        .effect = TREE_EFFECT_TYPE_SPECIAL_DAMAGE, .maxRank = 20, .valuePerRank = 10,               \
+    },                                                                                              \
+    [first + 1] = {                                                                                 \
+        .name = COMPOUND_STRING("Quick Mind"),                                                      \
+        .description = COMPOUND_STRING("+0.5% Speed\nper rank."),                                  \
+        .effect = TREE_EFFECT_SPEED, .maxRank = 10, .valuePerRank = 5,                              \
+    },                                                                                              \
+    [first + 2] = {                                                                                 \
+        .name = COMPOUND_STRING("Deep Focus"),                                                      \
+        .description = COMPOUND_STRING("+1% special damage\nper rank."),                           \
+        .effect = TREE_EFFECT_SPECIAL_DAMAGE, .maxRank = 10, .valuePerRank = 10,                    \
+    },                                                                                              \
+    TREE_MASTERY(first)
+
+#define BRANCH_STATUS(first)                                                                        \
+    [first] = {                                                                                     \
+        .name = COMPOUND_STRING("Afflict"),                                                         \
+        .description = COMPOUND_STRING("+0.5% chance to inflict\nits status per rank."),           \
+        .effect = TREE_EFFECT_STATUS_CHANCE, .maxRank = 20, .valuePerRank = 5,                      \
+    },                                                                                              \
+    [first + 1] = {                                                                                 \
+        .name = COMPOUND_STRING("Exploit"),                                                         \
+        .description = COMPOUND_STRING("+1% damage per rank vs\ntargets with its status."),        \
+        .effect = TREE_EFFECT_DAMAGE_VS_STATUS, .maxRank = 20, .valuePerRank = 10,                  \
+    },                                                                                              \
+    [first + 2] = {                                                                                 \
+        .name = COMPOUND_STRING("Resilience"),                                                      \
+        .description = COMPOUND_STRING("+1% max HP\nper rank."),                                   \
+        .effect = TREE_EFFECT_MAX_HP, .maxRank = 10, .valuePerRank = 10,                            \
+    },                                                                                              \
+    TREE_MASTERY(first)
+
+#define BRANCH_WEATHER(first)                                                                       \
+    [first] = {                                                                                     \
+        .name = COMPOUND_STRING("Weather Power"),                                                   \
+        .description = COMPOUND_STRING("In its weather, +1% dmg\nof its type per rank."),          \
+        .effect = TREE_EFFECT_TYPE_DAMAGE_WEATHER, .maxRank = 20, .valuePerRank = 10,               \
+    },                                                                                              \
+    [first + 1] = {                                                                                 \
+        .name = COMPOUND_STRING("Long Weather"),                                                    \
+        .description = COMPOUND_STRING("+1 turn to the weather\nyou summon per rank."),            \
+        .effect = TREE_EFFECT_WEATHER_TURNS, .maxRank = 5, .valuePerRank = 1,                       \
+    },                                                                                              \
+    [first + 2] = {                                                                                 \
+        .name = COMPOUND_STRING("Weather Bloom"),                                                   \
+        .description = COMPOUND_STRING("In its weather, heal 0.5%\nmax HP each turn per rank."),   \
+        .effect = TREE_EFFECT_WEATHER_HEAL, .maxRank = 10, .valuePerRank = 5,                       \
+    },                                                                                              \
+    TREE_MASTERY(first)
+
+#define BRANCH_GUARD(first)                                                                         \
+    [first] = {                                                                                     \
+        .name = COMPOUND_STRING("Bulwark"),                                                         \
+        .description = COMPOUND_STRING("-0.5% damage from super\neffective moves per rank."),      \
+        .effect = TREE_EFFECT_WEAKNESS_GUARD, .maxRank = 20, .valuePerRank = 5,                     \
+    },                                                                                              \
+    [first + 1] = {                                                                                 \
+        .name = COMPOUND_STRING("Thick Hide"),                                                      \
+        .description = COMPOUND_STRING("+1% max HP\nper rank."),                                   \
+        .effect = TREE_EFFECT_MAX_HP, .maxRank = 10, .valuePerRank = 10,                            \
+    },                                                                                              \
+    [first + 2] = {                                                                                 \
+        .name = COMPOUND_STRING("Last Stand"),                                                      \
+        .description = COMPOUND_STRING("Below 50% HP, +2% damage\nof its type per rank."),         \
+        .effect = TREE_EFFECT_TYPE_DAMAGE_LOW_HP, .maxRank = 10, .valuePerRank = 20,                \
+    },                                                                                              \
+    TREE_MASTERY(first)
+
+#define B1 (TREE_TRUNK_NODES)
+#define B2 (TREE_TRUNK_NODES + TREE_BRANCH_NODES)
+#define B3 (TREE_TRUNK_NODES + 2 * TREE_BRANCH_NODES)
+
+// Assaut / Focus / Garde.
+#define TREE_GUARD                                                                                  \
+    {                                                                                               \
+        .branchNames = { COMPOUND_STRING("Assault"), COMPOUND_STRING("Focus"), COMPOUND_STRING("Guard") }, \
+        .nodes = { TREE_TRUNK, BRANCH_ASSAULT(B1), BRANCH_FOCUS(B2), BRANCH_GUARD(B3) },            \
+    }
+
+// Assaut / Focus / Météo.
+#define TREE_WEATHER(weatherName, weatherFlags)                                                     \
+    {                                                                                               \
+        .branchNames = { COMPOUND_STRING("Assault"), COMPOUND_STRING("Focus"), COMPOUND_STRING(weatherName) }, \
+        .weather = weatherFlags,                                                                    \
+        .nodes = { TREE_TRUNK, BRANCH_ASSAULT(B1), BRANCH_FOCUS(B2), BRANCH_WEATHER(B3) },          \
+    }
+
+// Assaut / Statut / troisième branche (Garde ou Météo).
+#define TREE_STATUS_GUARD(statusName, statusFlags)                                                  \
+    {                                                                                               \
+        .branchNames = { COMPOUND_STRING("Assault"), COMPOUND_STRING(statusName), COMPOUND_STRING("Guard") }, \
+        .status = statusFlags,                                                                      \
+        .nodes = { TREE_TRUNK, BRANCH_ASSAULT(B1), BRANCH_STATUS(B2), BRANCH_GUARD(B3) },           \
+    }
+
+#define TREE_STATUS_WEATHER(statusName, statusFlags, weatherName, weatherFlags)                     \
+    {                                                                                               \
+        .branchNames = { COMPOUND_STRING("Assault"), COMPOUND_STRING(statusName), COMPOUND_STRING(weatherName) }, \
+        .status = statusFlags,                                                                      \
+        .weather = weatherFlags,                                                                    \
+        .nodes = { TREE_TRUNK, BRANCH_ASSAULT(B1), BRANCH_STATUS(B2), BRANCH_WEATHER(B3) },         \
+    }
 
 const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES] =
 {
-    [TYPE_NORMAL] = TRUNK_ONLY_TREE,
-    [TYPE_FIGHTING] = TRUNK_ONLY_TREE,
-    [TYPE_FLYING] = TRUNK_ONLY_TREE,
-    [TYPE_POISON] = TRUNK_ONLY_TREE,
-    [TYPE_GROUND] = TRUNK_ONLY_TREE,
-    [TYPE_ROCK] = TRUNK_ONLY_TREE,
-    [TYPE_BUG] = TRUNK_ONLY_TREE,
-    [TYPE_GHOST] = TRUNK_ONLY_TREE,
-    [TYPE_STEEL] = TRUNK_ONLY_TREE,
-    [TYPE_WATER] = TRUNK_ONLY_TREE,
-    [TYPE_GRASS] = TRUNK_ONLY_TREE,
-    [TYPE_ELECTRIC] = TRUNK_ONLY_TREE,
-    [TYPE_PSYCHIC] = TRUNK_ONLY_TREE,
-    [TYPE_ICE] = TRUNK_ONLY_TREE,
-    [TYPE_DRAGON] = TRUNK_ONLY_TREE,
-    [TYPE_DARK] = TRUNK_ONLY_TREE,
-    [TYPE_FAIRY] = TRUNK_ONLY_TREE,
+    [TYPE_NORMAL]   = TREE_GUARD,
+    [TYPE_FIGHTING] = TREE_GUARD,
+    [TYPE_FLYING]   = TREE_GUARD,
+    [TYPE_POISON]   = TREE_STATUS_GUARD("Toxin", STATUS1_PSN_ANY),
+    [TYPE_GROUND]   = TREE_WEATHER("Sandstorm", B_WEATHER_SANDSTORM),
+    [TYPE_ROCK]     = TREE_WEATHER("Sandstorm", B_WEATHER_SANDSTORM),
+    [TYPE_BUG]      = TREE_GUARD,
+    [TYPE_GHOST]    = TREE_GUARD,
+    [TYPE_STEEL]    = TREE_GUARD,
+    [TYPE_WATER]    = TREE_WEATHER("Rain", B_WEATHER_RAIN),
+    [TYPE_GRASS]    = TREE_STATUS_WEATHER("Spores", STATUS1_SLEEP, "Sunlight", B_WEATHER_SUN),
+    [TYPE_ELECTRIC] = TREE_STATUS_WEATHER("Static", STATUS1_PARALYSIS, "Storm", B_WEATHER_RAIN),
+    [TYPE_PSYCHIC]  = TREE_GUARD,
+    [TYPE_ICE]      = TREE_STATUS_WEATHER("Frost", STATUS1_FREEZE | STATUS1_FROSTBITE, "Hail", B_WEATHER_HAIL | B_WEATHER_SNOW),
+    [TYPE_DRAGON]   = TREE_GUARD,
+    [TYPE_DARK]     = TREE_GUARD,
+    [TYPE_FAIRY]    = TREE_GUARD,
     [TYPE_FIRE] =
     {
         .branchNames = {
@@ -124,5 +257,17 @@ const struct ElementTree gElementTrees[NUMBER_OF_MON_TYPES] =
     },
 };
 
-#undef TRUNK_ONLY_TREE
+#undef TREE_STATUS_WEATHER
+#undef TREE_STATUS_GUARD
+#undef TREE_WEATHER
+#undef TREE_GUARD
+#undef B1
+#undef B2
+#undef B3
+#undef BRANCH_GUARD
+#undef BRANCH_WEATHER
+#undef BRANCH_STATUS
+#undef BRANCH_FOCUS
+#undef BRANCH_ASSAULT
+#undef TREE_MASTERY
 #undef TREE_TRUNK

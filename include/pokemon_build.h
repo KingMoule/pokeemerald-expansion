@@ -69,11 +69,14 @@ enum TreeEffect
     TREE_EFFECT_TYPE_DAMAGE_WEATHER,  // ‰ de dégâts de l'élément sous la météo de l'élément.
     TREE_EFFECT_WEATHER_TURNS,        // Tours de météo en plus quand ce Pokémon l'invoque.
     TREE_EFFECT_WEATHER_HEAL,         // ‰ des PV max récupérés en fin de tour sous la météo.
+    TREE_EFFECT_TYPE_SPECIAL_DAMAGE,  // ‰ de dégâts des attaques spéciales de l'élément.
+    TREE_EFFECT_WEAKNESS_GUARD,       // ‰ de dégâts en moins contre les attaques super efficaces.
     // Maîtrises dont les règles restent à préciser dans le wiki : sans effet pour l'instant.
     TREE_EFFECT_TYPE_DAMAGE_STACK,
     TREE_EFFECT_STATUS_DAMAGE,
     TREE_EFFECT_LINGERING_STATUS,
     TREE_EFFECT_WEATHER_ON_ENTRY,
+    TREE_EFFECT_INACTIVE_MASTERY,     // Maîtrise générique des autres éléments.
 };
 
 struct TreeNode
@@ -117,6 +120,7 @@ const struct ElementTree *GetBattlerTree(enum BattlerId battler);
 
 // Effets des arbres en combat.
 uq4_12_t GetTreeDamageModifier(enum BattlerId battlerAtk, enum BattlerId battlerDef, enum Move move, enum Type moveType);
+uq4_12_t GetTreeGuardModifier(enum BattlerId battlerDef, uq4_12_t typeEffectiveness);
 u32 ApplyTreeRecoilReduction(enum BattlerId battlerAtk, enum Type moveType, u32 recoil);
 u32 GetTreeStatusMoveEffect(u32 status);
 u32 GetTreeStatusChanceBonus(enum BattlerId battlerAtk, u32 moveEffect);

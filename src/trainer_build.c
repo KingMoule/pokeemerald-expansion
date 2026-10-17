@@ -160,14 +160,26 @@ static void InvestUpTo(struct Pokemon *mon, enum Type treeType, u32 node, u32 ra
         ;
 }
 
+static u32 GetTypeMovePower(struct Pokemon *mon, enum Type type)
+{
+    u32 i, power = 0;
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        enum Move move = GetMonData(mon, MON_DATA_MOVE1 + i);
+        if (move != MOVE_NONE && !IsBattleMoveStatus(move) && GetMoveType(move) == type)
+            power += GetMovePower(move);
+    }
+    return power;
+}
+
+// Double type : l'arbre du type dont les attaques du Pokémon sont les plus fortes, le premier à égalité.
 static enum Type ChooseTreeType(struct Pokemon *mon)
 {
     enum Species species = GetMonData(mon, MON_DATA_SPECIES);
     enum Type type1 = GetBoxMonMutatedType(&mon->box, species, 0);
     enum Type type2 = GetBoxMonMutatedType(&mon->box, species, 1);
 
-    // L'élément qui a des branches l'emporte ; à défaut, le premier type.
-    if (gElementTrees[type1].branchNames[0] == NULL && gElementTrees[type2].branchNames[0] != NULL)
+    if (GetTypeMovePower(mon, type2) > GetTypeMovePower(mon, type1))
         return type2;
     return type1;
 }

@@ -580,6 +580,8 @@ uq4_12_t GetTreeDamageModifier(enum BattlerId battlerAtk, enum BattlerId battler
     {
         if (IsBattleMovePhysical(move))
             bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_PHYSICAL_DAMAGE);
+        else if (IsBattleMoveSpecial(move))
+            bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_SPECIAL_DAMAGE);
         if (gBattleMons[battlerAtk].hp * 2 < gBattleMons[battlerAtk].maxHP)
             bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_TYPE_DAMAGE_LOW_HP);
         if (tree->weather != 0 && HasWeatherEffect() && (gBattleWeather & tree->weather))
@@ -590,6 +592,17 @@ uq4_12_t GetTreeDamageModifier(enum BattlerId battlerAtk, enum BattlerId battler
         bonus += GetBattlerTreeEffect(battlerAtk, TREE_EFFECT_DAMAGE_VS_STATUS);
 
     return UQ_4_12(1.0) + (bonus * UQ_4_12(1.0)) / 1000;
+}
+
+// Garde : réduit les dégâts des attaques super efficaces subies (multiplicatif, à part des bonus).
+uq4_12_t GetTreeGuardModifier(enum BattlerId battlerDef, uq4_12_t typeEffectiveness)
+{
+    u32 guard;
+
+    if (typeEffectiveness <= UQ_4_12(1.0))
+        return UQ_4_12(1.0);
+    guard = min(GetBattlerTreeEffect(battlerDef, TREE_EFFECT_WEAKNESS_GUARD), 1000);
+    return UQ_4_12(1.0) - (guard * UQ_4_12(1.0)) / 1000;
 }
 
 u32 ApplyTreeRecoilReduction(enum BattlerId battlerAtk, enum Type moveType, u32 recoil)
@@ -605,17 +618,20 @@ u32 ApplyTreeRecoilReduction(enum BattlerId battlerAtk, enum Type moveType, u32 
     return max(recoil, 1);
 }
 
+// Les statuts d'un arbre sont des masques (poison et poison grave, gel et gelure).
 u32 GetTreeStatusMoveEffect(u32 status)
 {
-    switch (status)
-    {
-    case STATUS1_BURN:      return MOVE_EFFECT_BURN;
-    case STATUS1_POISON:    return MOVE_EFFECT_POISON;
-    case STATUS1_PARALYSIS: return MOVE_EFFECT_PARALYSIS;
-    case STATUS1_FREEZE:    return MOVE_EFFECT_FREEZE;
-    case STATUS1_SLEEP:     return MOVE_EFFECT_SLEEP;
-    default:                return MOVE_EFFECT_NONE;
-    }
+    if (status & STATUS1_BURN)
+        return MOVE_EFFECT_BURN;
+    if (status & STATUS1_PSN_ANY)
+        return MOVE_EFFECT_POISON;
+    if (status & STATUS1_PARALYSIS)
+        return MOVE_EFFECT_PARALYSIS;
+    if (status & (STATUS1_FREEZE | STATUS1_FROSTBITE))
+        return MOVE_EFFECT_FREEZE_OR_FROSTBITE;
+    if (status & STATUS1_SLEEP)
+        return MOVE_EFFECT_SLEEP;
+    return MOVE_EFFECT_NONE;
 }
 
 // En points de pourcentage entiers : deux rangs à 0,5 point donnent 1 point.

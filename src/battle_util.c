@@ -7682,6 +7682,7 @@ static inline uq4_12_t GetOtherModifiers(struct DamageContext *ctx)
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(ctx->battlerAtk, ctx->typeEffectivenessModifier, ctx->holdEffects[ctx->battlerAtk]));
     }
     DAMAGE_MULTIPLY_MODIFIER(GetTreeDamageModifier(ctx->battlerAtk, ctx->battlerDef, ctx->move, ctx->moveType));
+    DAMAGE_MULTIPLY_MODIFIER(GetTreeGuardModifier(ctx->battlerDef, ctx->typeEffectivenessModifier));
     return finalModifier;
 }
 
