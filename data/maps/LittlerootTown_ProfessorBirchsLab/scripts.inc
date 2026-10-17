@@ -123,6 +123,7 @@ LittlerootTown_ProfessorBirchsLab_EventScript_NicknameStarter::
 	end
 
 LittlerootTown_ProfessorBirchsLab_EventScript_GoSeeRival::
+	msgbox LittlerootTown_ProfessorBirchsLab_Text_ModExplainStats, MSGBOX_DEFAULT
 	msgbox LittlerootTown_ProfessorBirchsLab_Text_MightBeGoodIdeaToGoSeeRival, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, YES, LittlerootTown_ProfessorBirchsLab_EventScript_AgreeToSeeRival
 	goto_if_eq VAR_RESULT, NO, LittlerootTown_ProfessorBirchsLab_EventScript_DeclineSeeingRival
@@ -528,6 +529,7 @@ LittlerootTown_ProfessorBirchsLab_EventScript_MayGivePokeBalls::
 	giveitem ITEM_POKE_BALL, 5
 	call_if_eq VAR_RESULT, FALSE, LittlerootTown_ProfessorBirchsLab_EventScript_MayNoRoomForPokeBalls
 	msgbox LittlerootTown_ProfessorBirchsLab_Text_CatchCutePokemonWithPokeBalls, MSGBOX_DEFAULT
+	msgbox LittlerootTown_ProfessorBirchsLab_Text_ModExplainTrees, MSGBOX_DEFAULT
 	setvar VAR_RESULT, 0
 	return
 
@@ -536,6 +538,7 @@ LittlerootTown_ProfessorBirchsLab_EventScript_BrendanGivePokeBalls::
 	giveitem ITEM_POKE_BALL, 5
 	call_if_eq VAR_RESULT, FALSE, LittlerootTown_ProfessorBirchsLab_EventScript_BrendanNoRoomForPokeBalls
 	msgbox LittlerootTown_ProfessorBirchsLab_Text_CatchCoolPokemonWithPokeBalls, MSGBOX_DEFAULT
+	msgbox LittlerootTown_ProfessorBirchsLab_Text_ModExplainTrees, MSGBOX_DEFAULT
 	setvar VAR_RESULT, 1
 	return
 
@@ -992,3 +995,26 @@ LittlerootTown_ProfessorBirchsLab_Text_ScottAboardSSTidalCall:
 	.string "we meet. I'll be waiting!\p"
 	.string "… … … … … …\n"
 	.string "… … … … … Click!$"
+
+LittlerootTown_ProfessorBirchsLab_Text_ModExplainStats:
+	.string "PROF. BIRCH: One more thing,\n"
+	.string "{PLAYER}.\p"
+	.string "In HOENN, battling alone won't\n"
+	.string "shape a POKéMON's stats anymore.\p"
+	.string "That takes real training, later\n"
+	.string "on your journey.\p"
+	.string "Check its SUMMARY. You can see\n"
+	.string "its IVs, its EVs and its nature.\p"
+	.string "Nothing about your partner is\n"
+	.string "hidden from you.$"
+
+LittlerootTown_ProfessorBirchsLab_Text_ModExplainTrees:
+	.string "Did you notice? Each level gives\n"
+	.string "your POKéMON a TREE point.\p"
+	.string "Open your party, pick BUILD,\n"
+	.string "then TREE. Spend points to grow\l"
+	.string "its strengths.\p"
+	.string "Think it through, though.\n"
+	.string "Points you spend stay spent.\p"
+	.string "My dad says that's what makes\n"
+	.string "each POKéMON unique!$"
