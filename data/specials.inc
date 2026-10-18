@@ -640,8 +640,7 @@ gSpecials::
 	def_special CheckAddCoins
 	def_special TreeMenu_Begin
 	def_special TreeMenu_PushTypeChoices
-	def_special TreeMenu_BufferHeader
-	def_special TreeMenu_PushNodes
+	def_special TreeScreen_Open, waitstate=1
 	def_special TreeMenu_CheckNode
 	def_special TreeMenu_Invest
 	def_special BuildMenu_Begin

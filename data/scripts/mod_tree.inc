@@ -31,25 +31,11 @@ EventScript_TreeMenu:
 	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_BuildMenu_Hub
 	copyvar VAR_0x8005, VAR_RESULT
 EventScript_TreeMenu_Loop:
-	special TreeMenu_BufferHeader
-	message Text_TreeMenu_Header
-	waitmessage
-	special TreeMenu_PushNodes
-	dynmultistack 0, 0, FALSE, 6, FALSE, VAR_0x8006, DYN_MULTICHOICE_CB_NONE
-	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_BuildMenu_Hub
-	copyvar VAR_0x8006, VAR_RESULT
-	special TreeMenu_CheckNode
-	goto_if_ne VAR_RESULT, 0, EventScript_TreeMenu_Refused
-	msgbox gStringVar4, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, EventScript_TreeMenu_Loop
-	special TreeMenu_Invest
-	playse SE_SUCCESS
-	waitse
-	goto EventScript_TreeMenu_Loop
-
-EventScript_TreeMenu_Refused:
-	msgbox gStringVar4, MSGBOX_DEFAULT
-	goto EventScript_TreeMenu_Loop
+	closemessage
+	fadescreen FADE_TO_BLACK
+	special TreeScreen_Open
+	waitstate
+	goto EventScript_BuildMenu_Hub
 
 @ Mutation volontaire (src/tree_menu.c) : type remplacé, puis nouveau type.
 EventScript_MutationMenu:
@@ -170,10 +156,6 @@ Text_MutationMenu_Done:
 Text_TreeMenu_ChooseTree:
 	.string "Which tree should {STR_VAR_1}\n"
 	.string "follow? This is permanent.$"
-
-Text_TreeMenu_Header:
-	.string "{STR_VAR_1} · {STR_VAR_2} Tree\n"
-	.string "Available points: {STR_VAR_3}$"
 
 Text_VariantMenu_ViewMoves:
 	.string "Check the variant of\n"
