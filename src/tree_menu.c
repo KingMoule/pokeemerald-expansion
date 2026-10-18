@@ -86,38 +86,6 @@ void TreeMenu_PushTypeChoices(void)
     PushTreeMenuItem(gTypesInfo[type2].name, type2);
 }
 
-// STR_VAR_2 : nom de l'arbre. STR_VAR_3 : points disponibles.
-void TreeMenu_BufferHeader(void)
-{
-    StringCopy(gStringVar2, gTypesInfo[sTreeType].name);
-    ConvertIntToDecimalStringN(gStringVar3, GetBoxMonTreePointsAvailable(GetTreeMenuBoxMon()), STR_CONV_MODE_LEFT_ALIGN, 3);
-}
-
-// Une ligne par nœud existant : « Nom rang/max », précédée d'un tiret si le nœud est verrouillé.
-void TreeMenu_PushNodes(void)
-{
-    struct BoxPokemon *boxMon = GetTreeMenuBoxMon();
-    u32 node;
-    u8 text[64];
-
-    for (node = 0; node < MOD_TREE_NODE_COUNT; node++)
-    {
-        const struct TreeNode *treeNode = GetTreeNode(sTreeType, node);
-        u8 *end = text;
-
-        if (treeNode == NULL)
-            continue;
-        if (CanBoxMonInvestInNode(boxMon, sTreeType, node) == TREE_INVEST_LOCKED)
-            end = StringCopy(end, COMPOUND_STRING("- "));
-        end = StringCopy(end, treeNode->name);
-        *end++ = CHAR_SPACE;
-        end = ConvertIntToDecimalStringN(end, GetBoxMonTreeRank(boxMon, node), STR_CONV_MODE_LEFT_ALIGN, 2);
-        *end++ = CHAR_SLASH;
-        ConvertIntToDecimalStringN(end, treeNode->maxRank, STR_CONV_MODE_LEFT_ALIGN, 2);
-        PushTreeMenuItem(text, node);
-    }
-}
-
 // gStringVar4 : description du nœud, puis la question ou la raison du refus.
 // VAR_RESULT : TREE_INVEST_OK ou la raison du refus (enum TreeInvestResult).
 void TreeMenu_CheckNode(void)

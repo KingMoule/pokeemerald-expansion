@@ -4,6 +4,7 @@
 #include "pokemon.h"
 #include "pokemon_build.h"
 #include "tree_menu.h"
+#include "tree_screen.h"
 #include "test/test.h"
 
 TEST("Mod: tree menu picks the only tree of a single-type Pokémon")
@@ -51,6 +52,31 @@ TEST("Mod: tree menu invests one point and reports locked nodes")
     EXPECT_EQ(gSpecialVar_Result, TREE_INVEST_LOCKED);
     TreeMenu_Invest();
     EXPECT_EQ(GetBoxMonTreeRank(&gParties[B_TRAINER_PLAYER][0].box, 4), 0);
+}
+
+TEST("Mod: tree screen stacks pending points and commits them at once")
+{
+    struct BoxPokemon preview;
+    u8 pending[MOD_TREE_NODE_COUNT] = {0};
+    struct BoxPokemon *boxMon = &gParties[B_TRAINER_PLAYER][0].box;
+    u32 i;
+
+    CreateRandomMonWithIVs(&gParties[B_TRAINER_PLAYER][0], SPECIES_CHARMANDER, 30, 0);
+    TreePreview_Rebuild(&preview, boxMon, TYPE_FIRE, pending);
+    for (i = 0; i < 15; i++)
+        EXPECT(TreePreview_Add(&preview, TYPE_FIRE, pending, 0));
+    EXPECT(TreePreview_Add(&preview, TYPE_FIRE, pending, 4)); // Branche ouverte par les points en attente.
+    EXPECT_EQ(GetBoxMonTreeRank(boxMon, 0), 0);
+    EXPECT_EQ(GetBoxMonTreePointsAvailable(&preview), 14);
+
+    // Retirer un point du tronc referme la branche : son point en attente tombe.
+    EXPECT(TreePreview_Remove(&preview, boxMon, TYPE_FIRE, pending, 0));
+    EXPECT_EQ(pending[4], 0);
+    EXPECT(!TreePreview_Remove(&preview, boxMon, TYPE_FIRE, pending, 4));
+
+    EXPECT_EQ(TreePreview_Commit(boxMon, TYPE_FIRE, pending), 14);
+    EXPECT_EQ(GetBoxMonTreeRank(boxMon, 0), 14);
+    EXPECT(boxMon->build.treeType == TYPE_FIRE);
 }
 
 TEST("Mod: tree menu does nothing for an egg")
