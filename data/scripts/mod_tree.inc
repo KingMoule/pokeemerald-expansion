@@ -164,8 +164,8 @@ Text_MutationMenu_ChooseNew:
 	.string "Which type will it gain?$"
 
 Text_MutationMenu_Done:
-	.string "{STR_VAR_1} mutated!\n"
-	.string "It is now part {STR_VAR_3}.$"
+	.string "{STR_VAR_1} mutated! Its {STR_VAR_2}\n"
+	.string "type became {STR_VAR_3}.$"
 
 Text_TreeMenu_ChooseTree:
 	.string "Which tree should {STR_VAR_1}\n"

@@ -114,9 +114,19 @@ ShiftingRuins_EventScript_DebriefLost:
 ShiftingRuins_EventScript_FloorOnResume::
 	pyramid_settrainers
 	special ShiftingRuins_OnFloorResume
-	goto_if_eq VAR_RESULT, RUINS_RESUME_LOST, ShiftingRuins_EventScript_RunLost
+	goto_if_eq VAR_RESULT, RUINS_RESUME_LOST, ShiftingRuins_EventScript_LostOnResume
 	goto_if_eq VAR_RESULT, RUINS_RESUME_WON, ShiftingRuins_EventScript_LightUp
 	end
+
+@ Un script ON_RESUME ne peut pas attendre la fin d'un warp : la sortie passe par ON_FRAME.
+ShiftingRuins_EventScript_LostOnResume:
+	setvar VAR_TEMP_C, 1
+	end
+
+ShiftingRuins_EventScript_LostOnFrame::
+	lockall
+	setvar VAR_TEMP_C, 0
+	goto ShiftingRuins_EventScript_RunLost
 
 ShiftingRuins_EventScript_LightUp:
 	setvar VAR_TEMP_D, 1
@@ -289,7 +299,7 @@ Text_ShiftingRuins_SaveFirst:
 
 Text_ShiftingRuins_Enter:
 	.string "Your team will be safe with me.\n"
-	.string "Here are your partners for this run.$"
+	.string "Here is who goes in with you.$"
 
 Text_ShiftingRuins_Decline:
 	.string "The ruins will wait. They always do.$"

@@ -148,7 +148,27 @@ void TreeMenu_CheckNode(void)
         end = StringCopy(end, treeNode->description);
         *end++ = CHAR_PROMPT_CLEAR;
     }
-    StringCopy(end, sRefusals[result]);
+    // Nœud verrouillé : dire ce qui l'ouvre.
+    if (result == TREE_INVEST_LOCKED && (sNode - TREE_TRUNK_NODES) % TREE_BRANCH_NODES == 0)
+    {
+        end = StringCopy(end, COMPOUND_STRING("Locked. Needs "));
+        end = ConvertIntToDecimalStringN(end, MOD_TREE_BRANCH_UNLOCK_POINTS, STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringCopy(end, COMPOUND_STRING(" points\nin the first four nodes."));
+    }
+    else if (result == TREE_INVEST_LOCKED)
+    {
+        const struct TreeNode *parent = GetTreeNode(sTreeType, sNode - 1);
+        end = StringCopy(end, COMPOUND_STRING("Locked. Needs "));
+        end = StringCopy(end, parent->name);
+        *end++ = CHAR_NEWLINE;
+        end = StringCopy(end, COMPOUND_STRING("at rank "));
+        end = ConvertIntToDecimalStringN(end, min(MOD_TREE_PARENT_RANKS, parent->maxRank), STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringCopy(end, COMPOUND_STRING(" first."));
+    }
+    else
+    {
+        StringCopy(end, sRefusals[result]);
+    }
     gSpecialVar_Result = result;
 }
 
@@ -360,16 +380,23 @@ void MutationMenu_PushNewTypes(void)
 {
     enum Species species = GetBoxMonData(GetTreeMenuBoxMon(), MON_DATA_SPECIES);
     enum Type type;
+    u32 pass;
     u8 text[32];
 
-    for (type = 0; type < NUMBER_OF_MON_TYPES; type++)
+    // Types ouverts d'abord, puis les types scellés.
+    for (pass = 0; pass < 2; pass++)
     {
-        if (!IsMutationTargetType(type) || type == GetSpeciesType(species, 0) || type == GetSpeciesType(species, 1))
-            continue;
-        StringCopy(text, gTypesInfo[type].name);
-        if (!IsMutationTypeOpen(type))
-            StringAppend(text, sText_MutationSealed);
-        PushTreeMenuItem(text, type);
+        for (type = 0; type < NUMBER_OF_MON_TYPES; type++)
+        {
+            if (!IsMutationTargetType(type) || type == GetSpeciesType(species, 0) || type == GetSpeciesType(species, 1))
+                continue;
+            if ((IsMutationTypeOpen(type) ? 0 : 1) != pass)
+                continue;
+            StringCopy(text, gTypesInfo[type].name);
+            if (pass == 1)
+                StringAppend(text, sText_MutationSealed);
+            PushTreeMenuItem(text, type);
+        }
     }
 }
 

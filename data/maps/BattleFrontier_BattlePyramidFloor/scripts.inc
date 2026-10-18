@@ -5,6 +5,7 @@ BattleFrontier_BattlePyramidFloor_MapScripts::
 	.byte 0
 
 BattleFrontier_BattlePyramidFloor_OnFrame:
+	map_script_2 VAR_TEMP_C, 1, ShiftingRuins_EventScript_LostOnFrame  @ Mod : Shifting Ruins perdues
 	map_script_2 VAR_TEMP_D, 1, BattleFrontier_BattlePyramidFloor_EventScript_UpdateLight
 	map_script_2 VAR_TEMP_PLAYING_PYRAMID_MUSIC, 0, BattleFrontier_BattlePyramidFloor_EventScript_PlayPyramidMusic
 	map_script_2 VAR_TEMP_F, 1, BattleFrontier_BattlePyramidFloor_EventScript_ShowMapName
