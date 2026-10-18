@@ -289,6 +289,8 @@ void ModChallenge_Finish(void)
     gModChallengeActive = FALSE;
     VarSet(VAR_MOD_NO_BAG, NO_BAG_RESTRICTION);
     HealPlayerParty();
+    // Le combat a pu réécrire gStringVar1 : le message de victoire nomme le défi.
+    StringCopy(gStringVar1, sChallenges[sCurrentChallenge].name);
     gSpecialVar_Result = ITEM_NONE;
     if (won && !ModChallenge_IsCleared(sCurrentChallenge))
     {

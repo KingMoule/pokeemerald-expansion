@@ -408,13 +408,13 @@ void MutationMenu_Check(void)
     gSpecialVar_Result = FALSE;
     if (!IsMutationTypeOpen(sNewType) && !CheckBagHasItem(ITEM_MUTATION_SEAL, 1))
     {
-        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("The {STR_VAR_3} type is still sealed.\pA Mutation Seal from the Shifting\nRuins can open it for good."));
+        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("The {STR_VAR_3} type is still sealed.\pA MUTATION SEAL from the SHIFTING\nRUINS can open it for good."));
         return;
     }
     if (IsMutationTypeOpen(sNewType))
         StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("{STR_VAR_1} will trade {STR_VAR_2}\nfor {STR_VAR_3}.\pIts weaknesses will hurt more.\nThis is forever. Mutate?"));
     else
-        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("Use a Mutation Seal to open\nthe {STR_VAR_3} type for good?\p{STR_VAR_1} will trade {STR_VAR_2}\nfor {STR_VAR_3}.\pIts weaknesses will hurt more.\nThis is forever. Mutate?"));
+        StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("Use a MUTATION SEAL to open\nthe {STR_VAR_3} type for good?\p{STR_VAR_1} will trade {STR_VAR_2}\nfor {STR_VAR_3}.\pIts weaknesses will hurt more.\nThis is forever. Mutate?"));
     gSpecialVar_Result = TRUE;
 }
 
