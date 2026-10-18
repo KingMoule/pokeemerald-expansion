@@ -21,7 +21,7 @@ EventScript_TrainingDepths_ChooseMon:
 	message Text_TrainingDepths_ChoosePath
 	waitmessage
 	special EvDungeon_PushPaths
-	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
+	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_DESCRIBE
 	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_TrainingDepths_Decline
 	copyvar VAR_0x8005, VAR_RESULT
 	setvar VAR_0x8006, 1
@@ -29,7 +29,7 @@ EventScript_TrainingDepths_ChooseMon:
 	goto_if_le VAR_RESULT, 1, EventScript_TrainingDepths_Enter
 	message Text_TrainingDepths_ChooseFloor
 	waitmessage
-	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
+	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_DESCRIBE
 	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_TrainingDepths_Decline
 	copyvar VAR_0x8006, VAR_RESULT
 	goto EventScript_TrainingDepths_Enter

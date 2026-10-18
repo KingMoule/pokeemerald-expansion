@@ -937,7 +937,50 @@ void ShiftingRuins_ChooseKeptMon(void)
     sRuins.keptSlot = gSpecialVar_0x8004;
     GetMonData(mon, MON_DATA_NICKNAME, gStringVar1);
     StringGet_Nickname(gStringVar1);
+    ShiftingRuins_BufferKeptSummary(mon, gStringVar4);
     gSpecialVar_Result = TRUE;
+}
+
+// Ce que le Pokémon ramené garde (nature, talent, IV, mutation), puis la question de confirmation.
+void ShiftingRuins_BufferKeptSummary(struct Pokemon *mon, u8 *dest)
+{
+    static const u8 *const sIvLabels[NUM_STATS] =
+    {
+        [STAT_HP]    = COMPOUND_STRING("IVs  HP "),
+        [STAT_ATK]   = COMPOUND_STRING("  Atk "),
+        [STAT_DEF]   = COMPOUND_STRING("  Def "),
+        [STAT_SPEED] = COMPOUND_STRING("  Spe "),
+        [STAT_SPATK] = COMPOUND_STRING("SpA "),
+        [STAT_SPDEF] = COMPOUND_STRING("  SpD "),
+    };
+    // Ordre d'affichage : PV, Attaque, Défense, puis Attaque Spé., Défense Spé., Vitesse.
+    static const u8 sIvOrder[NUM_STATS] = { STAT_HP, STAT_ATK, STAT_DEF, STAT_SPATK, STAT_SPDEF, STAT_SPEED };
+    enum Type mutation = mon->box.build.mutationType;
+    u8 *end = StringCopy(dest, gStringVar1);
+    u32 i;
+
+    end = StringCopy(end, COMPOUND_STRING(" keeps its "));
+    end = StringCopy(end, gNaturesInfo[GetNature(mon)].name);
+    end = StringCopy(end, COMPOUND_STRING(" nature\nand "));
+    end = StringCopy(end, gAbilitiesInfo[GetMonAbility(mon)].name);
+    end = StringCopy(end, COMPOUND_STRING(".\p"));
+    for (i = 0; i < NUM_STATS; i++)
+    {
+        u32 stat = sIvOrder[i];
+
+        if (i == 3)
+            *end++ = CHAR_NEWLINE;
+        end = StringCopy(end, sIvLabels[stat]);
+        end = ConvertIntToDecimalStringN(end, GetMonData(mon, MON_DATA_HP_IV + stat), STR_CONV_MODE_LEFT_ALIGN, 2);
+    }
+    *end++ = CHAR_PROMPT_CLEAR;
+    if (mutation != TYPE_NONE)
+    {
+        end = StringCopy(end, COMPOUND_STRING("Its "));
+        end = StringCopy(end, gTypesInfo[mutation].name);
+        end = StringCopy(end, COMPOUND_STRING(" mutation stays.\n"));
+    }
+    StringCopy(end, COMPOUND_STRING("Bring it back at level 5?"));
 }
 
 // Fin de la tentative : rend l'équipe et les données de la Zone de Combat, ajoute le Pokémon

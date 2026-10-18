@@ -386,11 +386,69 @@ void EvDungeon_SetBeneficiary(void)
     gSpecialVar_Result = TRUE;
 }
 
+static const u8 *const sStatShortNames[NUM_STATS] =
+{
+    [STAT_HP]    = COMPOUND_STRING("HP"),
+    [STAT_ATK]   = COMPOUND_STRING("Attack"),
+    [STAT_DEF]   = COMPOUND_STRING("Defense"),
+    [STAT_SPEED] = COMPOUND_STRING("Speed"),
+    [STAT_SPATK] = COMPOUND_STRING("Sp. Atk"),
+    [STAT_SPDEF] = COMPOUND_STRING("Sp. Def"),
+};
+
+// Panneau à côté des voies : EV actuels du Pokémon choisi (VAR_0x8004) dans la statistique
+// de la voie, total, et place restante.
+void EvDungeon_DescribePath(u32 path, u8 *dest)
+{
+    struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][min(gSpecialVar_0x8004, PARTY_SIZE - 1)];
+    enum Stat stat = sPaths[min(path, EV_PATH_COUNT - 1)].stat;
+    u32 current = GetMonData(mon, MON_DATA_HP_EV + stat);
+    u32 total = GetTotalEvs(mon);
+    u32 room = min(current < MAX_PER_STAT_EVS ? MAX_PER_STAT_EVS - current : 0, total < MAX_TOTAL_EVS ? MAX_TOTAL_EVS - total : 0);
+    u8 *end;
+
+    end = StringCopy(dest, sStatShortNames[stat]);
+    end = StringCopy(end, COMPOUND_STRING(" EV: "));
+    end = AppendNumber(end, current);
+    *end++ = CHAR_SLASH;
+    end = AppendNumber(end, MAX_PER_STAT_EVS);
+    end = StringCopy(end, COMPOUND_STRING("\nAll EV: "));
+    end = AppendNumber(end, total);
+    *end++ = CHAR_SLASH;
+    end = AppendNumber(end, MAX_TOTAL_EVS);
+    if (room == 0)
+    {
+        StringCopy(end, COMPOUND_STRING("\n{COLOR RED}{SHADOW LIGHT_RED}No room left."));
+    }
+    else
+    {
+        end = StringCopy(end, COMPOUND_STRING("\nRoom: "));
+        end = AppendNumber(end, room);
+        StringCopy(end, COMPOUND_STRING(" EV"));
+    }
+}
+
+// Panneau à côté des étages de départ : adversaires et gains de cet étage.
+void EvDungeon_DescribeStartFloor(u32 floor, u8 *dest)
+{
+    u8 *end;
+
+    floor = max(1, min(floor, MOD_EVDJ_MAX_FLOOR));
+    end = StringCopy(dest, COMPOUND_STRING("Foes: Lv. "));
+    end = AppendNumber(end, EvDungeon_GetEnemyLevel(floor, GetPartyMaxLevel()));
+    end = StringCopy(end, COMPOUND_STRING(", "));
+    end = AppendNumber(end, EvDungeon_GetEnemyPartySize(floor));
+    end = StringCopy(end, COMPOUND_STRING(" POKéMON\nGain: "));
+    end = AppendNumber(end, EvDungeon_GetFloorGain(floor));
+    StringCopy(end, COMPOUND_STRING(" EV per floor"));
+}
+
 void EvDungeon_PushPaths(void)
 {
     u32 i;
     for (i = 0; i < EV_PATH_COUNT; i++)
         PushItem(sPaths[i].name, i);
+    gDynamicMultichoiceDescribe = EvDungeon_DescribePath;
 }
 
 // VAR_RESULT : nombre d'étages de départ débloqués (raccourcis). Le choix n'est proposé
@@ -410,6 +468,7 @@ void EvDungeon_PushStartFloors(void)
         AppendNumber(end, floor);
         PushItem(text, floor);
     }
+    gDynamicMultichoiceDescribe = EvDungeon_DescribeStartFloor;
 }
 
 // VAR_0x8005 : voie choisie. VAR_0x8006 : étage de départ.

@@ -56,6 +56,7 @@ void ShiftingRuins_CheckStairs(void);
 void ShiftingRuins_HasBranches(void);
 void ShiftingRuins_PushPaths(void);
 void ShiftingRuins_DescribePath(u32 path, u8 *dest);
+void ShiftingRuins_BufferKeptSummary(struct Pokemon *mon, u8 *dest);
 void ShiftingRuins_TakePath(void);
 void ShiftingRuins_GoDeeper(void);
 void ShiftingRuins_StartBossBattle(void);

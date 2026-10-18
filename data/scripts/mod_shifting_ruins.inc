@@ -84,7 +84,12 @@ ShiftingRuins_EventScript_ChooseKept:
 	special ChoosePartyMon
 	waitstate
 	special ShiftingRuins_ChooseKeptMon
-	goto_if_eq VAR_RESULT, TRUE, ShiftingRuins_EventScript_Finish
+	goto_if_eq VAR_RESULT, FALSE, ShiftingRuins_EventScript_ConfirmNoKept
+	@ Ce qu'il garde (nature, talent, IV, mutation), puis confirmation.
+	msgbox gStringVar4, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, ShiftingRuins_EventScript_Finish
+	goto ShiftingRuins_EventScript_ChooseKept
+ShiftingRuins_EventScript_ConfirmNoKept:
 	msgbox ShiftingRuins_Text_ConfirmNoKept, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, ShiftingRuins_EventScript_ChooseKept
 ShiftingRuins_EventScript_Finish:

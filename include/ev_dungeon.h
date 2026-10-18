@@ -22,6 +22,8 @@ u32 EvDungeon_GetFloorGain(u32 floor);
 u32 EvDungeon_GetEnemyPartySize(u32 floor);
 u32 EvDungeon_GetEnemyLevel(u32 floor, u32 partyMaxLevel);
 u32 EvDungeon_GetDefeatKeptGain(u32 pending);
+void EvDungeon_DescribePath(u32 path, u8 *dest);
+void EvDungeon_DescribeStartFloor(u32 floor, u8 *dest);
 u32 EvDungeon_ClampGain(struct Pokemon *mon, enum Stat stat, u32 gain);
 u32 EvDungeon_ApplyGain(struct Pokemon *mon, enum Stat stat, u32 gain);
 bool32 EvDungeon_IsRestFloor(u32 floor);
