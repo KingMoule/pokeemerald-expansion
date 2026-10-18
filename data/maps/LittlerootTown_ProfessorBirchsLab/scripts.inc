@@ -1009,8 +1009,8 @@ LittlerootTown_ProfessorBirchsLab_Text_ModExplainStats:
 	.string "hidden from you.$"
 
 LittlerootTown_ProfessorBirchsLab_Text_ModExplainTrees:
-	.string "Did you notice? Each level gives\n"
-	.string "your POKéMON a TREE point.\p"
+	.string "{RIVAL}: Did you notice? Each level\n"
+	.string "gives your POKéMON a TREE point.\p"
 	.string "Open your party, pick BUILD,\n"
 	.string "then TREE. Spend points to grow\l"
 	.string "its strengths.\p"

@@ -3,6 +3,7 @@
 #include "battle_pyramid.h"
 #include "battle_setup.h"
 #include "event_data.h"
+#include "event_scripts.h"
 #include "item.h"
 #include "pokedex.h"
 #include "pokemon.h"
@@ -573,6 +574,9 @@ void ShiftingRuins_PlaceRecruiter(struct ObjectEventTemplate *events, u32 count)
         if (events[i].localId != LOCALID_NONE && events[i].graphicsId == OBJ_EVENT_GFX_ITEM_BALL)
         {
             events[i].graphicsId = OBJ_EVENT_GFX_EXPERT_M;
+            // Les gabarits copiés des carrés de la Pyramide portent déjà le script de l'objet :
+            // le remplacer ici, sinon l'éclaireur donne un objet quand on lui parle.
+            events[i].script = ShiftingRuins_EventScript_Recruiter;
             sRuins.recruiterLocalId = events[i].localId;
             return;
         }
