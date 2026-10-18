@@ -41,6 +41,10 @@ bool8 ScriptMenu_ShowPokemonPic(enum Species species, u8 x, u8 y);
 bool8 (*ScriptMenu_HidePokemonPic(void))(void);
 int ConvertPixelWidthToTileWidth(int width);
 u8 CreateWindowFromRect(u8 x, u8 y, u8 width, u8 height);
+
+// Mod : remplit le panneau de DYN_MULTICHOICE_CB_DESCRIBE pour l'élément id. Remis à NULL
+// à la fermeture de la liste.
+extern void (*gDynamicMultichoiceDescribe)(u32 id, u8 *dest);
 void ClearToTransparentAndRemoveWindow(u8 windowId);
 int DisplayTextAndGetWidth(const u8 *str, int prevWidth);
 int ScriptMenu_AdjustLeftCoordFromWidth(int left, int width);

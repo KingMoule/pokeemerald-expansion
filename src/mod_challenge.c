@@ -27,7 +27,7 @@
 struct ModChallenge
 {
     const u8 *name;
-    const u8 *rules;
+    const u8 *summary; // Règles en bref, pour le panneau à côté de la liste (≈ 22 caractères par ligne).
     u16 trainers[MAX_CHALLENGE_STAGES]; // TRAINER_NONE après le dernier combat.
     enum Item reward;
     bool8 noBag;
@@ -45,42 +45,41 @@ static const struct ModChallenge sChallenges[CHALLENGE_COUNT] =
     [CHALLENGE_ELEMENT] =
     {
         .name = COMPOUND_STRING("ELEMENT TRIAL"),
-        .rules = COMPOUND_STRING("Every POKéMON you bring must share\none type.\pYour opponent is a FIRE expert\nwho fights in the sun."),
+        .summary = COMPOUND_STRING("All your POKéMON must\nshare one type.\nFoe: a FIRE expert,\nin the sun."),
         .trainers = { TRAINER_CHALLENGE_ELEMENT, TRAINER_NONE },
         .reward = ITEM_TECHNIQUE_CODEX,
     },
     [CHALLENGE_DOUBLE] =
     {
         .name = COMPOUND_STRING("DOUBLE TRIAL"),
-        .rules = COMPOUND_STRING("A DOUBLE BATTLE. You need at least\ntwo POKéMON able to battle.\pYour opponents fight as a pair,\nunder the rain."),
+        .summary = COMPOUND_STRING("A DOUBLE BATTLE with at\nleast two able POKéMON.\nFoes: a pair, under\nthe rain."),
         .trainers = { TRAINER_CHALLENGE_DOUBLE, TRAINER_NONE },
         .reward = ITEM_TECHNIQUE_CODEX,
     },
     [CHALLENGE_VARIETY] =
     {
         .name = COMPOUND_STRING("VARIETY TRIAL"),
-        .rules = COMPOUND_STRING("Bring six POKéMON. No two of them\nmay share a type.\pYour opponent's team covers many\ntypes, too."),
+        .summary = COMPOUND_STRING("Six POKéMON, no two\nsharing a type.\nFoe: a team covering\nmany types."),
         .trainers = { TRAINER_CHALLENGE_VARIETY, TRAINER_NONE },
         .reward = ITEM_LINEAGE_CHARM,
     },
     [CHALLENGE_RISING] =
     {
         .name = COMPOUND_STRING("RISING TRIAL"),
-        .rules = COMPOUND_STRING("Every POKéMON you bring must be\nlevel {STR_VAR_3} or lower.\pYour opponent's FIGHTING team\nis no higher, either."),
+        .summary = COMPOUND_STRING("All your POKéMON must\nbe level {STR_VAR_3} or lower.\nFoe: a FIGHTING team,\nno higher."),
         .trainers = { TRAINER_CHALLENGE_RISING, TRAINER_NONE },
         .reward = ITEM_TECHNIQUE_CODEX,
     },
     [CHALLENGE_ENDURANCE] =
     {
         .name = COMPOUND_STRING("ENDURANCE TRIAL"),
-        .rules = COMPOUND_STRING("Two battles in a row. No healing\nin between, and no items from\lyour BAG during battle.\pPlan for the long haul!"),
+        .summary = COMPOUND_STRING("Two battles in a row.\nNo healing in between,\nno BAG in battle."),
         .trainers = { TRAINER_CHALLENGE_ENDURANCE_1, TRAINER_CHALLENGE_ENDURANCE_2 },
         .reward = ITEM_LINEAGE_CHARM,
         .noBag = TRUE,
     },
 };
 
-static const u8 sText_Cleared[] = _(" (WON)");
 
 static bool32 IsBattler(struct Pokemon *mon)
 {
@@ -216,28 +215,51 @@ void ModChallenge_SetupBattle(void)
     CreateTrainerPartyWithBuilds(gParties[B_TRAINER_OPPONENT_A], trainerId);
 }
 
-static void PushItem(const u8 *text, bool32 cleared, u32 id)
+static void PushItem(const u8 *text, u32 id)
 {
     struct ListMenuItem item;
     u8 *name = Alloc(32);
 
     StringCopy(name, text);
-    if (cleared)
-        StringAppend(name, sText_Cleared);
     item.name = name;
     item.id = id;
     MultichoiceDynamic_PushElement(item);
 }
 
-// Liste des défis ; « (WON) » marque ceux déjà réussis.
+// Panneau à côté de la liste : règles en bref, récompense, et si l'équipe actuelle est acceptée.
+void ModChallenge_Describe(u32 challenge, u8 *dest)
+{
+    u8 *end;
+
+    if (challenge >= CHALLENGE_COUNT)
+        challenge = 0;
+    ConvertIntToDecimalStringN(gStringVar3, MOD_CHALLENGE_RISING_MAX_LEVEL, STR_CONV_MODE_LEFT_ALIGN, 3);
+    end = StringExpandPlaceholders(dest, sChallenges[challenge].summary);
+    if (ModChallenge_IsCleared(challenge))
+    {
+        end = StringCopy(end, COMPOUND_STRING("\n{COLOR BLUE}{SHADOW LIGHT_BLUE}WON{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}: no new reward."));
+    }
+    else
+    {
+        end = StringCopy(end, COMPOUND_STRING("\nPrize: "));
+        end = CopyItemName(sChallenges[challenge].reward, end);
+    }
+    if (ModChallenge_IsPartyAllowed(challenge, gParties[B_TRAINER_PLAYER]))
+        StringCopy(end, COMPOUND_STRING("\nYour team: {COLOR GREEN}{SHADOW LIGHT_GREEN}OK"));
+    else
+        StringCopy(end, COMPOUND_STRING("\nYour team: {COLOR RED}{SHADOW LIGHT_RED}not allowed"));
+}
+
+// Liste des défis. Le panneau suit le curseur.
 void ModChallenge_PushList(void)
 {
     u32 i;
     for (i = 0; i < CHALLENGE_COUNT; i++)
-        PushItem(sChallenges[i].name, ModChallenge_IsCleared(i), i);
+        PushItem(sChallenges[i].name, i); // « WON » est dans le panneau : la liste reste étroite.
+    gDynamicMultichoiceDescribe = ModChallenge_Describe;
 }
 
-// VAR_0x8005 : défi choisi. STR_VAR_1 : nom, STR_VAR_2 : récompense, gStringVar4 : règles.
+// VAR_0x8005 : défi choisi. STR_VAR_1 : nom, STR_VAR_2 : récompense.
 void ModChallenge_BufferRules(void)
 {
     u32 challenge = gSpecialVar_0x8005;
@@ -245,8 +267,6 @@ void ModChallenge_BufferRules(void)
         challenge = 0;
     StringCopy(gStringVar1, sChallenges[challenge].name);
     CopyItemName(sChallenges[challenge].reward, gStringVar2);
-    ConvertIntToDecimalStringN(gStringVar3, MOD_CHALLENGE_RISING_MAX_LEVEL, STR_CONV_MODE_LEFT_ALIGN, 3);
-    StringExpandPlaceholders(gStringVar4, sChallenges[challenge].rules);
     gSpecialVar_Result = ModChallenge_IsCleared(challenge);
 }
 

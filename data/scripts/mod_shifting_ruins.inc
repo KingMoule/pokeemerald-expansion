@@ -14,9 +14,16 @@ EventScript_ShiftingRuins_Welcome:
 	special ShiftingRuins_BufferRecord
 	goto_if_eq VAR_RESULT, 0, EventScript_ShiftingRuins_AskEnter
 	msgbox Text_ShiftingRuins_Record, MSGBOX_DEFAULT
+@ Enter, Rules (le détail, à réécouter quand on veut) ou Not now.
 EventScript_ShiftingRuins_AskEnter:
-	msgbox Text_ShiftingRuins_AskEnter, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, EventScript_ShiftingRuins_Decline
+	message Text_ShiftingRuins_AskEnter
+	waitmessage
+	dynmultipush Text_ShiftingRuins_OptionEnter, 0
+	dynmultipush Text_ShiftingRuins_OptionRules, 1
+	dynmultipush Text_ShiftingRuins_OptionNotNow, 2
+	dynmultistack 0, 0, FALSE, 3, FALSE, 0, DYN_MULTICHOICE_CB_NONE
+	goto_if_eq VAR_RESULT, 1, EventScript_ShiftingRuins_Rules
+	goto_if_ne VAR_RESULT, 0, EventScript_ShiftingRuins_Decline
 	msgbox Text_ShiftingRuins_SaveFirst, MSGBOX_DEFAULT
 	closemessage
 	call Common_EventScript_SaveGame
@@ -31,6 +38,11 @@ EventScript_ShiftingRuins_AskEnter:
 	waitstate
 	release
 	end
+
+EventScript_ShiftingRuins_Rules:
+	special ShiftingRuins_CheckAccess
+	msgbox Text_ShiftingRuins_Rules, MSGBOX_DEFAULT
+	goto EventScript_ShiftingRuins_AskEnter
 
 EventScript_ShiftingRuins_Decline:
 	msgbox Text_ShiftingRuins_Decline, MSGBOX_DEFAULT
@@ -178,7 +190,7 @@ ShiftingRuins_EventScript_Branches:
 	message ShiftingRuins_Text_Branches
 	waitmessage
 	special ShiftingRuins_PushPaths
-	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
+	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_DESCRIBE
 	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, ShiftingRuins_EventScript_StayOnFloor
 	copyvar VAR_0x8004, VAR_RESULT
 	special ShiftingRuins_TakePath
@@ -261,29 +273,41 @@ Text_ShiftingRuins_Intro:
 	.string "I guide trainers into the SHIFTING\n"
 	.string "RUINS. Their halls change on every\l"
 	.string "visit.\p"
+	.string "You go in alone with a random\n"
+	.string "POKéMON at level 5. Catch and grow\l"
+	.string "a team on the way down.\p"
+	.string "Get out alive to keep your rare\n"
+	.string "finds and one POKéMON. Ask me for\l"
+	.string "the RULES whenever you like.$"
+
+Text_ShiftingRuins_Rules:
 	.string "Your team waits here with me. You\n"
-	.string "go in with a random POKéMON at\l"
-	.string "level 5 and a small BAG.\p"
-	.string "Battle, catch and grow your team\n"
-	.string "on the way down.\p"
+	.string "only get a small BAG inside.\p"
 	.string "Rare finds, like TECHNIQUE CODICES,\n"
 	.string "are only yours if you get out.\p"
 	.string "You can leave every {STR_VAR_2} floors,\n"
-	.string "or with an ESCAPE ORB.\p"
-	.string "Fall, and every rare find of that\n"
-	.string "run is lost.\p"
-	.string "When you get out, bring back one\n"
-	.string "POKéMON. It returns to level 5 and\l"
-	.string "forgets what it learned inside.\p"
+	.string "or with an ESCAPE ORB. Fall, and\l"
+	.string "every rare find of that run is lost.\p"
+	.string "The POKéMON you bring back returns\n"
+	.string "to level 5 and forgets what it\l"
+	.string "learned inside.\p"
 	.string "Every 10 floors, a GUARDIAN bars\n"
 	.string "the stairs. Beat it for a\l"
 	.string "MUTATION SEAL.\p"
 	.string "Some stairs split in two. Pick\n"
-	.string "the passage that suits your run.\p"
-	.string "And if you meet a scout down\n"
-	.string "there, hear them out.\p"
+	.string "the passage that suits your run.\l"
+	.string "If you meet a scout, hear them out.\p"
 	.string "The deeper you get out from, the\n"
 	.string "better your next start.$"
+
+Text_ShiftingRuins_OptionEnter:
+	.string "Enter$"
+
+Text_ShiftingRuins_OptionRules:
+	.string "Rules$"
+
+Text_ShiftingRuins_OptionNotNow:
+	.string "Not now$"
 
 Text_ShiftingRuins_Record:
 	.string "Your best escape was from floor\n"

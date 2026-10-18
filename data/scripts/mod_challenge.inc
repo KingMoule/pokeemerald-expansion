@@ -10,19 +10,15 @@ EventScript_Challenge_Choose:
 	message Text_Challenge_Choose
 	waitmessage
 	special ModChallenge_PushList
-	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_NONE
+	dynmultistack 0, 0, FALSE, 6, FALSE, 0, DYN_MULTICHOICE_CB_DESCRIBE
 	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_Challenge_Decline
 	copyvar VAR_0x8005, VAR_RESULT
+	@ Règles, récompense et équipe sont déjà dans le panneau à côté de la liste.
 	special ModChallenge_BufferRules
-	copyvar VAR_0x8006, VAR_RESULT
-	msgbox gStringVar4, MSGBOX_DEFAULT
-	goto_if_eq VAR_0x8006, TRUE, EventScript_Challenge_Confirm
-	msgbox Text_Challenge_Reward, MSGBOX_DEFAULT
-EventScript_Challenge_Confirm:
-	msgbox Text_Challenge_Confirm, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, EventScript_Challenge_Decline
 	special ModChallenge_CheckParty
 	goto_if_eq VAR_RESULT, FALSE, EventScript_Challenge_NotAllowed
+	msgbox Text_Challenge_Confirm, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_Challenge_Decline
 	special ModChallenge_Start
 	msgbox Text_Challenge_Begin, MSGBOX_DEFAULT
 	closemessage
@@ -86,10 +82,6 @@ Text_Challenge_Intro:
 
 Text_Challenge_Choose:
 	.string "Which TRIAL interests you?$"
-
-Text_Challenge_Reward:
-	.string "Clear it for the first time, and\n"
-	.string "you'll get a {STR_VAR_2}.$"
 
 Text_Challenge_Confirm:
 	.string "Take on the {STR_VAR_1}\n"

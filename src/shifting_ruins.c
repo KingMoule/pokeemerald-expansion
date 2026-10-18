@@ -190,9 +190,17 @@ static const u8 sText_BossVictory[] = _("The ruins keep their secrets.");
 static const u8 *const sPathNames[RUINS_PATH_COUNT] =
 {
     [RUINS_PATH_PLAIN]     = COMPOUND_STRING("Plain stairs"),
-    [RUINS_PATH_OVERGROWN] = COMPOUND_STRING("Overgrown: rare Pokémon"),
-    [RUINS_PATH_SPRING]    = COMPOUND_STRING("Spring: heals your team"),
-    [RUINS_PATH_PERILOUS]  = COMPOUND_STRING("Perilous: tougher, richer"),
+    [RUINS_PATH_OVERGROWN] = COMPOUND_STRING("Overgrown"),
+    [RUINS_PATH_SPRING]    = COMPOUND_STRING("Spring"),
+    [RUINS_PATH_PERILOUS]  = COMPOUND_STRING("Perilous"),
+};
+// Effet de chaque passage, dans le panneau à côté de la liste. STR_VAR_1 et 2 : valeurs de mod.h.
+static const u8 *const sPathDescriptions[RUINS_PATH_COUNT] =
+{
+    [RUINS_PATH_PLAIN]     = COMPOUND_STRING("The usual way down."),
+    [RUINS_PATH_OVERGROWN] = COMPOUND_STRING("Rarer wild POKéMON,\nas if {STR_VAR_1} levels\ndeeper. All their IVs\nare {STR_VAR_2} or more."),
+    [RUINS_PATH_SPRING]    = COMPOUND_STRING("A spring heals your\nwhole team on the\nway down."),
+    [RUINS_PATH_PERILOUS]  = COMPOUND_STRING("Wild POKéMON, trainers\nand guardian get\n+{STR_VAR_1} levels.\nRare finds x{STR_VAR_2}."),
 };
 static const u8 sText_TrainerVictory[] = _("The ruins keep what they take!");
 static const u8 sText_FloorWindow[] = _("Shifting Ruins\nFloor ");
@@ -766,6 +774,23 @@ void ShiftingRuins_PushPaths(void)
         item.id = sRuins.branches[i];
         MultichoiceDynamic_PushElement(item);
     }
+    gDynamicMultichoiceDescribe = ShiftingRuins_DescribePath;
+}
+
+void ShiftingRuins_DescribePath(u32 path, u8 *dest)
+{
+    if (path >= RUINS_PATH_COUNT)
+        path = RUINS_PATH_PLAIN;
+    if (path == RUINS_PATH_PERILOUS)
+    {
+        ConvertIntToDecimalStringN(gStringVar1, MOD_RUINS_PERILOUS_LEVELS, STR_CONV_MODE_LEFT_ALIGN, 2);
+        ConvertIntToDecimalStringN(gStringVar2, MOD_RUINS_PERILOUS_RELICS, STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringExpandPlaceholders(dest, sPathDescriptions[path]);
+        return;
+    }
+    ConvertIntToDecimalStringN(gStringVar1, MOD_RUINS_OVERGROWN_BONUS, STR_CONV_MODE_LEFT_ALIGN, 2);
+    ConvertIntToDecimalStringN(gStringVar2, MOD_RUINS_OVERGROWN_IV, STR_CONV_MODE_LEFT_ALIGN, 2);
+    StringExpandPlaceholders(dest, sPathDescriptions[path]);
 }
 
 // VAR_0x8004 : passage choisi.

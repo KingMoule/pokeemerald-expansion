@@ -70,6 +70,11 @@ static void MultichoiceDynamicEventShowSprite_OnInit(struct DynamicListMenuEvent
 static void MultichoiceDynamicEventShowItem_OnSelectionChanged(struct DynamicListMenuEventArgs *eventArgs);
 static void MultichoiceDynamicEventShowPkmn_OnSelectionChanged(struct DynamicListMenuEventArgs *eventArgs);
 static void MultichoiceDynamicEventShowSprite_OnDestroy(struct DynamicListMenuEventArgs *eventArgs);
+static void MultichoiceDynamicEventDescribe_OnInit(struct DynamicListMenuEventArgs *eventArgs);
+static void MultichoiceDynamicEventDescribe_OnSelectionChanged(struct DynamicListMenuEventArgs *eventArgs);
+static void MultichoiceDynamicEventDescribe_OnDestroy(struct DynamicListMenuEventArgs *eventArgs);
+
+EWRAM_DATA void (*gDynamicMultichoiceDescribe)(u32 id, u8 *dest) = NULL;
 
 static const struct DynamicListMenuEventCollection sDynamicListMenuEventCollections[] =
 {
@@ -90,6 +95,12 @@ static const struct DynamicListMenuEventCollection sDynamicListMenuEventCollecti
         .OnInit = MultichoiceDynamicEventShowSprite_OnInit,
         .OnSelectionChanged = MultichoiceDynamicEventShowPkmn_OnSelectionChanged,
         .OnDestroy = MultichoiceDynamicEventShowSprite_OnDestroy
+    },
+    [DYN_MULTICHOICE_CB_DESCRIBE] =
+    {
+        .OnInit = MultichoiceDynamicEventDescribe_OnInit,
+        .OnSelectionChanged = MultichoiceDynamicEventDescribe_OnSelectionChanged,
+        .OnDestroy = MultichoiceDynamicEventDescribe_OnDestroy
     }
 };
 
@@ -232,6 +243,62 @@ static void MultichoiceDynamicEventShowSprite_OnDestroy(struct DynamicListMenuEv
         FreeSpritePaletteByTag(TAG_CB_SPRITE_ICON);
         DestroySprite(&gSprites[sSpriteId]);
     }
+}
+
+// Mod : panneau de description à droite de la liste, jusqu'au bord de l'écran, au moins 6 tuiles
+// de haut. Les tuiles suivent celles de la liste (la boîte de message commence à 0x194).
+static void MultichoiceDynamicEventDescribe_OnInit(struct DynamicListMenuEventArgs *eventArgs)
+{
+    struct WindowTemplate *template = &gWindows[eventArgs->windowId].window;
+    u32 baseBlock = template->baseBlock + template->width * template->height;
+    u32 left = template->tilemapLeft + template->width + 2;
+    u32 width = (left < 22) ? 29 - left : 7;
+    u32 height = max(template->height, 6);
+    struct WindowTemplate auxTemplate = CreateWindowTemplate(0, left, template->tilemapTop, width, height, 15, baseBlock);
+    u32 auxWindowId = AddWindow(&auxTemplate);
+
+    SetStandardWindowBorderStyle(auxWindowId, FALSE);
+    FillWindowPixelBuffer(auxWindowId, PIXEL_FILL(1));
+    CopyWindowToVram(auxWindowId, COPYWIN_FULL);
+    sAuxWindowId = auxWindowId;
+}
+
+static void MultichoiceDynamicEventDescribe_OnSelectionChanged(struct DynamicListMenuEventArgs *eventArgs)
+{
+    FillWindowPixelBuffer(sAuxWindowId, PIXEL_FILL(1));
+    if (gDynamicMultichoiceDescribe != NULL)
+    {
+        // Une ligne toutes les 12 pixels : la petite police tient 6 lignes dans 10 tuiles.
+        u8 *line = gStringVar4, *end;
+        u32 y = 0;
+
+        gDynamicMultichoiceDescribe(eventArgs->selectedItem, gStringVar4);
+        while (TRUE)
+        {
+            bool32 last;
+
+            for (end = line; *end != EOS && *end != CHAR_NEWLINE; end++)
+            {
+                if (*end == EXT_CTRL_CODE_BEGIN)
+                    end += GetExtCtrlCodeLength(end[1]);
+            }
+            last = (*end == EOS);
+            *end = EOS;
+            AddTextPrinterParameterized(sAuxWindowId, FONT_SMALL_NARROW, line, 0, y, TEXT_SKIP_DRAW, NULL);
+            if (last)
+                break;
+            line = end + 1;
+            y += 12;
+        }
+    }
+    CopyWindowToVram(sAuxWindowId, COPYWIN_GFX);
+}
+
+static void MultichoiceDynamicEventDescribe_OnDestroy(struct DynamicListMenuEventArgs *eventArgs)
+{
+    ClearStdWindowAndFrame(sAuxWindowId, TRUE);
+    RemoveWindow(sAuxWindowId);
+    gDynamicMultichoiceDescribe = NULL;
 }
 
 #undef sAuxWindowId
