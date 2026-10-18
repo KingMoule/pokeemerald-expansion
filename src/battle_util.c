@@ -8304,7 +8304,7 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(struct DamageCont
     }
     else if (ctx->moveType == TYPE_GROUND && ctx->battlerAtk != ctx->battlerDef && IsTreeGroundImmune(ctx->battlerDef))
     {
-        modifier = UQ_4_12(0.0); // Mod : Magnet Rise de l'arbre, dépensé en fin d'attaque
+        modifier = UQ_4_12(0.0); // Mod : Magnet Rise de l'arbre, dépensé quand l'attaque échoue
     }
     else if (ctx->moveType == TYPE_GROUND
         && !TreeMoveIgnoresImmunity(ctx->battlerAtk, TYPE_GROUND, TYPE_FLYING)

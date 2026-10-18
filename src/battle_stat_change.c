@@ -748,6 +748,7 @@ static bool32 IsTreeStatLossBlocked(struct BattleCalcValues *cv, struct StatChan
     MarkStatsAsDone(st, NUM_BATTLE_STATS);
     gBattleScripting.battler = cv->battlerDef;
     st->script = BattleScript_TreeNoStatLoss;
+    SetTreeNodeNameForEffect(cv->battlerDef, effect);
     return TRUE;
 }
 

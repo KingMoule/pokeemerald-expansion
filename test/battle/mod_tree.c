@@ -155,7 +155,7 @@ SINGLE_BATTLE_TEST("Mod: Rock Head reduces recoil of all its moves", s16 recoil)
     PARAMETRIZE { rank = 0; }
     PARAMETRIZE { rank = 10; }
     GIVEN {
-        PLAYER(SPECIES_GEODUDE) { TreeRank(TYPE_ROCK, OFFENSE(1), rank); }
+        PLAYER(SPECIES_GEODUDE) { Ability(ABILITY_STURDY); TreeRank(TYPE_ROCK, OFFENSE(1), rank); }
         OPPONENT(SPECIES_WOBBUFFET) { HP(9999); MaxHP(9999); }
     } WHEN {
         TURN { MOVE(player, MOVE_DOUBLE_EDGE); }
@@ -321,6 +321,7 @@ SINGLE_BATTLE_TEST("Mod: Moxie raises its best attacking stat after a KO")
 
 SINGLE_BATTLE_TEST("Mod: Soul Siphon drains a quarter of the damage of its Ghost moves", s16 damage, s16 heal)
 {
+    PARAMETRIZE { }
     GIVEN {
         PLAYER(SPECIES_GASTLY) { TreeRank(TYPE_GHOST, OFFENSE(3), 1); HP(1); }
         OPPONENT(SPECIES_WOBBUFFET);
@@ -467,7 +468,7 @@ SINGLE_BATTLE_TEST("Mod: Dark Veil makes the first status move aimed at it fail"
         TURN { MOVE(opponent, MOVE_GLARE); }
         TURN { MOVE(opponent, MOVE_GLARE); }
     } SCENE {
-        NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_GLARE, opponent);
+        MESSAGE("Poochyena avoided the attack!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_GLARE, opponent);
         STATUS_ICON(player, paralysis: TRUE);
     }
@@ -506,12 +507,12 @@ SINGLE_BATTLE_TEST("Mod: Clear Body may ignore a stat drop from a foe")
 {
     PASSES_RANDOMLY(50, 100, RNG_TREE_STAT_DROP_IGNORE);
     GIVEN {
-        PLAYER(SPECIES_REGISTEEL) { TreeRank(TYPE_STEEL, DEFENSE(2), 10); }
+        PLAYER(SPECIES_MAGNEMITE) { TreeRank(TYPE_STEEL, DEFENSE(2), 10); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_GROWL); }
     } SCENE {
-        MESSAGE("Registeel's Clear Body kept its stats from being lowered!");
+        MESSAGE("Magnemite's Clear Body kept its stats from being lowered!");
     } THEN {
         EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
     }
@@ -535,13 +536,13 @@ SINGLE_BATTLE_TEST("Mod: Misty Veil may avoid a status from a foe")
 SINGLE_BATTLE_TEST("Mod: Synchronize passes a status back to the foe")
 {
     GIVEN {
-        PLAYER(SPECIES_ABRA) { TreeRank(TYPE_PSYCHIC, DEFENSE(3), 1); }
+        PLAYER(SPECIES_DROWZEE) { TreeRank(TYPE_PSYCHIC, DEFENSE(3), 1); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_GLARE); }
     } SCENE {
         STATUS_ICON(player, paralysis: TRUE);
-        MESSAGE("Abra's Synchronize activated!");
+        MESSAGE("Drowzee's Synchronize activated!");
         STATUS_ICON(opponent, paralysis: TRUE);
     }
 }
@@ -571,7 +572,7 @@ SINGLE_BATTLE_TEST("Mod: Toxic Debris sets Toxic Spikes after the first physical
     } SCENE {
         MESSAGE("Ekans's Toxic Debris activated!");
     } THEN {
-        EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].toxicSpikesAmount, 1);
+        EXPECT_EQ((u32)gSideTimers[B_SIDE_OPPONENT].toxicSpikesAmount, 1);
     }
 }
 

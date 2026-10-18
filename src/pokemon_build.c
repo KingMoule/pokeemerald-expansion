@@ -978,17 +978,6 @@ void UpdateTreeFirstHitGuard(enum BattlerId battlerAtk, enum Move move)
             SetTreeOnceUsed(battler, TREE_ONCE_FIRST_HIT);
     }
 
-    // Magnet Rise : la première attaque Sol qui le visait a échoué.
-    if (moveType == TYPE_GROUND && !IsBattleMoveStatus(move))
-    {
-        for (battler = 0; battler < gBattlersCount; battler++)
-        {
-            if (battler != battlerAtk && GetBattlerSide(battler) != GetBattlerSide(battlerAtk)
-             && (gBattleStruct->moveResultFlags[battler] & MOVE_RESULT_DOESNT_AFFECT_FOE)
-             && IsTreeGroundImmune(battler))
-                SetTreeOnceUsed(battler, TREE_ONCE_GROUND_IMMUNITY);
-        }
-    }
 }
 
 // Recul en moins : toutes les attaques du Pokémon.
@@ -1508,6 +1497,13 @@ bool32 IsTreeGroundImmune(enum BattlerId battlerDef)
     return IsTreeOnceReady(battlerDef, TREE_EFFECT_GROUND_IMMUNITY_ONCE, TREE_ONCE_GROUND_IMMUNITY);
 }
 
+// Magnet Rise : dépensé quand l'attaque Sol échoue contre lui.
+void SpendTreeGroundImmunity(enum BattlerId battlerAtk, enum BattlerId battlerDef, enum Type moveType)
+{
+    if (moveType == TYPE_GROUND && battlerAtk != battlerDef && IsTreeGroundImmune(battlerDef))
+        SetTreeOnceUsed(battlerDef, TREE_ONCE_GROUND_IMMUNITY);
+}
+
 // ---------------------------------------------------------------------------------------------
 // Chances et effets secondaires
 
@@ -1666,9 +1662,11 @@ enum
     TREE_MOVEEND_LAST_HAUNT,
     TREE_MOVEEND_TYPE_DRAIN,
     TREE_MOVEEND_DEF_DROP,
-    TREE_MOVEEND_MOXIE,
-    TREE_MOVEEND_KO_HEAL,
     TREE_MOVEEND_COUNT,
+    // Après l'annonce des K.O., comme Moxie
+    TREE_MOVEEND_MOXIE = TREE_MOVEEND_COUNT,
+    TREE_MOVEEND_KO_HEAL,
+    TREE_MOVEEND_FOES_FAINTED_COUNT,
 };
 
 static const u8 *TryTreeMoveEndStep(struct BattleCalcValues *cv, u32 step)
@@ -1793,22 +1791,6 @@ static const u8 *TryTreeMoveEndStep(struct BattleCalcValues *cv, u32 step)
             return BattleScript_TreeStatChange;
         }
         break;
-    case TREE_MOVEEND_MOXIE:
-        if (defHit && !IsBattlerAlive(def) && atkAlive && !NoAliveMonsForEitherParty()
-         && GetBattlerTreeEffect(atk, TREE_EFFECT_MOXIE)
-         && gBattleMons[atk].statStages[GetTreeBestAttackingStat(atk)] < MAX_STAT_STAGE)
-        {
-            SetStatChange(atk, GetTreeBestAttackingStat(atk), 1);
-            gBattleScripting.battler = atk;
-            SetTreeNodeNameForEffect(atk, TREE_EFFECT_MOXIE);
-            return BattleScript_TreeStatChange;
-        }
-        break;
-    case TREE_MOVEEND_KO_HEAL:
-        value = GetBattlerTreeEffect(atk, TREE_EFFECT_KO_HEAL);
-        if (value != 0 && defHit && !IsBattlerAlive(def) && atkAlive && CanTreeHeal(atk))
-            return SetTreeHeal(atk, TREE_EFFECT_KO_HEAL, GetNonDynamaxMaxHP(atk) * value / 10000);
-        break;
     }
     return NULL;
 }
@@ -1822,6 +1804,63 @@ const u8 *TryTreeMoveEndEffect(struct BattleCalcValues *cv)
         while (sTreeMoveEndStep < TREE_MOVEEND_COUNT)
         {
             const u8 *script = TryTreeMoveEndStep(cv, sTreeMoveEndStep++);
+            if (script != NULL)
+                return script;
+        }
+    }
+    sTreeMoveEndStep = 0;
+    return NULL;
+}
+
+static bool32 HasTreeKnockedOutFoe(enum BattlerId battlerAtk)
+{
+    for (enum BattlerId battler = 0; battler < gBattlersCount; battler++)
+    {
+        if (GetBattlerSide(battler) != GetBattlerSide(battlerAtk)
+         && IsBattlerTurnDamaged(battler, EXCLUDING_SUBSTITUTES) && !IsBattlerAlive(battler))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+static const u8 *TryTreeFoesFaintedStep(struct BattleCalcValues *cv, u32 step)
+{
+    enum BattlerId atk = cv->battlerAtk;
+    u32 value;
+
+    switch (step)
+    {
+    case TREE_MOVEEND_MOXIE:
+        if (!NoAliveMonsForEitherParty()
+         && GetBattlerTreeEffect(atk, TREE_EFFECT_MOXIE)
+         && gBattleMons[atk].statStages[GetTreeBestAttackingStat(atk)] < MAX_STAT_STAGE)
+        {
+            SetStatChange(atk, GetTreeBestAttackingStat(atk), 1);
+            gBattleScripting.battler = atk;
+            SetTreeNodeNameForEffect(atk, TREE_EFFECT_MOXIE);
+            return BattleScript_TreeStatChange;
+        }
+        break;
+    case TREE_MOVEEND_KO_HEAL:
+        value = GetBattlerTreeEffect(atk, TREE_EFFECT_KO_HEAL);
+        if (value != 0 && CanTreeHeal(atk))
+            return SetTreeHeal(atk, TREE_EFFECT_KO_HEAL, GetNonDynamaxMaxHP(atk) * value / 10000);
+        break;
+    }
+    return NULL;
+}
+
+// Mod : Moxie et Dark Recovery, une fois les K.O. annoncés.
+const u8 *TryTreeFoesFaintedEffect(struct BattleCalcValues *cv)
+{
+    if (sTreeMoveEndStep < TREE_MOVEEND_COUNT)
+        sTreeMoveEndStep = TREE_MOVEEND_COUNT;
+    if (IsBattlerAlive(cv->battlerAtk) && !gSpecialStatuses[cv->battlerAtk].attackerInParty
+     && HasTreeKnockedOutFoe(cv->battlerAtk))
+    {
+        while (sTreeMoveEndStep < TREE_MOVEEND_FOES_FAINTED_COUNT)
+        {
+            const u8 *script = TryTreeFoesFaintedStep(cv, sTreeMoveEndStep++);
             if (script != NULL)
                 return script;
         }

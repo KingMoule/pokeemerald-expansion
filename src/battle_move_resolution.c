@@ -2252,6 +2252,7 @@ static enum CancelerResult CancelerTargetFailure(struct BattleCalcValues *cv)
             else if (ctx.typeEffectivenessModifier == UQ_4_12(0.0))
             {
                 TryInitializeTrainerSlideMonUnaffected(cv->battlerDef, cv->battlerAtk);
+                SpendTreeGroundImmunity(cv->battlerAtk, cv->battlerDef, ctx.moveType); // Mod : Magnet Rise de l'arbre
                 gSpecialStatuses[cv->battlerDef].updateStallMons = TRUE;
                 gBattleStruct->moveResultFlags[cv->battlerDef] = MOVE_RESULT_FAILED;
                 BattleScriptCall(BattleScript_DoesntAffectScripting);
@@ -4534,6 +4535,20 @@ static enum MoveEndResult MoveEndAbilityEffectFoesFainted(struct BattleCalcValue
     return result;
 }
 
+// Mod : rappelé tant qu'un effet d'arbre lié à un K.O. se déclenche.
+static enum MoveEndResult MoveEndTreeFoesFainted(struct BattleCalcValues *cv)
+{
+    const u8 *script = TryTreeFoesFaintedEffect(cv);
+
+    if (script == NULL)
+    {
+        gBattleScripting.moveendState++;
+        return MOVEEND_RESULT_CONTINUE;
+    }
+    BattleScriptCall(script);
+    return MOVEEND_RESULT_RUN_SCRIPT;
+}
+
 static enum MoveEndResult MoveEndShellTrap(struct BattleCalcValues *cv)
 {
     u32 shellTrapBattlerMask = 0;
@@ -5371,6 +5386,7 @@ static enum MoveEndResult (*const sMoveEndHandlers[])(struct BattleCalcValues *c
     [MOVEEND_MOVE_BLOCK] = MoveEndMoveBlock,
     [MOVEEND_ITEM_EFFECTS_ATTACKER_2] = MoveEndItemEffectsAttacker2,
     [MOVEEND_ABILITY_EFFECT_FOES_FAINTED] = MoveEndAbilityEffectFoesFainted,
+    [MOVEEND_TREE_FOES_FAINTED] = MoveEndTreeFoesFainted,
     [MOVEEND_SHELL_TRAP] = MoveEndShellTrap,
     [MOVEEND_COLOR_CHANGE] = MoveEndColorChange,
     [MOVEEND_KEE_MARANGA_HP_THRESHOLD_ITEM_TARGET] = MoveEndKeeMarangaHpThresholdItemTarget,
