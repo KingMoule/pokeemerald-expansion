@@ -15,6 +15,7 @@
 #include "constants/songs.h"
 #include "constants/game_stat.h"
 #include "constants/trainers.h"
+#include "constants/opponents.h"
 #include "constants/species.h"
 #include "constants/config_changes.h"
 	.include "asm/macros.inc"
@@ -2897,6 +2898,9 @@ BattleScript_LocalBattleLost::
 	jumpifbattletype BATTLE_TYPE_TRAINER_HILL, BattleScript_LocalBattleLostPrintTrainersWinText
 	jumpifbattletype BATTLE_TYPE_EREADER_TRAINER, BattleScript_LocalBattleLostEnd
 	jumpifhalfword CMP_EQUAL, gTrainerBattleParameter + 2, TRAINER_SECRET_BASE, BattleScript_LocalBattleLostEnd
+	jumpifhalfword CMP_EQUAL, gTrainerBattleParameter + 2, TRAINER_EV_DUNGEON, BattleScript_LocalBattleLostPrintTrainersWinText @ Mod : pas de perte d'argent dans les Training Depths
+	jumpifbyte CMP_NOT_EQUAL, gShiftingRuinsActive, FALSE, BattleScript_ShiftingRuinsBattleLost @ Mod : ni argent perdu ni retour au Centre dans les Shifting Ruins
+	jumpifbyte CMP_NOT_EQUAL, gModChallengeActive, FALSE, BattleScript_LocalBattleLostPrintTrainersWinText @ Mod : pas de perte d'argent dans les défis
 	jumpifbyte CMP_NOT_EQUAL, cMULTISTRING_CHOOSER, 0, BattleScript_RivalBattleLost
 	jumpifnowhiteout BattleScript_LocalBattleLostEnd_
 	jumpifbattletype BATTLE_TYPE_INGAME_PARTNER, BattleScript_LocalBattleLostPrintWhiteOut
@@ -2923,6 +2927,10 @@ BattleScript_LocalBattleLostEnd::
 BattleScript_LocalBattleLostEnd::
 	end
 .endif
+
+BattleScript_ShiftingRuinsBattleLost::
+	jumpifbattletype BATTLE_TYPE_TRAINER, BattleScript_LocalBattleLostPrintTrainersWinText
+	end
 
 BattleScript_CheckDomeDrew::
 	jumpifbyte CMP_EQUAL, gBattleOutcome, B_OUTCOME_DREW, BattleScript_LocalBattleLostEnd_
@@ -3789,6 +3797,34 @@ BattleScript_AquaRingHeal::
 	playanimation BS_ATTACKER, B_ANIM_AQUA_RING_HEAL
 	printstring STRINGID_AQUARINGHEAL
 	goto BattleScript_TurnHeal
+
+BattleScript_TreeWeatherHeal::
+	printstring STRINGID_TREEWEATHERHEAL
+	goto BattleScript_TurnHeal
+
+BattleScript_TreeHeartActivates::
+	printstring STRINGID_TREEHEART
+	waitmessage B_WAIT_TIME_LONG
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER, ASSURANCE_DOUBLE
+	tryfaintmon BS_ATTACKER
+	return
+
+BattleScript_TreeLingeringStatus::
+	printfromtable gTreeLingerStringIds
+	waitmessage B_WAIT_TIME_LONG
+	updatestatusicon BS_SCRIPTING
+	return
+
+BattleScript_TreeWeatherOnEntry::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_TREEWEATHERENTRY
+	waitmessage B_WAIT_TIME_LONG
+	printfromtable gMoveWeatherChangeStringIds
+	waitmessage B_WAIT_TIME_LONG
+	playanimation_var BS_BATTLER_0, sB_ANIM_ARG1
+	call BattleScript_ActivateWeatherAbilities
+	return
 
 BattleScript_PrintMonIsRooted::
 	pause B_WAIT_TIME_SHORT

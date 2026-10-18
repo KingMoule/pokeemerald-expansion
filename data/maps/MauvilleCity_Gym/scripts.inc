@@ -115,6 +115,7 @@ MauvilleCity_Gym_EventScript_GiveShockWave2::
 	giveitem ITEM_TM_SHOCK_WAVE
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
 	msgbox MauvilleCity_Gym_Text_ExplainShockWave, MSGBOX_DEFAULT
+	msgbox MauvilleCity_Gym_Text_ModExplainMutations, MSGBOX_DEFAULT
 	setflag FLAG_RECEIVED_TM_SHOCK_WAVE
 	release
 	end
@@ -123,6 +124,7 @@ MauvilleCity_Gym_EventScript_GiveShockWave::
 	giveitem ITEM_TM_SHOCK_WAVE
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_BagIsFull
 	msgbox MauvilleCity_Gym_Text_ExplainShockWave, MSGBOX_DEFAULT
+	msgbox MauvilleCity_Gym_Text_ModExplainMutations, MSGBOX_DEFAULT
 	setflag FLAG_RECEIVED_TM_SHOCK_WAVE
 	return
 
@@ -419,3 +421,21 @@ MauvilleCity_Gym_Text_WattsonRematchNeedTwoMons:
 	.string "Come see me with two or more\n"
 	.string "POKéMON, all right?$"
 
+MauvilleCity_Gym_Text_ModExplainMutations:
+	.string "Wahahah! Here's something to\n"
+	.string "chew on, {PLAYER}.\p"
+	.string "A POKéMON that puts 50 points in\n"
+	.string "its TREE and reaches a final\l"
+	.string "mastery can MUTATE.\p"
+	.string "It trades one of its types\n"
+	.string "for a new one!\p"
+	.string "At first, only FIRE, WATER and\n"
+	.string "GRASS are open to it.\p"
+	.string "MUTATION SEALS from the SHIFTING\n"
+	.string "RUINS open the other types.\p"
+	.string "But it's forever. And the type it\n"
+	.string "keeps takes even more damage\l"
+	.string "from its weaknesses.\p"
+	.string "So plan that TREE from the start.\n"
+	.string "A good build doesn't happen\l"
+	.string "by accident!$"

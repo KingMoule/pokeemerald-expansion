@@ -17,6 +17,7 @@
 #include "item_menu.h"
 #include "util.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "random.h"
 #include "battle_controllers.h"
 #include "battle_interface.h"
@@ -1744,6 +1745,7 @@ void SetNonVolatileStatus(enum BattlerId battlerAtk, enum BattlerId effectBattle
     gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STATUSED;
 
     gBattleScripting.moveEffect = MOVE_EFFECT_NONE;
+    RecordTreeStatusInflicted(battlerAtk, effectBattler); // Mod : Attiser les flammes, Braises tenaces
 
     TrySynchronizeActivation(battlerAtk, effectBattler, effect);
 
@@ -2259,7 +2261,7 @@ static void Cmd_getexp(void)
                 gBattleScripting.getexpState = 5;
                 gBattleStruct->battlerExpReward = 0;
             }
-            else if (GetMonData(&gParties[B_TRAINER_PLAYER][*expMonId], MON_DATA_LEVEL) == MAX_LEVEL)
+            else if (GetMonData(&gParties[B_TRAINER_PLAYER][*expMonId], MON_DATA_LEVEL) >= GetCurrentLevelCap()) // Mod : plafond des sceaux
             {
                 gBattleScripting.getexpState = 5;
                 gBattleStruct->battlerExpReward = 0;
@@ -3236,9 +3238,10 @@ static void Cmd_switchindataupdate(void)
         return;
     }
 
-    gBattleMons[battler].types[0] = GetSpeciesType(gBattleMons[battler].species, 0);
-    gBattleMons[battler].types[1] = GetSpeciesType(gBattleMons[battler].species, 1);
+    gBattleMons[battler].types[0] = GetBattlerMutatedType(battler, 0);
+    gBattleMons[battler].types[1] = GetBattlerMutatedType(battler, 1);
     gBattleMons[battler].types[2] = TYPE_MYSTERY;
+    ResetTreeOnSwitchIn(battler); // Mod : Cœur et statuts suivis perdus au changement
     gBattleMons[battler].ability = GetAbilityBySpecies(gBattleMons[battler].species, gBattleMons[battler].abilityNum);
     #if TESTING
     if (gTestRunnerEnabled)
@@ -9463,7 +9466,7 @@ void BS_ItemRestorePP(void)
     {
         pp = GetMonData(mon, MON_DATA_PP1 + i);
         moveId = GetMonData(mon, MON_DATA_MOVE1 + i);
-        maxPP = CalculatePPWithBonus(moveId, GetMonData(mon, MON_DATA_PP_BONUSES), i);
+        maxPP = CalculateMonMovePP(mon, moveId, GetMonData(mon, MON_DATA_PP_BONUSES), i);
         if (pp != maxPP)
         {
             pp += effect[6];
@@ -10946,7 +10949,7 @@ void BS_RestoreMovePp(void)
     u32 data[MAX_MON_MOVES + 1];
     for (moveIndex = 0; moveIndex < MAX_MON_MOVES; moveIndex++)
     {
-        gBattleMons[battler].pp[moveIndex] = CalculatePPWithBonus(gBattleMons[battler].moves[moveIndex], gBattleMons[battler].ppBonuses, moveIndex);
+        gBattleMons[battler].pp[moveIndex] = CalculateBattlerMovePP(battler, gBattleMons[battler].moves[moveIndex], gBattleMons[battler].ppBonuses, moveIndex);
         data[moveIndex] = gBattleMons[battler].pp[moveIndex];
     }
     data[moveIndex] = gBattleMons[battler].ppBonuses;

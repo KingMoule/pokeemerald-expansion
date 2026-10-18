@@ -5,7 +5,21 @@
 #include "pokemon.h"
 
 
+// Mod : plafond de toute la sauvegarde, relevé par chaque sceau de dépassement.
+u32 GetModLevelCap(void)
+{
+    u32 cap = MOD_LEVEL_BASE_CAP + VarGet(VAR_MOD_LEVEL_SEALS) * MOD_LEVEL_CAP_PER_SEAL;
+    return min(cap, MAX_LEVEL);
+}
+
+static u32 GetBaseLevelCap(void);
+
 u32 GetCurrentLevelCap(void)
+{
+    return min(GetBaseLevelCap(), GetModLevelCap());
+}
+
+static u32 GetBaseLevelCap(void)
 {
     static const u32 sLevelCapFlagMap[][2] =
     {

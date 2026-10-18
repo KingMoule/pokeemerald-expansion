@@ -30,6 +30,7 @@
 #include "palette.h"
 #include "pokeball.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "pokemon_sprite_visualizer.h"
 #include "pokemon_storage_system.h"
 #include "pokemon_summary_screen.h"
@@ -1884,6 +1885,8 @@ static void ShowMonSkillsInfo(u8 taskId, s16 mode)
     PrintLeftColumnStats();
     BufferRightColumnStats();
     PrintRightColumnStats();
+    if (sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS)
+        PrintExpPointsNextLevel();
     gTasks[taskId].func = Task_HandleInput;
 }
 
@@ -2554,6 +2557,7 @@ static void SwapMonMoves(struct Pokemon *mon, u8 moveIndex1, u8 moveIndex2)
     SetMonData(mon, MON_DATA_PP1 + moveIndex1, &move2pp);
     SetMonData(mon, MON_DATA_PP1 + moveIndex2, &move1pp);
     SetMonData(mon, MON_DATA_PP_BONUSES, &ppBonuses);
+    SwapBoxMonMoveVariants(&mon->box, moveIndex1, moveIndex2);
 
     summary->moves[moveIndex1] = move2;
     summary->moves[moveIndex2] = move1;
@@ -2589,6 +2593,7 @@ static void SwapBoxMonMoves(struct BoxPokemon *mon, u8 moveIndex1, u8 moveIndex2
     SetBoxMonData(mon, MON_DATA_PP1 + moveIndex1, &move2pp);
     SetBoxMonData(mon, MON_DATA_PP1 + moveIndex2, &move1pp);
     SetBoxMonData(mon, MON_DATA_PP_BONUSES, &ppBonuses);
+    SwapBoxMonMoveVariants(mon, moveIndex1, moveIndex2);
 
     summary->moves[moveIndex1] = move2;
     summary->moves[moveIndex2] = move1;
@@ -3950,12 +3955,44 @@ static void PrintRightColumnStats(void)
     PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_RIGHT), gStringVar4, x, 1, 0, 0);
 }
 
+// En mode EV, la zone de l'expérience affiche le total d'EV et les plafonds.
+static void PrintEvTotals(u8 windowId)
+{
+    static const u8 sText_TotalEvs[] = _("TOTAL EVS");
+    static const u8 sText_MaxPerStat[] = _("MAX PER STAT");
+    u8 *txtPtr;
+    int x;
+
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, sText_TotalEvs, 6, 1, 0, 1);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, sText_MaxPerStat, 6, 17, 0, 1);
+
+    txtPtr = ConvertIntToDecimalStringN(gStringVar1, GetMonEVCount(&sMonSummaryScreen->currentMon), STR_CONV_MODE_LEFT_ALIGN, 4);
+    txtPtr = StringCopy(txtPtr, gText_Slash);
+    ConvertIntToDecimalStringN(txtPtr, MAX_TOTAL_EVS, STR_CONV_MODE_LEFT_ALIGN, 4);
+    x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 42) + 2;
+    PrintTextOnWindow(windowId, gStringVar1, x, 1, 0, 0);
+
+    ConvertIntToDecimalStringN(gStringVar1, MAX_PER_STAT_EVS, STR_CONV_MODE_LEFT_ALIGN, 3);
+    x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 42) + 2;
+    PrintTextOnWindow(windowId, gStringVar1, x, 17, 0, 0);
+}
+
 static void PrintExpPointsNextLevel(void)
 {
     struct PokeSummary *sum = &sMonSummaryScreen->summary;
     u8 windowId = AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_EXP);
     int x;
     u32 expToNextLevel;
+
+    FillWindowPixelBuffer(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, PIXEL_FILL(0));
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
+    if (sMonSummaryScreen->skillsPageMode == SUMMARY_SKILLS_MODE_EVS)
+    {
+        PrintEvTotals(windowId);
+        return;
+    }
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, gText_ExpPoints, 6, 1, 0, 1);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, gText_NextLv, 6, 17, 0, 1);
 
     ConvertIntToDecimalStringN(gStringVar1, sum->exp, STR_CONV_MODE_RIGHT_ALIGN, 7);
     x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 42) + 2;
@@ -4049,7 +4086,10 @@ static void PrintMoveNameAndPP(u8 moveIndex)
 
     if (move != 0)
     {
-        pp = CalculatePPWithBonus(move, summary->ppBonuses, moveIndex);
+        if (moveIndex < MAX_MON_MOVES)
+            pp = CalculateBoxMonMovePP(GetCurrentBoxmon(), move, summary->ppBonuses, moveIndex);
+        else
+            pp = CalculatePPWithBonus(move, summary->ppBonuses, moveIndex);
         PrintTextOnWindowToFit(moveNameWindowId, GetMoveName(move), 0, moveIndex * 16 + 1, 0, 1);
         ConvertIntToDecimalStringN(gStringVar1, summary->pp[moveIndex], STR_CONV_MODE_RIGHT_ALIGN, 2);
         ConvertIntToDecimalStringN(gStringVar2, pp, STR_CONV_MODE_RIGHT_ALIGN, 2);
@@ -4344,10 +4384,13 @@ static void SetMonTypeIcons(void)
     }
     else
     {
-        SetTypeSpritePosAndPal(GetSpeciesType(summary->species, 0), 120, 48, SPRITE_ARR_ID_TYPE);
-        if (GetSpeciesType(summary->species, 0) != GetSpeciesType(summary->species, 1))
+        // Mod : types après mutation.
+        enum Type type1 = GetBoxMonMutatedType(&sMonSummaryScreen->currentMon.box, summary->species, 0);
+        enum Type type2 = GetBoxMonMutatedType(&sMonSummaryScreen->currentMon.box, summary->species, 1);
+        SetTypeSpritePosAndPal(type1, 120, 48, SPRITE_ARR_ID_TYPE);
+        if (type1 != type2)
         {
-            SetTypeSpritePosAndPal(GetSpeciesType(summary->species, 1), 160, 48, SPRITE_ARR_ID_TYPE + 1);
+            SetTypeSpritePosAndPal(type2, 160, 48, SPRITE_ARR_ID_TYPE + 1);
             SetSpriteInvisibility(SPRITE_ARR_ID_TYPE + 1, FALSE);
         }
         else

@@ -2,6 +2,7 @@
 #include "config/save.h"
 #include "battle_pike.h"
 #include "battle_pyramid.h"
+#include "shifting_ruins.h"
 #include "battle_pyramid_bag.h"
 #include "bg.h"
 #include "debug.h"
@@ -154,6 +155,8 @@ static const struct WindowTemplate sWindowTemplate_SafariBalls = {
     .paletteNum = 15,
     .baseBlock = 0x8
 };
+
+static const u8 sText_ShiftingRuinsConfirmRetire[] = _("Give up on the SHIFTING RUINS?\nThis run's rare finds will be lost.");
 
 static const u8 *const sPyramidFloorNames[FRONTIER_STAGES_PER_CHALLENGE + 1] =
 {
@@ -414,7 +417,8 @@ static void BuildBattlePyramidStartMenu(void)
     AddStartMenuAction(MENU_ACTION_POKEMON);
     AddStartMenuAction(MENU_ACTION_PYRAMID_BAG);
     AddStartMenuAction(MENU_ACTION_PLAYER);
-    AddStartMenuAction(MENU_ACTION_REST_FRONTIER);
+    if (!InShiftingRuins()) // Mod : pas de sauvegarde dans les Shifting Ruins
+        AddStartMenuAction(MENU_ACTION_REST_FRONTIER);
     AddStartMenuAction(MENU_ACTION_RETIRE_FRONTIER);
     AddStartMenuAction(MENU_ACTION_OPTION);
     AddStartMenuAction(MENU_ACTION_EXIT);
@@ -459,8 +463,15 @@ static void ShowPyramidFloorWindow(void)
 
     PutWindowTilemap(sBattlePyramidFloorWindowId);
     DrawStdWindowFrame(sBattlePyramidFloorWindowId, FALSE);
-    StringCopy(gStringVar1, sPyramidFloorNames[gSaveBlock2Ptr->frontier.curChallengeBattleNum]);
-    StringExpandPlaceholders(gStringVar4, gText_BattlePyramidFloor);
+    if (InShiftingRuins())
+    {
+        ShiftingRuins_BufferFloorWindowText(gStringVar4);
+    }
+    else
+    {
+        StringCopy(gStringVar1, sPyramidFloorNames[gSaveBlock2Ptr->frontier.curChallengeBattleNum]);
+        StringExpandPlaceholders(gStringVar4, gText_BattlePyramidFloor);
+    }
     AddTextPrinterParameterized(sBattlePyramidFloorWindowId, FONT_NORMAL, gStringVar4, 0, 1, TEXT_SKIP_DRAW, NULL);
     CopyWindowToVram(sBattlePyramidFloorWindowId, COPYWIN_GFX);
 }
@@ -1229,7 +1240,7 @@ static u8 BattlePyramidConfirmRetireCallback(void)
 {
     ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
     RemoveStartMenuWindow();
-    ShowSaveMessage(gText_BattlePyramidConfirmRetire, BattlePyramidRetireYesNoCallback);
+    ShowSaveMessage(InShiftingRuins() ? sText_ShiftingRuinsConfirmRetire : gText_BattlePyramidConfirmRetire, BattlePyramidRetireYesNoCallback);
 
     return SAVE_IN_PROGRESS;
 }

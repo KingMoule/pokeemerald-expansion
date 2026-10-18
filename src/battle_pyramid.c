@@ -29,6 +29,7 @@
 #include "event_scripts.h"
 #include "graphics.h"
 #include "wild_encounter.h"
+#include "shifting_ruins.h"
 #include "constants/battle_frontier.h"
 #include "constants/battle_pyramid.h"
 #include "constants/event_objects.h"
@@ -990,6 +991,14 @@ static void SetPickupItem(void)
     u32 floor = gSaveBlock2Ptr->frontier.curChallengeBattleNum;
     u32 round = (gSaveBlock2Ptr->frontier.pyramidWinStreaks[lvlMode] / FRONTIER_STAGES_PER_CHALLENGE) % TOTAL_PYRAMID_ROUNDS;
 
+    // Mod : butin propre aux Shifting Ruins (VAR_RESULT = TRUE pour un objet rare à rapporter).
+    if (InShiftingRuins())
+    {
+        ShiftingRuins_SetFloorItem();
+        return;
+    }
+    gSpecialVar_Result = FALSE;
+
     if (round >= TOTAL_PYRAMID_ROUNDS)
         round = TOTAL_PYRAMID_ROUNDS - 1;
 
@@ -1063,6 +1072,9 @@ static void ShowPostBattleHintText(void)
             break;
         }
     }
+    // Mod : ces indices nomment la Pyramide, inutilisables dans les Shifting Ruins.
+    if (InShiftingRuins() && textGroup == 4)
+        textGroup = 5;
 
     hintType = sHintTextTypes[gObjectEvents[gSelectedObjectEvent].localId - 1];
     i = 0;
@@ -1398,6 +1410,13 @@ static bool32 CheckBattlePyramidEvoRequirement(enum Species species, const u16 *
 extern u32 GetTotalBaseStat(enum Species species);
 void GenerateBattlePyramidWildMon(enum Species forceSpecies)
 {
+    // Mod : rencontres propres aux Shifting Ruins.
+    if (InShiftingRuins())
+    {
+        ShiftingRuins_GenerateWildMon();
+        return;
+    }
+
     u8 name[POKEMON_NAME_LENGTH + 1];
     int i, j;
     u32 id;
@@ -1571,6 +1590,13 @@ void GenerateBattlePyramidWildMon(enum Species forceSpecies)
 #else
 void GenerateBattlePyramidWildMon(enum Species forceSpecies)
 {
+    // Mod : rencontres propres aux Shifting Ruins.
+    if (InShiftingRuins())
+    {
+        ShiftingRuins_GenerateWildMon();
+        return;
+    }
+
     u8 name[POKEMON_NAME_LENGTH + 1];
     int i;
     const struct PyramidWildMon *wildMons;
@@ -1835,6 +1861,8 @@ void LoadBattlePyramidObjectEventTemplates(void)
             break;
         }
     }
+    if (InShiftingRuins()) // Mod : éclaireur des Shifting Ruins à la place d'un objet
+        ShiftingRuins_PlaceRecruiter(gSaveBlock1Ptr->objectEventTemplates, OBJECT_EVENT_TEMPLATES_COUNT);
 }
 
 void LoadBattlePyramidFloorObjectEventScripts(void)
@@ -1844,7 +1872,9 @@ void LoadBattlePyramidFloorObjectEventScripts(void)
 
     for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
     {
-        if (events[i].graphicsId != OBJ_EVENT_GFX_ITEM_BALL)
+        if (ShiftingRuins_IsRecruiter(events[i].localId)) // Mod : éclaireur des Shifting Ruins
+            events[i].script = ShiftingRuins_EventScript_Recruiter;
+        else if (events[i].graphicsId != OBJ_EVENT_GFX_ITEM_BALL)
             events[i].script = BattlePyramid_TrainerBattle;
         else
             events[i].script = BattlePyramid_FindItemBall;
@@ -2104,7 +2134,8 @@ static bool8 TrySetPyramidObjectEventPositionAtCoords(u8 objType, u8 x, u8 y, u8
             if (floorEvents[objectEventId].graphicsId != OBJ_EVENT_GFX_ITEM_BALL)
             {
                 i = GetUniqueTrainerId(objectEventId);
-                floorEvents[objectEventId].graphicsId = GetBattleFacilityTrainerGfxId(i);
+                // Mod : tous les dresseurs des Shifting Ruins sont des Ruin Maniacs (TRAINER_RUINS).
+                floorEvents[objectEventId].graphicsId = InShiftingRuins() ? OBJ_EVENT_GFX_HIKER : GetBattleFacilityTrainerGfxId(i);
                 gSaveBlock2Ptr->frontier.trainerIds[objectEventId] = i;
             }
             return FALSE;
@@ -2180,6 +2211,9 @@ u16 GetBattlePyramidPickupItemId(void)
     u32 i;
     enum FrontierLevelMode lvlMode = gSaveBlock2Ptr->frontier.lvlMode;
     int round = (gSaveBlock2Ptr->frontier.pyramidWinStreaks[lvlMode] / FRONTIER_STAGES_PER_CHALLENGE);
+
+    if (InShiftingRuins())
+        return ShiftingRuins_GetPickupItem();
 
     if (round >= TOTAL_PYRAMID_ROUNDS)
         round = TOTAL_PYRAMID_ROUNDS - 1;

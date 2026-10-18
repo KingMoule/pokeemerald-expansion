@@ -1,9 +1,11 @@
 #include "global.h"
+#include "caps.h"
 #include "item_use.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_stat_change.h"
 #include "battle_pyramid.h"
+#include "shifting_ruins.h"
 #include "battle_pyramid_bag.h"
 #include "berry.h"
 #include "berry_powder.h"
@@ -36,6 +38,7 @@
 #include "party_menu.h"
 #include "pokeblock.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "script.h"
 #include "sound.h"
 #include "strings.h"
@@ -857,6 +860,12 @@ void ItemUseOutOfBattle_AbilityCapsule(u8 taskId)
     SetUpItemUseCallback(taskId);
 }
 
+void ItemUseOutOfBattle_TechniqueCodex(u8 taskId)
+{
+    gItemUseCB = ItemUseCB_TechniqueCodex;
+    SetUpItemUseCallback(taskId);
+}
+
 void ItemUseOutOfBattle_AbilityPatch(u8 taskId)
 {
     gItemUseCB = ItemUseCB_AbilityPatch;
@@ -961,6 +970,22 @@ static void RemoveUsedItem(void)
         UpdatePyramidBagList();
         UpdatePyramidBagCursorPos();
     }
+}
+
+// Mod : chaque sceau relève de MOD_LEVEL_CAP_PER_SEAL le plafond de niveau de toute la sauvegarde.
+void ItemUseOutOfBattle_AscensionSeal(u8 taskId)
+{
+    if (GetModLevelCap() >= MAX_LEVEL)
+    {
+        DisplayItemMessage(taskId, FONT_NORMAL, gText_WontHaveEffect, CloseItemMessage);
+        return;
+    }
+    VarSet(VAR_MOD_LEVEL_SEALS, VarGet(VAR_MOD_LEVEL_SEALS) + 1);
+    RemoveUsedItem();
+    ConvertIntToDecimalStringN(gStringVar1, GetModLevelCap(), STR_CONV_MODE_LEFT_ALIGN, 3);
+    StringExpandPlaceholders(gStringVar4, COMPOUND_STRING("The level cap of all your\nPokémon rose to {STR_VAR_1}!"));
+    PlaySE(SE_EXP_MAX);
+    DisplayItemMessage(taskId, FONT_NORMAL, gStringVar4, CloseItemMessage);
 }
 
 void ItemUseOutOfBattle_Repel(u8 taskId)
@@ -1100,6 +1125,28 @@ bool8 CanUseDigOrEscapeRopeOnCurMap(void)
         return FALSE;
 }
 
+// Mod : l'Escape Orb fait quitter les Shifting Ruins en gardant les trouvailles.
+static void ItemUseOnFieldCB_EscapeOrb(u8 taskId)
+{
+    RemoveBagItem(gSpecialVar_ItemId, 1);
+    LockPlayerFieldControls();
+    ScriptContext_SetupScript(ShiftingRuins_EventScript_EscapeOrb);
+    DestroyTask(taskId);
+}
+
+void ItemUseOutOfBattle_EscapeOrb(u8 taskId)
+{
+    if (InShiftingRuins())
+    {
+        sItemUseOnFieldCB = ItemUseOnFieldCB_EscapeOrb;
+        SetUpItemUseOnFieldCallback(taskId);
+    }
+    else
+    {
+        DisplayDadsAdviceCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem);
+    }
+}
+
 void ItemUseOutOfBattle_EscapeRope(u8 taskId)
 {
     if (CanUseDigOrEscapeRopeOnCurMap() == TRUE)
@@ -1126,6 +1173,8 @@ static u32 GetBallThrowableState(void)
         return BALL_THROW_UNABLE_TWO_MONS;
     else if (IsPlayerPartyAndPokemonStorageFull() == TRUE)
         return BALL_THROW_UNABLE_NO_ROOM;
+    else if (InShiftingRuins() && CalculatePlayerPartyCount() >= PARTY_SIZE) // Mod : pas de PC dans les ruines
+        return BALL_THROW_UNABLE_NO_ROOM;
     else if (GetConfig(B_SEMI_INVULNERABLE_CATCH) >= GEN_4 &&  IsSemiInvulnerable(GetCatchingBattler(), CHECK_ALL))
         return BALL_THROW_UNABLE_SEMI_INVULNERABLE;
     else if (FlagGet(WE_FLAG_NO_CATCHING) || !IsAllowedToUseBag())
@@ -1142,6 +1191,7 @@ bool32 CanThrowBall(void)
 static const u8 sText_CantThrowPokeBall_TwoMons[] = _("Cannot throw a ball!\nThere are two Pokémon out there!\p");
 static const u8 sText_CantThrowPokeBall_SemiInvulnerable[] = _("Cannot throw a ball!\nThere's no Pokémon in sight!\p");
 static const u8 sText_CantThrowPokeBall_Disabled[] = _("POKé BALLS cannot be used\nright now!\p");
+static const u8 sText_CantThrowPokeBall_RuinsPartyFull[] = _("Your team is full! There's no PC\nin the ruins.\p");
 
 static void ItemUseInBattle_ShowPartyMenu(u8 taskId)
 {
@@ -1245,7 +1295,7 @@ bool32 CannotUseItemsInBattle(enum Item itemId, struct Pokemon *mon)
             cannotUse = TRUE;
             break;
         case BALL_THROW_UNABLE_NO_ROOM:
-            failStr = gText_BoxFull;
+            failStr = InShiftingRuins() ? sText_CantThrowPokeBall_RuinsPartyFull : gText_BoxFull;
             cannotUse = TRUE;
             break;
         case BALL_THROW_UNABLE_SEMI_INVULNERABLE:
@@ -1301,13 +1351,13 @@ bool32 CannotUseItemsInBattle(enum Item itemId, struct Pokemon *mon)
         {
             for (i = 0; i < MAX_MON_MOVES; i++)
             {
-                if (GetMonData(mon, MON_DATA_PP1 + i) < CalculatePPWithBonus(GetMonData(mon, MON_DATA_MOVE1 + i), GetMonData(mon, MON_DATA_PP_BONUSES), i))
+                if (GetMonData(mon, MON_DATA_PP1 + i) < CalculateMonMovePP(mon, GetMonData(mon, MON_DATA_MOVE1 + i), GetMonData(mon, MON_DATA_PP_BONUSES), i))
                     break;
             }
             if (i == MAX_MON_MOVES)
                 cannotUse = TRUE;
         }
-        else if (GetMonData(mon, MON_DATA_PP1 + gPartyMenu.data1) == CalculatePPWithBonus(GetMonData(mon, MON_DATA_MOVE1 + gPartyMenu.data1), GetMonData(mon, MON_DATA_PP_BONUSES), gPartyMenu.data1))
+        else if (GetMonData(mon, MON_DATA_PP1 + gPartyMenu.data1) == CalculateMonMovePP(mon, GetMonData(mon, MON_DATA_MOVE1 + gPartyMenu.data1), GetMonData(mon, MON_DATA_PP_BONUSES), gPartyMenu.data1))
         {
             cannotUse = TRUE;
         }

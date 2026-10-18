@@ -859,12 +859,23 @@
 #define TRAINER_LEAF                        852
 #define TRAINER_BRENDAN_PLACEHOLDER         853
 #define TRAINER_MAY_PLACEHOLDER             854
+#define TRAINER_EV_DUNGEON                  855 // Mod : adversaire des Training Depths (équipe générée)
+#define TRAINER_RUINS                       856 // Mod : dresseur des Shifting Ruins (équipe générée)
+// Mod : adversaires des défis à règles annoncées (Centre Pokémon d'Ever Grande).
+#define TRAINER_CHALLENGE_ELEMENT           857
+#define TRAINER_CHALLENGE_DOUBLE            858
+#define TRAINER_CHALLENGE_VARIETY           859
+#define TRAINER_CHALLENGE_RISING            860
+#define TRAINER_CHALLENGE_ENDURANCE_1       861
+#define TRAINER_CHALLENGE_ENDURANCE_2       862
+#define TRAINER_CHALLENGE_FIRST             TRAINER_CHALLENGE_ELEMENT
+#define TRAINER_CHALLENGE_LAST              TRAINER_CHALLENGE_ENDURANCE_2
 
 // NOTE: Because each Trainer uses a flag to determine when they are defeated, there is only space for 9 additional trainers before trainer flag space overflows
 //       More space can be made by shifting flags around in constants/flags.h or changing how trainer flags are handled
 //       MAX_TRAINERS_COUNT can be increased but will take up additional saveblock space
 
-#define TRAINERS_COUNT_EMERALD     855
+#define TRAINERS_COUNT_EMERALD     863
 #define MAX_TRAINERS_COUNT_EMERALD 864
 
 #if IS_FRLG

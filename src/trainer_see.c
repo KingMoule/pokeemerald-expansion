@@ -15,6 +15,7 @@
 #include "trainer_hill.h"
 #include "util.h"
 #include "battle_pyramid.h"
+#include "shifting_ruins.h"
 #include "constants/battle_frontier.h"
 #include "constants/event_objects.h"
 #include "constants/event_object_movement.h"
@@ -492,6 +493,8 @@ bool8 CheckForTrainersWantingBattle(void)
         if (gNoOfApproachingTrainers > 1)
             break;
         if (GetMonsStateToDoubles_2() != PLAYER_HAS_TWO_USABLE_MONS) // one trainer found and can't have a double battle
+            break;
+        if (InShiftingRuins()) // Mod : un seul dresseur à la fois dans les Shifting Ruins
             break;
     }
 

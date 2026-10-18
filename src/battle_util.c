@@ -16,6 +16,7 @@
 #include "config_changes.h"
 #include "party_menu.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "international_string_util.h"
 #include "item.h"
 #include "util.h"
@@ -2089,6 +2090,8 @@ enum WeatherFailure TryChangeBattleWeather(enum BattlerId battler, u32 battleWea
             gBattleStruct->weatherDuration = 8;
         else
             gBattleStruct->weatherDuration = 5;
+        if (gBattleStruct->weatherDuration != 0)
+            gBattleStruct->weatherDuration += GetTreeWeatherTurnsBonus(battler, gBattleWeather);
     }
 
     if (ability != ABILITY_NONE) // Weather started by Ability
@@ -6780,6 +6783,8 @@ static inline u32 CalcMoveBasePowerAfterModifiers(struct DamageContext *ctx)
         break;
     }
 
+    modifier = uq4_12_multiply(modifier, GetMoveVariantPowerModifier(battlerAtk, move));
+
     // Terastallization boosts weak, non-priority, non-multi hit moves after modifiers to 60 BP.
     if (GetActiveGimmick(battlerAtk) == GIMMICK_TERA
         && (moveType == GetBattlerTeraType(battlerAtk)
@@ -7676,6 +7681,9 @@ static inline uq4_12_t GetOtherModifiers(struct DamageContext *ctx)
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(ctx));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(ctx->battlerAtk, ctx->typeEffectivenessModifier, ctx->holdEffects[ctx->battlerAtk]));
     }
+    DAMAGE_MULTIPLY_MODIFIER(GetTreeDamageModifier(ctx->battlerAtk, ctx->battlerDef, ctx->move, ctx->moveType));
+    DAMAGE_MULTIPLY_MODIFIER(GetTreeGuardModifier(ctx->battlerDef, ctx->typeEffectivenessModifier));
+    DAMAGE_MULTIPLY_MODIFIER(GetTreeFirstWeaknessModifier(ctx->battlerDef, ctx->typeEffectivenessModifier));
     return finalModifier;
 }
 
@@ -7958,7 +7966,8 @@ s32 CalcCritChanceStage(struct DamageContext *ctx)
                     + GetHoldEffectCritChanceIncrease(ctx->battlerAtk, ctx->holdEffects[ctx->battlerAtk])
                     + ((B_AFFECTION_MECHANICS == TRUE && GetBattlerAffectionHearts(ctx->battlerAtk) == AFFECTION_FIVE_HEARTS) ? 2 : 0)
                     + (ctx->abilities[ctx->battlerAtk] == ABILITY_SUPER_LUCK ? 1 : 0)
-                    + gBattleMons[ctx->battlerAtk].volatiles.bonusCritStages;
+                    + gBattleMons[ctx->battlerAtk].volatiles.bonusCritStages
+                    + GetTreeCritStageBonus(ctx->battlerAtk, ctx->move, ctx->moveType); // Mod : maîtrise Focus
 
         if (critChance >= ARRAY_COUNT(sCriticalHitOdds))
             critChance = ARRAY_COUNT(sCriticalHitOdds) - 1;
@@ -8268,6 +8277,7 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(struct DamageCont
         MulByTypeEffectiveness(ctx, &modifier, types[1]);
     if (types[2] != TYPE_MYSTERY && types[2] != types[1] && types[2] != types[0])
         MulByTypeEffectiveness(ctx, &modifier, types[2]);
+    modifier = ApplyMutationWeaknessPenalty(ctx->battlerDef, ctx->moveType, modifier);
     if (ctx->moveType == TYPE_FIRE && gBattleMons[ctx->battlerDef].volatiles.tarShot)
         modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
 
@@ -9586,8 +9596,8 @@ void CopyMonAbilityAndTypesToBattleMon(enum BattlerId battler, struct Pokemon *m
             gBattleMons[battler].ability = TestRunner_Battle_GetForcedAbility(array, partyIndex);
     }
     #endif
-    gBattleMons[battler].types[0] = GetSpeciesType(gBattleMons[battler].species, 0);
-    gBattleMons[battler].types[1] = GetSpeciesType(gBattleMons[battler].species, 1);
+    gBattleMons[battler].types[0] = GetBoxMonMutatedType(&mon->box, gBattleMons[battler].species, 0);
+    gBattleMons[battler].types[1] = GetBoxMonMutatedType(&mon->box, gBattleMons[battler].species, 1);
     gBattleMons[battler].types[2] = TYPE_MYSTERY;
 }
 
@@ -9651,6 +9661,10 @@ u32 CalcSecondaryEffectChance(enum BattlerId battler, enum Ability battlerAbilit
     bool8 hasSereneGrace = (battlerAbility == ABILITY_SERENE_GRACE);
     bool8 hasRainbow = (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_RAINBOW) != 0;
     u16 secondaryEffectChance = additionalEffect->chance;
+
+    if (secondaryEffectChance != 0)
+        secondaryEffectChance += GetTreeStatusChanceBonus(battler, additionalEffect->moveEffect);
+    secondaryEffectChance = ApplyMoveVariantEffectChance(battler, additionalEffect, secondaryEffectChance);
 
     if (hasRainbow && hasSereneGrace && additionalEffect->moveEffect == MOVE_EFFECT_FLINCH)
         return secondaryEffectChance * 2;
@@ -9766,7 +9780,7 @@ bool32 CanMonParticipateInSkyBattle(struct Pokemon *mon)
     enum Ability ability = GetSpeciesAbility(species, monAbilityNum);
 
     bool32 hasLevitateAbility = (ability == ABILITY_LEVITATE || ability == ABILITY_EELEVATE);
-    bool32 isFlyingType = GetSpeciesType(species, 0) == TYPE_FLYING || GetSpeciesType(species, 1) == TYPE_FLYING;
+    bool32 isFlyingType = GetBoxMonMutatedType(&mon->box, species, 0) == TYPE_FLYING || GetBoxMonMutatedType(&mon->box, species, 1) == TYPE_FLYING;
     bool32 monIsValidAndNotEgg = GetMonData(mon, MON_DATA_SANITY_HAS_SPECIES) && !GetMonData(mon, MON_DATA_IS_EGG);
 
     if (monIsValidAndNotEgg)

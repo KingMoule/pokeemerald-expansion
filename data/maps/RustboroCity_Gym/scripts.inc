@@ -6,6 +6,7 @@ RustboroCity_Gym_EventScript_Roxanne::
 	specialvar VAR_RESULT, ShouldTryRematchBattle
 	goto_if_eq VAR_RESULT, TRUE, RustboroCity_Gym_EventScript_RoxanneRematch
 	goto_if_unset FLAG_RECEIVED_TM_ROCK_TOMB, RustboroCity_Gym_EventScript_GiveRockTomb
+	goto_if_unset FLAG_RECEIVED_TECHNIQUE_CODEX, RustboroCity_Gym_EventScript_GiveTechniqueCodex
 	msgbox RustboroCity_Gym_Text_RoxannePostBattle, MSGBOX_DEFAULT
 	release
 	end
@@ -30,6 +31,17 @@ RustboroCity_Gym_EventScript_GiveRockTomb::
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
 	setflag FLAG_RECEIVED_TM_ROCK_TOMB
 	msgbox RustboroCity_Gym_Text_ExplainRockTomb, MSGBOX_DEFAULT
+	goto_if_unset FLAG_RECEIVED_TECHNIQUE_CODEX, RustboroCity_Gym_EventScript_GiveTechniqueCodex
+	release
+	end
+
+@ Mod : premier Technique Codex, pour faire découvrir les variantes d'attaques.
+RustboroCity_Gym_EventScript_GiveTechniqueCodex::
+	msgbox RustboroCity_Gym_Text_TechniqueCodexIntro, MSGBOX_DEFAULT
+	giveitem ITEM_TECHNIQUE_CODEX
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag FLAG_RECEIVED_TECHNIQUE_CODEX
+	msgbox RustboroCity_Gym_Text_ExplainTechniqueCodex, MSGBOX_DEFAULT
 	release
 	end
 
@@ -281,3 +293,23 @@ RustboroCity_Gym_Text_RoxanneRematchNeedTwoMons:
 	.string "You only have one POKéMON with you?\p"
 	.string "Please return with at least one more\n"
 	.string "POKéMON.$"
+
+RustboroCity_Gym_Text_TechniqueCodexIntro:
+	.string "One more thing, {PLAYER}.\n"
+	.string "Please take this as well.$"
+
+RustboroCity_Gym_Text_ExplainTechniqueCodex:
+	.string "A TECHNIQUE CODEX teaches a\n"
+	.string "POKéMON a new way to use\l"
+	.string "one of its moves.\p"
+	.string "Use it from your BAG. The move\n"
+	.string "gains a variant: more power,\l"
+	.string "more PP or a stronger effect.\p"
+	.string "Choose carefully, though.\n"
+	.string "A variant can't be undone.\p"
+	.string "Codices like this one are found\n"
+	.string "deep in the SHIFTING RUINS.\p"
+	.string "They say its halls change\n"
+	.string "on every visit.\p"
+	.string "A guide waits at the POKéMON\n"
+	.string "CENTER here, if you dare.$"

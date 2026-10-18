@@ -100,7 +100,7 @@ WILD_BATTLE_TEST("Large exp gains are supported", s32 exp) // #1455
 
     PARAMETRIZE { level = 10; }
     PARAMETRIZE { level = 50; }
-    PARAMETRIZE { level = MAX_LEVEL; }
+    PARAMETRIZE { level = 100; } // Mod : MAX_LEVEL vaut 250 ; le gain serait alors tronqué par le plafond de 100.
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Level(1); Item(ITEM_LUCKY_EGG); OTName("Test"); } // OT Name is different so it gets more exp as a traded mon
@@ -150,7 +150,7 @@ WILD_BATTLE_TEST("Transformed Pokemon gives the experience points of the copied 
     } THEN {
         EXPECT_EQ(gainedExp, gSpeciesInfo[speciesExp].expYield);
         EXPECT_EQ(GetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_EXP), 1 + gSpeciesInfo[speciesExp].expYield);
-        EXPECT_EQ(GetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_HP_EV), gSpeciesInfo[speciesExp].evYield_HP);
+        EXPECT_EQ(GetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_HP_EV), MOD_BATTLE_EV_GAINS ? gSpeciesInfo[speciesExp].evYield_HP : 0);
     }
 }
 

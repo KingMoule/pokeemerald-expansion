@@ -6,7 +6,8 @@
 #endif
 
 #if B_EXP_CAP_TYPE == EXP_CAP_HARD || B_EXP_CAP_TYPE == EXP_CAP_SOFT
-#if B_LEVEL_CAP_TYPE != LEVEL_CAP_FLAG_LIST && B_LEVEL_CAP_TYPE != LEVEL_CAP_VARIABLE
+// Mod : LEVEL_CAP_NONE est accepté, le plafond venant alors des sceaux (GetModLevelCap).
+#if B_LEVEL_CAP_TYPE != LEVEL_CAP_NONE && B_LEVEL_CAP_TYPE != LEVEL_CAP_FLAG_LIST && B_LEVEL_CAP_TYPE != LEVEL_CAP_VARIABLE
 #error "Invalid choice for B_LEVEL_CAP_TYPE, must be of [LEVEL_CAP_FLAG_LIST, LEVEL_CAP_VARIABLE]"
 #endif
 #if B_LEVEL_CAP_TYPE == LEVEL_CAP_VARIABLE && B_LEVEL_CAP_VARIABLE == 0
@@ -19,6 +20,7 @@
 #endif
 
 u32 GetCurrentLevelCap(void);
+u32 GetModLevelCap(void);
 u32 GetSoftLevelCapExpValue(u32 level, u32 expValue);
 u32 GetCurrentEVCap(void);
 

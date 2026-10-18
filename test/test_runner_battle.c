@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_build.h"
 #include "battle.h"
 #include "battle_ai_util.h"
 #include "battle_anim.h"
@@ -2738,6 +2739,31 @@ void GigantamaxFactor_(u32 sourceLine, bool32 gigantamaxFactor)
     INVALID_IF(!DATA.currentMon, "GigantamaxFactor outside of PLAYER/OPPONENT");
     SetMonData(DATA.currentMon, MON_DATA_GIGANTAMAX_FACTOR, &gigantamaxFactor);
     SetGimmick(sourceLine, DATA.battlerParty, DATA.currentPartyIndex, GIMMICK_DYNAMAX);
+}
+
+void Mutation_(u32 sourceLine, enum Type mutationType, u32 mutationSlot)
+{
+    INVALID_IF(!DATA.currentMon, "Mutation outside of PLAYER/OPPONENT");
+    SetMonData(DATA.currentMon, MON_DATA_MUTATION_TYPE, &mutationType);
+    SetMonData(DATA.currentMon, MON_DATA_MUTATION_SLOT, &mutationSlot);
+}
+
+// Fixe directement un rang d'arbre, sans passer par les règles d'investissement.
+void TreeRank_(u32 sourceLine, enum Type treeType, u32 node, u32 rank)
+{
+    INVALID_IF(!DATA.currentMon, "TreeRank outside of PLAYER/OPPONENT");
+    SetMonData(DATA.currentMon, MON_DATA_TREE_TYPE, &treeType);
+    SetBoxMonTreeRank(&DATA.currentMon->box, node, rank);
+    CalculateMonStats(DATA.currentMon);
+}
+
+// À placer après Moves(...) : la variante s'attache à l'attaque de cet emplacement.
+void MoveVariant_(u32 sourceLine, u32 slot, u32 variant)
+{
+    INVALID_IF(!DATA.currentMon, "MoveVariant outside of PLAYER/OPPONENT");
+    INVALID_IF(slot >= MAX_MON_MOVES, "Illegal move slot: %d", slot);
+    SetBoxMonMoveVariant(&DATA.currentMon->box, slot, variant);
+    BoxMonRestorePP(&DATA.currentMon->box);
 }
 
 void TeraType_(u32 sourceLine, enum Type teraType)

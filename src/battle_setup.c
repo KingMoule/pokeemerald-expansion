@@ -5,6 +5,8 @@
 #include "battle_frontier.h"
 #include "battle_pike.h"
 #include "battle_pyramid.h"
+#include "shifting_ruins.h"
+#include "trainer_build.h"
 #include "battle_setup.h"
 #include "battle_special.h"
 #include "battle_partner.h"
@@ -405,7 +407,12 @@ static void DoStandardWildBattle(bool32 isDouble)
     }
     else if (isDouble)
         gBattleTypeFlags |= BATTLE_TYPE_DOUBLE;
-    if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
+    if (InShiftingRuins())
+    {
+        // Mod : combat sauvage ordinaire dans les Shifting Ruins (expérience, capture, évolution).
+        ShiftingRuins_SetupWildBattle();
+    }
+    else if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
     {
         VarSet(VAR_TEMP_E, 0);
         gBattleTypeFlags |= BATTLE_TYPE_PYRAMID;
@@ -1466,7 +1473,12 @@ void BattleSetup_StartTrainerBattle(void)
     if (TRAINER_BATTLE_PARAM.earlyRival && GetRivalBattleFlags() & RIVAL_BATTLE_TUTORIAL)
         gBattleTypeFlags |= BATTLE_TYPE_FIRST_BATTLE;
 
-    if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
+    if (InShiftingRuins())
+    {
+        // Mod : combat de dresseur ordinaire contre une équipe générée (TRAINER_RUINS).
+        ShiftingRuins_SetupTrainerBattle();
+    }
+    else if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
     {
         VarSet(VAR_TEMP_PLAYING_PYRAMID_MUSIC, 0);
         gBattleTypeFlags |= BATTLE_TYPE_PYRAMID;
@@ -2220,6 +2232,7 @@ static void CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum)
     if (!GetTrainerStructFromId(trainerNum)->overrideTrainer)
     {
         CreateNPCTrainerPartyFromTrainer(party, GetTrainerStructFromId(trainerNum));
+        ApplyTrainerPartyBuilds(party, trainerNum); // Mod : builds des adversaires importants
         return;
     }
 
@@ -2233,6 +2246,13 @@ static void CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum)
     if (tempTrainer.partySize == 0)
         tempTrainer.partySize = origTrainer->partySize;
     CreateNPCTrainerPartyFromTrainer(party, (const struct Trainer *)(&tempTrainer));
+    ApplyTrainerPartyBuilds(party, trainerNum); // Mod : builds des adversaires importants
+}
+
+// Mod : équipe d'un dresseur pour un combat lancé hors de trainerbattle (défis).
+void CreateTrainerPartyWithBuilds(struct Pokemon *party, u16 trainerNum)
+{
+    CreateNPCTrainerParty(party, trainerNum);
 }
 
 void CreateTrainerPartyForPlayer(void)

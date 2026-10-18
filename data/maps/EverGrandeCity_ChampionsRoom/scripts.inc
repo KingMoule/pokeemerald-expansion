@@ -105,6 +105,7 @@ EverGrandeCity_ChampionsRoom_EventScript_BirchArrivesExitForHoF::
 	waitmovement 0
 	msgbox EverGrandeCity_ChampionsRoom_Text_BirchArriveRatePokedex, MSGBOX_DEFAULT
 	call ProfBirch_EventScript_RatePokedex
+	msgbox EverGrandeCity_ChampionsRoom_Text_ModBirchEndgame, MSGBOX_DEFAULT
 	msgbox EverGrandeCity_ChampionsRoom_Text_BirchCongratulations, MSGBOX_DEFAULT
 	applymovement LOCALID_CHAMPIONS_ROOM_WALLACE, Common_Movement_WalkInPlaceFasterUp
 	waitmovement 0
@@ -338,3 +339,14 @@ EverGrandeCity_ChampionsRoom_Text_BrendanCongratulations:
 	.string "{PLAYER}, way to go!\n"
 	.string "Congratulations!$"
 
+EverGrandeCity_ChampionsRoom_Text_ModBirchEndgame:
+	.string "PROF. BIRCH: Your journey isn't over,\n"
+	.string "{PLAYER}{KUN}!\p"
+	.string "The GYM LEADERS will want rematches,\n"
+	.string "with teams far stronger than before.\p"
+	.string "And there are DOUBLE BATTLES and\n"
+	.string "special TRIALS with announced rules.\p"
+	.string "The expert at this city's POKéMON\n"
+	.string "CENTER runs those TRIALS.\p"
+	.string "Every POKéMON you've raised will\n"
+	.string "have its chance!$"

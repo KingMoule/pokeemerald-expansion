@@ -16877,3 +16877,307 @@ Double Battle: No
 Kyogre
 Level: 5
 IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
+
+=== TRAINER_EV_DUNGEON ===
+Name: KAI
+Class: Cooltrainer
+Pic: Cooltrainer M
+Gender: Male
+Music: Cool
+Double Battle: No
+AI: Basic Trainer
+
+Zigzagoon
+Level: 30
+IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
+
+=== TRAINER_RUINS ===
+Name: ROVER
+Class: Ruin Maniac
+Pic: Ruin Maniac
+Gender: Male
+Music: Hiker
+Double Battle: No
+AI: Basic Trainer
+
+Zigzagoon
+Level: 5
+IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
+
+=== TRAINER_CHALLENGE_ELEMENT ===
+Name: MASON
+Class: Expert
+Pic: Expert M
+Gender: Male
+Music: Intense
+Items: Full Restore / Full Restore
+Double Battle: No
+AI: Basic Trainer
+
+Ninetales
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+Ability: Drought
+- Flamethrower
+- Solar Beam
+- Will O Wisp
+- Hypnosis
+
+Houndoom
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Fire Blast
+- Dark Pulse
+- Will O Wisp
+- Nasty Plot
+
+Arcanine
+Level: 61
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Flare Blitz
+- Extreme Speed
+- Crunch
+- Wild Charge
+
+Camerupt
+Level: 61
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Eruption
+- Earth Power
+- Sunny Day
+- Will O Wisp
+
+Charizard @ Sitrus Berry
+Level: 62
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Flamethrower
+- Dragon Pulse
+- Solar Beam
+- Focus Blast
+
+=== TRAINER_CHALLENGE_DOUBLE ===
+Name: RIO & MAE
+Class: Young Couple
+Pic: Young Couple
+Gender: Male
+Music: Girl
+Items: Full Restore / Full Restore
+Double Battle: Yes
+AI: Basic Trainer
+
+Politoed
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+Ability: Drizzle
+- Surf
+- Ice Beam
+- Helping Hand
+- Protect
+
+Ludicolo
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+Ability: Swift Swim
+- Fake Out
+- Surf
+- Giga Drain
+- Ice Beam
+
+Manectric
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Thunder
+- Flamethrower
+- Thunder Wave
+- Protect
+
+Kingdra @ Sitrus Berry
+Level: 62
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+Ability: Swift Swim
+- Muddy Water
+- Dragon Pulse
+- Ice Beam
+- Protect
+
+=== TRAINER_CHALLENGE_VARIETY ===
+Name: ALANA
+Class: Cooltrainer
+Pic: Cooltrainer F
+Gender: Female
+Music: Cool
+Items: Full Restore / Full Restore
+Double Battle: No
+AI: Basic Trainer
+
+Breloom
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Spore
+- Mach Punch
+- Seed Bomb
+- Rock Slide
+
+Starmie
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Surf
+- Psychic
+- Thunderbolt
+- Recover
+
+Aggron
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Iron Tail
+- Rock Slide
+- Earthquake
+- Iron Defense
+
+Absol
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Night Slash
+- Psycho Cut
+- Swords Dance
+- Sucker Punch
+
+Gardevoir
+Level: 61
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Psychic
+- Moonblast
+- Calm Mind
+- Thunderbolt
+
+Altaria @ Sitrus Berry
+Level: 62
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Dragon Pulse
+- Moonblast
+- Flamethrower
+- Roost
+
+=== TRAINER_CHALLENGE_RISING ===
+Name: KOJI
+Class: Black Belt
+Pic: Black Belt
+Gender: Male
+Music: Intense
+Items: Full Restore
+Double Battle: No
+AI: Basic Trainer
+
+Hariyama
+Level: 50
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Fake Out
+- Close Combat
+- Knock Off
+- Bullet Punch
+
+Medicham
+Level: 50
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- High Jump Kick
+- Zen Headbutt
+- Ice Punch
+- Bullet Punch
+
+Breloom
+Level: 50
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Spore
+- Mach Punch
+- Seed Bomb
+- Rock Tomb
+
+Blaziken @ Sitrus Berry
+Level: 52
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Blaze Kick
+- Sky Uppercut
+- Thunder Punch
+- Bulk Up
+
+=== TRAINER_CHALLENGE_ENDURANCE_1 ===
+Name: GRANT
+Class: Hiker
+Pic: Hiker
+Gender: Male
+Music: Hiker
+Double Battle: No
+AI: Basic Trainer
+
+Skarmory
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Spikes
+- Steel Wing
+- Drill Peck
+- Roost
+
+Torkoal
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Lava Plume
+- Earth Power
+- Will O Wisp
+- Protect
+
+Claydol
+Level: 60
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Earthquake
+- Psychic
+- Toxic
+- Reflect
+
+Swampert
+Level: 61
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Waterfall
+- Earthquake
+- Ice Beam
+- Protect
+
+=== TRAINER_CHALLENGE_ENDURANCE_2 ===
+Name: BELLE
+Class: Expert
+Pic: Expert F
+Gender: Female
+Music: Intense
+Double Battle: No
+AI: Basic Trainer
+
+Milotic
+Level: 61
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Scald
+- Ice Beam
+- Toxic
+- Recover
+
+Gengar
+Level: 61
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Shadow Ball
+- Sludge Bomb
+- Thunderbolt
+- Will O Wisp
+
+Metagross
+Level: 62
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Meteor Mash
+- Zen Headbutt
+- Earthquake
+- Bullet Punch
+
+Salamence @ Sitrus Berry
+Level: 63
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Dragon Claw
+- Flamethrower
+- Earthquake
+- Dragon Dance

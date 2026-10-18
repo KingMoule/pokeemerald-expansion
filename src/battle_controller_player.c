@@ -21,6 +21,7 @@
 #include "party_menu.h"
 #include "pokeball.h"
 #include "pokemon.h"
+#include "pokemon_build.h"
 #include "random.h"
 #include "recorded_battle.h"
 #include "reshow_battle_screen.h"
@@ -1081,6 +1082,7 @@ void HandleMoveSwitching(enum BattlerId battler)
                 }
 
                 SetMonData(GetBattlerMon(battler), MON_DATA_PP_BONUSES, &totalPPBonuses);
+                SwapBoxMonMoveVariants(&GetBattlerMon(battler)->box, gMoveSelectionCursor[battler], gMultiUsePlayerCursor);
             }
         }
 

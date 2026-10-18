@@ -427,6 +427,8 @@ extern const u8 EventScript_UseRockSmash[];
 extern const u8 EventScript_UseDig[];
 extern const u8 EventScript_UseCutGrass[];
 extern const u8 EventScript_UseDefog[];
+extern const u8 EventScript_BuildMenu[];
+extern const u8 EventScript_TechniqueCodex[];
 
 //player pc
 extern const u8 EventScript_PalletTown_PlayersHouse_2F_ShutDownPC[];
@@ -640,6 +642,8 @@ extern const u8 TrainerHill_EventScript_TrainerBattle[];
 
 // Item Use
 extern const u8 BerryTree_EventScript_ItemUsePlantBerry[];
+extern const u8 ShiftingRuins_EventScript_EscapeOrb[];
+extern const u8 ShiftingRuins_EventScript_Recruiter[];
 extern const u8 BerryTree_EventScript_ItemUseWailmerPail[];
 extern const u8 BattleFrontier_OutsideEast_EventScript_WaterSudowoodo[];
 

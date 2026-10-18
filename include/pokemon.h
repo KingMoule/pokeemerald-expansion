@@ -39,6 +39,11 @@ enum MonData {
     MON_DATA_HIDDEN_NATURE,
     MON_DATA_HP_LOST,
     MON_DATA_DAYS_SINCE_FORM_CHANGE,
+    MON_DATA_TREE_TYPE,
+    MON_DATA_TREE_POINTS,
+    MON_DATA_MUTATION_TYPE,
+    MON_DATA_MUTATION_SLOT,
+    MON_DATA_MOVE_VARIANTS,
     MON_DATA_ENCRYPT_SEPARATOR,
     MON_DATA_NICKNAME,
     MON_DATA_NICKNAME10,
@@ -255,6 +260,22 @@ union PokemonSubstruct
     u16 raw[NUM_SUBSTRUCT_BYTES / 2]; // /2 because it's u16, not u8
 };
 
+// Données du mod propres à chaque Pokémon (arbre, mutation, variantes).
+// Non chiffrées : elles se lisent avec Get/SetBoxMonData et les fonctions de pokemon_build.h.
+struct PokemonBuild
+{
+    u8 treeRanks[(MOD_TREE_NODE_COUNT * MOD_TREE_RANK_BITS + 7) / 8]; // Rangs des nœuds, compactés.
+    u8 treeType:5; // Élément de l'arbre suivi (TYPE_NONE tant qu'aucun point n'est investi).
+    u8 mutationSlot:1; // Type remplacé par la mutation : 0 = premier, 1 = second.
+    u8 unused_0B:2;
+    u8 mutationType:5; // Nouveau type (TYPE_NONE = aucune mutation).
+    u8 unused_0C:3;
+    u8 treePoints; // Points d'arbre gagnés; les points dépensés sont la somme des rangs.
+    u8 moveVariants; // MOD_MOVE_VARIANT_BITS bits par attaque.
+    u8 expHigh;  // Bits de poids fort de l'expérience au-delà de 21 bits (niveaux > 100).
+    u8 unused_0F;
+};
+
 struct BoxPokemon
 {
     u32 personality;
@@ -281,6 +302,8 @@ struct BoxPokemon
         u32 raw[(NUM_SUBSTRUCT_BYTES * 4) / 4]; // *4 because there are 4 substructs, /4 because it's u32, not u8
         union PokemonSubstruct substructs[4];
     } secure;
+
+    struct PokemonBuild build;
 };
 
 struct Pokemon

@@ -10,6 +10,7 @@
 #include "battle_stat_change.h"
 #include "battle_scripts.h"
 #include "battle_z_move.h"
+#include "pokemon_build.h"
 #include "battle_anim_scripts.h"
 #include "item.h"
 #include "battle_controllers.h"
@@ -4160,7 +4161,8 @@ static enum MoveEndResult MoveEndMoveBlockRecoil(struct BattleCalcValues *cv)
             }
             else
             {
-                SetPassiveDamageAmount(cv->battlerAtk, gBattleScripting.savedDmg * max(1, GetMoveRecoil(cv->move)) / 100);
+                u32 recoil = gBattleScripting.savedDmg * max(1, GetMoveRecoil(cv->move)) / 100;
+                SetPassiveDamageAmount(cv->battlerAtk, ApplyTreeRecoilReduction(cv->battlerAtk, GetBattleMoveType(cv->move), recoil));
             }
             TryUpdateEvolutionTracker(IF_RECOIL_DAMAGE_GE, gBattleStruct->passiveHpUpdate[cv->battlerAtk], MOVE_NONE);
             BattleScriptCall(BattleScript_MoveEffectRecoil);
@@ -4697,9 +4699,24 @@ static enum MoveEndResult MoveEndFormChange(struct BattleCalcValues *cv)
     return result;
 }
 
+// Mod : maîtrises Garde et Cœur juste avant l'Orbe Vie, une fois par attaque.
+static EWRAM_DATA bool8 sTreeHeartChecked = FALSE;
+
 static enum MoveEndResult MoveEndLifeOrbShellBell(struct BattleCalcValues *cv)
 {
     enum MoveEndResult result = MOVEEND_RESULT_CONTINUE;
+
+    if (!sTreeHeartChecked)
+    {
+        sTreeHeartChecked = TRUE;
+        UpdateTreeFirstWeaknessGuard(cv->battlerAtk);
+        if (TryTreeHeartActivation(cv->battlerAtk, gCurrentMove))
+        {
+            BattleScriptCall(BattleScript_TreeHeartActivates);
+            return MOVEEND_RESULT_RUN_SCRIPT;
+        }
+    }
+    sTreeHeartChecked = FALSE;
 
     if (ItemBattleEffects(cv->battlerAtk, 0, cv->holdEffects[cv->battlerAtk], IsLifeOrbShellBellActivation))
         result = MOVEEND_RESULT_RUN_SCRIPT;

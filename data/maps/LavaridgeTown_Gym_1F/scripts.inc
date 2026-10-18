@@ -82,6 +82,7 @@ LavaridgeTown_Gym_1F_EventScript_GiveOverheat2::
 	giveitem ITEM_TM_OVERHEAT
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
 	msgbox LavaridgeTown_Gym_1F_Text_ExplainOverheat, MSGBOX_DEFAULT
+	msgbox LavaridgeTown_Gym_1F_Text_ModExplainDepthsAndLineage, MSGBOX_DEFAULT
 	setflag FLAG_RECEIVED_TM_OVERHEAT
 	release
 	end
@@ -90,6 +91,7 @@ LavaridgeTown_Gym_1F_EventScript_GiveOverheat::
 	giveitem ITEM_TM_OVERHEAT
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_BagIsFull
 	msgbox LavaridgeTown_Gym_1F_Text_ExplainOverheat, MSGBOX_DEFAULT
+	msgbox LavaridgeTown_Gym_1F_Text_ModExplainDepthsAndLineage, MSGBOX_DEFAULT
 	setflag FLAG_RECEIVED_TM_OVERHEAT
 	return
 
@@ -396,3 +398,29 @@ LavaridgeTown_Gym_1F_Text_FlanneryRematchNeedTwoMons:
 	.string "that can battle?\p"
 	.string "I hate to say this, but when you come\n"
 	.string "see me, bring at least two POKéMON.$"
+
+LavaridgeTown_Gym_1F_Text_ModExplainDepthsAndLineage:
+	.string "Your POKéMON have heart, but heart\n"
+	.string "alone won't push their stats\l"
+	.string "further.\p"
+	.string "There's a place in MAUVILLE's\n"
+	.string "POKéMON CENTER called the\l"
+	.string "TRAINING DEPTHS.\p"
+	.string "Now that you have four BADGES,\n"
+	.string "they'll let you in.\p"
+	.string "Pick one POKéMON and the stat\n"
+	.string "you want it to grow.\p"
+	.string "The deeper you go, the more it\n"
+	.string "gains. Just don't bite off more\l"
+	.string "than you can chew!\p"
+	.string "Oh, and one more thing!\n"
+	.string "A mutation can be passed down.\p"
+	.string "Leave a mutated POKéMON at the\n"
+	.string "DAY CARE on ROUTE 117.\p"
+	.string "Its EGG may hatch with the same\n"
+	.string "mutation, if the baby naturally\l"
+	.string "has the type being replaced.\p"
+	.string "A LINEAGE CHARM from the SHIFTING\n"
+	.string "RUINS makes it a sure thing.\p"
+	.string "Start planning your bloodlines\n"
+	.string "early!$"

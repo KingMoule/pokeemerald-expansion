@@ -5,6 +5,7 @@ BattleFrontier_BattlePyramidFloor_MapScripts::
 	.byte 0
 
 BattleFrontier_BattlePyramidFloor_OnFrame:
+	map_script_2 VAR_TEMP_C, 1, ShiftingRuins_EventScript_LostOnFrame  @ Mod : Shifting Ruins perdues
 	map_script_2 VAR_TEMP_D, 1, BattleFrontier_BattlePyramidFloor_EventScript_UpdateLight
 	map_script_2 VAR_TEMP_PLAYING_PYRAMID_MUSIC, 0, BattleFrontier_BattlePyramidFloor_EventScript_PlayPyramidMusic
 	map_script_2 VAR_TEMP_F, 1, BattleFrontier_BattlePyramidFloor_EventScript_ShowMapName
@@ -38,6 +39,8 @@ BattleFrontier_BattlePyramidFloor_EventScript_PlayPyramidMusic::
 
 BattleFrontier_BattlePyramidFloor_OnResume:
 	pyramid_setfloorpal
+	special ShiftingRuins_IsActive  @ Mod : étage des Shifting Ruins
+	goto_if_eq VAR_RESULT, TRUE, ShiftingRuins_EventScript_FloorOnResume
 	frontier_getstatus
 	switch VAR_TEMP_CHALLENGE_STATUS
 	case 0, BattleFrontier_BattlePyramidFloor_EventScript_ReadyChallenge
@@ -57,6 +60,8 @@ BattleFrontier_BattlePyramidFloor_EventScript_ResetParty::
 	end
 
 BattleFrontier_BattlePyramid_EventScript_WarpToLobbyLost::
+	special ShiftingRuins_IsActive  @ Mod : équipe K.O. dans les Shifting Ruins (poison hors combat)
+	goto_if_eq VAR_RESULT, TRUE, ShiftingRuins_EventScript_RunLost
 	frontier_set FRONTIER_DATA_CHALLENGE_STATUS, CHALLENGE_STATUS_LOST
 	pyramid_set PYRAMID_DATA_TRAINER_FLAGS, 255
 BattleFrontier_BattlePyramid_EventScript_WarpToLobby::
@@ -86,6 +91,8 @@ BattleFrontier_BattlePyramidFloor_EventScript_SetLightRadius::
 	return
 
 BattlePyramid_WarpToNextFloor::
+	special ShiftingRuins_IsActive  @ Mod : escalier des Shifting Ruins
+	goto_if_eq VAR_RESULT, TRUE, ShiftingRuins_EventScript_Stairs
 	call BattleFrontier_EventScript_IncrementWinStreak
 	frontier_get FRONTIER_DATA_BATTLE_NUM  @ Floor number
 	addvar VAR_RESULT, 1
@@ -114,6 +121,7 @@ BattlePyramid_TrainerBattle::
 
 BattlePyramid_FindItemBall::
 	pyramid_setitem
+	goto_if_eq VAR_RESULT, TRUE, ShiftingRuins_EventScript_FindRelic  @ Mod : objet rare des Shifting Ruins
 	callstd STD_FIND_ITEM
 	goto_if_eq VAR_0x8007, 0, BattlePyramid_FindItemBallEnd
 	pyramid_hideitem
@@ -121,6 +129,8 @@ BattlePyramid_FindItemBallEnd::
 	end
 
 BattlePyramid_Retire::
+	special ShiftingRuins_IsActive  @ Mod : abandon dans les Shifting Ruins
+	goto_if_eq VAR_RESULT, TRUE, ShiftingRuins_EventScript_Retire
 	goto BattleFrontier_BattlePyramid_EventScript_WarpToLobbyLost
 
 @ Also used by Trainer Hill

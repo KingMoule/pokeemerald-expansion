@@ -7307,6 +7307,98 @@ const struct ItemInfo gItemsInfo[] =
         .iconPalette = gItemIconPalette_Glimmoranite,
     },
 
+    // Mod : objet du donjon rogue-lite. Icône provisoire reprise du Scroll of Waters.
+    [ITEM_TECHNIQUE_CODEX] =
+    {
+        .name = ITEM_NAME("Technique Codex"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Gives one move a\n"
+            "permanent variant.\n"
+            "It is used up."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_FIELD_USE,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_TechniqueCodex,
+        .iconPic = gItemIcon_ScrollOfWaters,
+        .iconPalette = gItemIconPalette_ScrollOfWaters,
+    },
+
+    // Mod : objet de contrôle de l'héritage, tenu par un parent à la pension.
+    // Icône provisoire reprise de l'Oval Charm.
+    [ITEM_LINEAGE_CHARM] =
+    {
+        .name = ITEM_NAME("Lineage Charm"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Held by a parent,\n"
+            "it passes on its\n"
+            "mutation to Eggs."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_HELD_ITEM,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .flingPower = 10,
+        .iconPic = gItemIcon_OvalCharm,
+        .iconPalette = gItemIconPalette_OvalCharm,
+    },
+
+    // Mod : objet d'évasion des Shifting Ruins, utilisable seulement à l'intérieur.
+    // Icône provisoire reprise de la Corde Sortie.
+    [ITEM_ESCAPE_ORB] =
+    {
+        .name = ITEM_NAME("Escape Orb"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Leave the Ruins at\n"
+            "once and keep all\n"
+            "your finds."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_FIELD_USE,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_EscapeOrb,
+        .iconPic = gItemIcon_EscapeRope,
+        .iconPalette = gItemIconPalette_EscapeRope,
+    },
+
+    // Mod : sceau de mutation, à rapporter vivant des Shifting Ruins. Il est consommé dans
+    // BUILD > Mutate pour ouvrir un type encore scellé. Icône provisoire reprise de l'Ability Capsule.
+    [ITEM_MUTATION_SEAL] =
+    {
+        .name = ITEM_NAME("Mutation Seal"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Opens a new type\n"
+            "for mutations, for\n"
+            "good. Used up."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_FIELD_USE,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconPic = gItemIcon_AbilityCapsule,
+        .iconPalette = gItemIconPalette_AbilityCapsule,
+    },
+
+#if MOD_LEVELS_BEYOND_100
+    // Mod : sceau de dépassement, à rapporter vivant des Shifting Ruins.
+    // Icône provisoire reprise du Shiny Charm.
+    [ITEM_ASCENSION_SEAL] =
+    {
+        .name = ITEM_NAME("Ascension Seal"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Raises the level\n"
+            "cap of all your\n"
+            "Pokémon for good."),
+        .pocket = POCKET_ITEMS,
+        .sortType = ITEM_TYPE_FIELD_USE,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_AscensionSeal,
+        .iconPic = gItemIcon_ShinyCharm,
+        .iconPalette = gItemIconPalette_ShinyCharm,
+    },
+#endif
+
 // Gems
 #if I_PRICE >= GEN_9
     #define GEM_PRICE 15000
