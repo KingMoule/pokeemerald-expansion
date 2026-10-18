@@ -2,17 +2,14 @@
 #include "battle_main.h"
 #include "event_data.h"
 #include "item.h"
-#include "list_menu.h"
-#include "malloc.h"
 #include "pokemon.h"
 #include "pokemon_build.h"
-#include "script_menu.h"
 #include "string_util.h"
 #include "text.h"
 #include "tree_menu.h"
 
-// Écran d'investissement des points d'arbre, ouvert depuis le menu d'équipe.
-// Le script EventScript_TreeMenu enchaîne ces specials :
+// Logique de l'écran BUILD (arbre, variantes, mutation), testée dans test/mod_tree_menu.c.
+// L'écran lui-même est dans src/tree_screen.c. Variables :
 //   VAR_0x8004 : emplacement du Pokémon dans l'équipe.
 //   VAR_0x8005 : élément de l'arbre affiché.
 //   VAR_0x8006 : dernier nœud choisi (position du curseur).
@@ -31,17 +28,6 @@ enum
 static struct BoxPokemon *GetTreeMenuBoxMon(void)
 {
     return &gParties[B_TRAINER_PLAYER][sMonSlot].box;
-}
-
-static void PushTreeMenuItem(const u8 *text, u32 id)
-{
-    struct ListMenuItem item;
-    u8 *name = Alloc(100);
-
-    StringCopy(name, text);
-    item.name = name;
-    item.id = id;
-    MultichoiceDynamic_PushElement(item);
 }
 
 // VAR_RESULT : TREE_MENU_READY si l'arbre est connu (déjà suivi ou un seul type),
@@ -73,17 +59,6 @@ void TreeMenu_Begin(void)
     type2 = GetBoxMonMutatedType(boxMon, species, 1);
     sTreeType = type1;
     gSpecialVar_Result = (type1 == type2) ? TREE_MENU_READY : TREE_MENU_CHOOSE_TREE;
-}
-
-void TreeMenu_PushTypeChoices(void)
-{
-    struct BoxPokemon *boxMon = GetTreeMenuBoxMon();
-    enum Species species = GetBoxMonData(boxMon, MON_DATA_SPECIES);
-    enum Type type1 = GetBoxMonMutatedType(boxMon, species, 0);
-    enum Type type2 = GetBoxMonMutatedType(boxMon, species, 1);
-
-    PushTreeMenuItem(gTypesInfo[type1].name, type1);
-    PushTreeMenuItem(gTypesInfo[type2].name, type2);
 }
 
 // gStringVar4 : description du nœud, puis la question ou la raison du refus.
@@ -209,32 +184,6 @@ static u8 *AppendVariantStats(u8 *end, enum MoveVariant variant)
     return StringCopy(end, COMPOUND_STRING("%."));
 }
 
-// Une ligne par attaque : « Nom » ou « Nom (Variante) ».
-void VariantMenu_PushMoves(void)
-{
-    struct BoxPokemon *boxMon = GetTreeMenuBoxMon();
-    u32 slot;
-    u8 text[64];
-
-    for (slot = 0; slot < MAX_MON_MOVES; slot++)
-    {
-        enum Move move = GetBoxMonData(boxMon, MON_DATA_MOVE1 + slot);
-        enum MoveVariant variant = GetBoxMonMoveVariant(boxMon, slot);
-        u8 *end;
-
-        if (move == MOVE_NONE)
-            continue;
-        end = StringCopy(text, GetMoveName(move));
-        if (variant != MOVE_VARIANT_STANDARD)
-        {
-            end = StringCopy(end, COMPOUND_STRING(" ("));
-            end = StringCopy(end, GetMoveVariantName(variant));
-            StringCopy(end, COMPOUND_STRING(")"));
-        }
-        PushTreeMenuItem(text, slot);
-    }
-}
-
 // VAR_RESULT : VARIANT_MENU_OK, ou la raison du refus avec son message dans gStringVar4.
 void VariantMenu_CheckMove(void)
 {
@@ -262,31 +211,6 @@ void VariantMenu_CheckMove(void)
     }
 }
 
-void VariantMenu_PushVariants(void)
-{
-    enum Move move = GetVariantMenuMove();
-    enum MoveVariant variant;
-
-    for (variant = MOVE_VARIANT_STANDARD + 1; variant < MOVE_VARIANT_COUNT; variant++)
-    {
-        if (CanMoveHaveVariant(move, variant))
-            PushTreeMenuItem(GetMoveVariantName(variant), variant);
-    }
-}
-
-// gStringVar4 : effet de la variante, puis la question de confirmation.
-void VariantMenu_BufferVariant(void)
-{
-    u8 *end = StringCopy(gStringVar4, GetMoveVariantName(sVariant));
-
-    end = StringCopy(end, COMPOUND_STRING(": "));
-    end = AppendVariantStats(end, sVariant);
-    *end++ = CHAR_PROMPT_CLEAR;
-    end = StringCopy(end, COMPOUND_STRING("Give this variant to\n"));
-    end = StringCopy(end, GetMoveName(GetVariantMenuMove()));
-    StringCopy(end, COMPOUND_STRING("? This is permanent."));
-}
-
 void VariantMenu_Apply(void)
 {
     TrySetBoxMonMoveVariant(GetTreeMenuBoxMon(), sMoveSlot, sVariant);
@@ -307,8 +231,6 @@ enum
     MUTATION_MENU_READY,
     MUTATION_MENU_CHOOSE_REPLACED,
 };
-
-static const u8 sText_MutationSealed[] = _(" (sealed)");
 
 // VAR_RESULT : MUTATION_MENU_READY (type remplacé connu), MUTATION_MENU_CHOOSE_REPLACED (double type)
 // ou MUTATION_MENU_REFUSED avec la raison dans gStringVar4.
@@ -333,39 +255,6 @@ void MutationMenu_Begin(void)
     }
     sReplacedType = type1;
     gSpecialVar_Result = (type1 == type2) ? MUTATION_MENU_READY : MUTATION_MENU_CHOOSE_REPLACED;
-}
-
-void MutationMenu_PushReplacedTypes(void)
-{
-    enum Species species = GetBoxMonData(GetTreeMenuBoxMon(), MON_DATA_SPECIES);
-
-    PushTreeMenuItem(gTypesInfo[GetSpeciesType(species, 0)].name, GetSpeciesType(species, 0));
-    PushTreeMenuItem(gTypesInfo[GetSpeciesType(species, 1)].name, GetSpeciesType(species, 1));
-}
-
-// Tous les types réels sauf ceux de l'espèce, les types encore scellés marqués comme tels.
-void MutationMenu_PushNewTypes(void)
-{
-    enum Species species = GetBoxMonData(GetTreeMenuBoxMon(), MON_DATA_SPECIES);
-    enum Type type;
-    u32 pass;
-    u8 text[32];
-
-    // Types ouverts d'abord, puis les types scellés.
-    for (pass = 0; pass < 2; pass++)
-    {
-        for (type = 0; type < NUMBER_OF_MON_TYPES; type++)
-        {
-            if (!IsMutationTargetType(type) || type == GetSpeciesType(species, 0) || type == GetSpeciesType(species, 1))
-                continue;
-            if ((IsMutationTypeOpen(type) ? 0 : 1) != pass)
-                continue;
-            StringCopy(text, gTypesInfo[type].name);
-            if (pass == 1)
-                StringAppend(text, sText_MutationSealed);
-            PushTreeMenuItem(text, type);
-        }
-    }
 }
 
 // VAR_RESULT : TRUE si la mutation est possible, gStringVar4 = question ; sinon FALSE et la raison.

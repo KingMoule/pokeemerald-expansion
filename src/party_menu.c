@@ -33,6 +33,7 @@
 #include "international_string_util.h"
 #include "item.h"
 #include "item_menu.h"
+#include "tree_screen.h"
 #include "item_use.h"
 #include "caps.h"
 #include "link.h"
@@ -478,7 +479,9 @@ static void CursorCb_Trade2(u8);
 static void CursorCb_Toss(u8);
 static void CursorCb_FieldMove(u8);
 static void CursorCb_Build(u8);
-static void FieldCallback_BuildMenu(void);
+static void CB2_OpenBuildScreen(void);
+static void CB2_ReturnToPartyMenuFromBuildScreen(void);
+static void CB2_OpenBuildScreenForCodex(void);
 static void CursorCb_CatalogBulb(u8);
 static void CursorCb_CatalogOven(u8);
 static void CursorCb_CatalogWashing(u8);
@@ -4092,39 +4095,39 @@ static void Task_HandleSpinTradeYesNoInput(u8 taskId)
     }
 }
 
-// Ouvre l'écran BUILD : arbre élémentaire et variantes d'attaques (data/scripts/mod_tree.inc).
+// Ouvre l'écran BUILD (src/tree_screen.c) : arbre, attaques et mutation. On revient ensuite
+// au menu d'équipe sur le dernier Pokémon affiché, comme après le résumé.
 static void CursorCb_Build(u8 taskId)
 {
     PlaySE(SE_SELECT);
-    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
-    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
-    gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
-    gPostMenuFieldCallback = FieldCallback_BuildMenu;
-    gPartyMenu.exitCallback = CB2_ReturnToField;
+    sPartyMenuInternal->exitCallback = CB2_OpenBuildScreen;
     Task_ClosePartyMenu(taskId);
 }
 
-static void FieldCallback_BuildMenu(void)
+static void CB2_OpenBuildScreen(void)
 {
-    gSpecialVar_0x8004 = gPartyMenu.slotId;
-    ScriptContext_SetupScript(EventScript_BuildMenu);
+    BuildScreen_Open(gPartyMenu.slotId, BUILD_PAGE_TREE, CB2_ReturnToPartyMenuFromBuildScreen);
 }
 
-// Technique Codex : le choix de l'attaque et de la variante se fait sur le terrain
-// (data/scripts/mod_tree.inc), et l'objet n'est retiré qu'une fois la variante appliquée.
-static void FieldCallback_TechniqueCodex(void)
+static void CB2_ReturnToPartyMenuFromBuildScreen(void)
 {
-    gSpecialVar_0x8004 = gPartyMenu.slotId;
-    ScriptContext_SetupScript(EventScript_TechniqueCodex);
+    gPaletteFade.bufferTransferDisabled = TRUE;
+    gPartyMenu.slotId = BuildScreen_GetLastMonSlot();
+    InitPartyMenu(gPartyMenu.menuType, KEEP_PARTY_LAYOUT, gPartyMenu.action, TRUE, PARTY_MSG_DO_WHAT_WITH_MON, Task_TryCreateSelectionWindow, gPartyMenu.exitCallback);
 }
 
+// Technique Codex : l'écran BUILD s'ouvre sur la page Moves, et l'objet n'est retiré qu'une fois
+// la variante choisie et confirmée. On revient ensuite au sac.
 void ItemUseCB_TechniqueCodex(u8 taskId, TaskFunc task)
 {
     PlaySE(SE_SELECT);
-    gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
-    gPostMenuFieldCallback = FieldCallback_TechniqueCodex;
-    gPartyMenu.exitCallback = CB2_ReturnToField;
+    sPartyMenuInternal->exitCallback = CB2_OpenBuildScreenForCodex;
     Task_ClosePartyMenu(taskId);
+}
+
+static void CB2_OpenBuildScreenForCodex(void)
+{
+    BuildScreen_Open(gPartyMenu.slotId, BUILD_PAGE_MOVES, gPartyMenu.exitCallback);
 }
 
 static void CursorCb_FieldMove(u8 taskId)

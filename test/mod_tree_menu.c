@@ -184,3 +184,27 @@ TEST("Mod: a Mutation Seal opens a sealed type for good")
     OpenMutationType(TYPE_FAIRY);
     EXPECT(IsMutationTypeOpen(TYPE_FAIRY));
 }
+
+TEST("Mod: build screen shows variant power and the weaknesses after a mutation")
+{
+    enum Type types[2];
+    u32 fireFighting, fireWater;
+
+    EXPECT_EQ(BuildScreen_GetVariantPower(MOVE_FLAMETHROWER, MOVE_VARIANT_STANDARD), 90);
+    EXPECT_EQ(BuildScreen_GetVariantPower(MOVE_FLAMETHROWER, MOVE_VARIANT_FOCUSED), 90 * MOD_VARIANT_FOCUSED_POWER / 100);
+    EXPECT_EQ(BuildScreen_GetVariantPower(MOVE_FLAMETHROWER, MOVE_VARIANT_THRIFTY), 90 * MOD_VARIANT_THRIFTY_POWER / 100);
+
+    // Combusken (Feu/Combat) qui abandonne Combat pour Eau.
+    BuildScreen_GetMutatedTypes(SPECIES_COMBUSKEN, 1, TYPE_WATER, types);
+    EXPECT_EQ(types[0], TYPE_FIRE);
+    EXPECT_EQ(types[1], TYPE_WATER);
+    fireFighting = BuildScreen_GetWeaknesses(TYPE_FIRE, TYPE_FIGHTING);
+    fireWater = BuildScreen_GetWeaknesses(types[0], types[1]);
+    EXPECT_EQ(fireFighting, (1u << TYPE_WATER) | (1u << TYPE_GROUND) | (1u << TYPE_FLYING) | (1u << TYPE_PSYCHIC));
+    EXPECT_EQ(fireWater, (1u << TYPE_GROUND) | (1u << TYPE_ROCK) | (1u << TYPE_ELECTRIC));
+
+    // Un type simple garde un type simple.
+    BuildScreen_GetMutatedTypes(SPECIES_CHARMANDER, 0, TYPE_GRASS, types);
+    EXPECT_EQ(types[0], TYPE_GRASS);
+    EXPECT_EQ(types[1], TYPE_GRASS);
+}

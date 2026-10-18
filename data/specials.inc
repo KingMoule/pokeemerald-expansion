@@ -638,22 +638,6 @@ gSpecials::
 	def_special UpdateTrainerCardPhotoIcons
 	def_special StickerManGetBragFlags
 	def_special CheckAddCoins
-	def_special TreeMenu_Begin
-	def_special TreeMenu_PushTypeChoices
-	def_special TreeScreen_Open, waitstate=1
-	def_special TreeMenu_CheckNode
-	def_special TreeMenu_Invest
-	def_special BuildMenu_Begin
-	def_special VariantMenu_PushMoves
-	def_special VariantMenu_CheckMove
-	def_special VariantMenu_PushVariants
-	def_special VariantMenu_BufferVariant
-	def_special VariantMenu_Apply
-	def_special MutationMenu_Begin
-	def_special MutationMenu_PushReplacedTypes
-	def_special MutationMenu_PushNewTypes
-	def_special MutationMenu_Check
-	def_special MutationMenu_Apply
 	def_special ModChallenge_PushList
 	def_special ModChallenge_BufferRules
 	def_special ModChallenge_CheckParty
