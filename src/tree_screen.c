@@ -27,7 +27,7 @@
 #include "constants/songs.h"
 
 // Écran BUILD, ouvert depuis le menu d'équipe (et par le Technique Codex depuis le sac).
-// Pages parcourues avec L/R : les onglets de l'arbre (Trunk et les trois branches), Moves, Mutate.
+// Pages parcourues avec L/R : les onglets de l'arbre (General, Offense, Defense, Utility), Moves, Mutate.
 // Select passe au Pokémon suivant de l'équipe.
 //  - Arbre : Gauche/Droite (ou A) placent des points en attente ; Start les investit tous après une
 //    seule confirmation. Un double type qui n'a pas encore d'arbre le choisit d'abord.
@@ -198,7 +198,7 @@ static u32 GetTabFirstNode(u32 tab)
 {
     if (tab == 0)
         return 0;
-    return TREE_TRUNK_NODES + (tab - 1) * TREE_BRANCH_NODES;
+    return TREE_GENERAL_NODES + (tab - 1) * TREE_BRANCH_NODES;
 }
 
 static u32 GetPendingTotal(const u8 *pending)
@@ -414,8 +414,8 @@ static const u8 *GetPageName(u32 page)
     if (!sTreeScreen->treeKnown)
         return COMPOUND_STRING("Tree");
     if (page == 0)
-        return COMPOUND_STRING("Trunk");
-    return gElementTrees[sTreeScreen->treeType].branchNames[page - 1];
+        return gTreeGeneralName;
+    return gTreeBranchNames[page - 1];
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -684,7 +684,7 @@ static void DrawTreeChoiceList(void)
         {
             if (branch != 0)
                 end = StringCopy(end, COMPOUND_STRING(", "));
-            end = StringCopy(end, gElementTrees[type].branchNames[branch]);
+            end = StringCopy(end, gTreeBranchNames[branch]);
         }
         AddTextPrinterParameterized3(WIN_LIST, FONT_SMALL, 104, i * 16 + 1, selected ? sColors_Highlight : sColors_Grey, TEXT_SKIP_DRAW, text);
     }
@@ -705,10 +705,10 @@ static void DrawTreeDescription(void)
     {
     case TREE_INVEST_LOCKED:
         end = StringCopy(end, COMPOUND_STRING("Locked: needs "));
-        if (node >= TREE_TRUNK_NODES && (node - TREE_TRUNK_NODES) % TREE_BRANCH_NODES == 0)
+        if (node >= TREE_GENERAL_NODES && (node - TREE_GENERAL_NODES) % TREE_BRANCH_NODES == 0)
         {
             end = ConvertIntToDecimalStringN(end, MOD_TREE_BRANCH_UNLOCK_POINTS, STR_CONV_MODE_LEFT_ALIGN, 2);
-            StringCopy(end, COMPOUND_STRING(" Trunk points."));
+            StringCopy(end, COMPOUND_STRING(" General points."));
         }
         else
         {

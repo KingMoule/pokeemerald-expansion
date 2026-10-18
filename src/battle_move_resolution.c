@@ -2334,7 +2334,7 @@ static enum CancelerResult CancelerMultihitMoves(struct BattleCalcValues *cv)
         {
             gMultiHitCounter = GetMoveSpeciesPowerOverride_NumOfHits(cv->move);
         }
-        else if (cv->abilities[cv->battlerAtk] == ABILITY_SKILL_LINK)
+        else if (cv->abilities[cv->battlerAtk] == ABILITY_SKILL_LINK || TryTreeMaxMultiHit(cv->battlerAtk)) // Mod : Icicle Volley, Swarm Strikes
         {
             gMultiHitCounter = 5;
         }
@@ -3476,6 +3476,20 @@ static enum MoveEndResult MoveEndAbilitiesAttacker(struct BattleCalcValues *cv)
 
     gBattleScripting.moveendState++;
     return result;
+}
+
+// Mod : rappelé tant qu'un effet d'arbre se déclenche pour cette cible.
+static enum MoveEndResult MoveEndTree(struct BattleCalcValues *cv)
+{
+    const u8 *script = TryTreeMoveEndEffect(cv);
+
+    if (script == NULL)
+    {
+        gBattleScripting.moveendState++;
+        return MOVEEND_RESULT_CONTINUE;
+    }
+    BattleScriptCall(script);
+    return MOVEEND_RESULT_RUN_SCRIPT;
 }
 
 static enum MoveEndResult MoveEndQueueDancer(struct BattleCalcValues *cv)
@@ -4699,7 +4713,7 @@ static enum MoveEndResult MoveEndFormChange(struct BattleCalcValues *cv)
     return result;
 }
 
-// Mod : maîtrises Garde et Cœur juste avant l'Orbe Vie, une fois par attaque.
+// Mod : suivi des arbres (premier coup amorti, enchaînements) et Heart juste avant l'Orbe Vie, une fois par attaque.
 static EWRAM_DATA bool8 sTreeHeartChecked = FALSE;
 
 static enum MoveEndResult MoveEndLifeOrbShellBell(struct BattleCalcValues *cv)
@@ -4709,7 +4723,9 @@ static enum MoveEndResult MoveEndLifeOrbShellBell(struct BattleCalcValues *cv)
     if (!sTreeHeartChecked)
     {
         sTreeHeartChecked = TRUE;
-        UpdateTreeFirstWeaknessGuard(cv->battlerAtk);
+        UpdateTreeFirstHitGuard(cv->battlerAtk, gCurrentMove);
+        UpdateTreeTargetsHit(cv->battlerAtk);
+        UpdateTreeAfterMove(cv->battlerAtk, gCurrentMove);
         if (TryTreeHeartActivation(cv->battlerAtk, gCurrentMove))
         {
             BattleScriptCall(BattleScript_TreeHeartActivates);
@@ -5332,6 +5348,7 @@ static enum MoveEndResult (*const sMoveEndHandlers[])(struct BattleCalcValues *c
     [MOVEEND_RESIST_BERRY_MESSAGE] = MoveEndResistBerryMessage,
     [MOVEEND_FORM_CHANGE_ON_HIT] = MoveEndFormChangeOnHit,
     [MOVEEND_ABILITIES_ATTACKER] = MoveEndAbilitiesAttacker,
+    [MOVEEND_TREE] = MoveEndTree,
     [MOVEEND_QUEUE_DANCER] = MoveEndQueueDancer,
     [MOVEEND_STATUS_IMMUNITY_ABILITIES] = MoveEndStatusImmunityAbilities,
     [MOVEEND_ATTACKER_INVISIBLE] = MoveEndAttackerInvisible,

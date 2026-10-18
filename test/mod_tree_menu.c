@@ -47,7 +47,7 @@ TEST("Mod: tree menu invests one point and reports locked nodes")
     EXPECT_EQ(GetBoxMonTreePointsAvailable(&gParties[B_TRAINER_PLAYER][0].box), 19);
     EXPECT_EQ(GetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_MAX_HP), hp + hp / 100);
 
-    gSpecialVar_0x8006 = 4; // Searing Impact : il faut 15 points dans le tronc.
+    gSpecialVar_0x8006 = 4; // Fire Power : il faut 10 points dans General.
     TreeMenu_CheckNode();
     EXPECT_EQ(gSpecialVar_Result, TREE_INVEST_LOCKED);
     TreeMenu_Invest();
@@ -63,19 +63,19 @@ TEST("Mod: tree screen stacks pending points and commits them at once")
 
     CreateRandomMonWithIVs(&gParties[B_TRAINER_PLAYER][0], SPECIES_CHARMANDER, 30, 0);
     TreePreview_Rebuild(&preview, boxMon, TYPE_FIRE, pending);
-    for (i = 0; i < 15; i++)
+    for (i = 0; i < 10; i++)
         EXPECT(TreePreview_Add(&preview, TYPE_FIRE, pending, 0));
     EXPECT(TreePreview_Add(&preview, TYPE_FIRE, pending, 4)); // Branche ouverte par les points en attente.
     EXPECT_EQ(GetBoxMonTreeRank(boxMon, 0), 0);
-    EXPECT_EQ(GetBoxMonTreePointsAvailable(&preview), 14);
+    EXPECT_EQ(GetBoxMonTreePointsAvailable(&preview), 19);
 
-    // Retirer un point du tronc referme la branche : son point en attente tombe.
+    // Retirer un point de General referme la branche : son point en attente tombe.
     EXPECT(TreePreview_Remove(&preview, boxMon, TYPE_FIRE, pending, 0));
     EXPECT_EQ(pending[4], 0);
     EXPECT(!TreePreview_Remove(&preview, boxMon, TYPE_FIRE, pending, 4));
 
-    EXPECT_EQ(TreePreview_Commit(boxMon, TYPE_FIRE, pending), 14);
-    EXPECT_EQ(GetBoxMonTreeRank(boxMon, 0), 14);
+    EXPECT_EQ(TreePreview_Commit(boxMon, TYPE_FIRE, pending), 9);
+    EXPECT_EQ(GetBoxMonTreeRank(boxMon, 0), 9);
     EXPECT(boxMon->build.treeType == TYPE_FIRE);
 }
 
@@ -119,11 +119,11 @@ static void TrainForMutation(struct Pokemon *mon)
     u32 node;
 
     mon->box.build.treeType = TYPE_FIRE;
-    for (node = 0; node < TREE_TRUNK_NODES; node++)
+    for (node = 0; node < TREE_GENERAL_NODES; node++)
         SetBoxMonTreeRank(&mon->box, node, 10);
-    for (node = TREE_TRUNK_NODES; node < TREE_TRUNK_NODES + TREE_BRANCH_NODES - 1; node++)
+    for (node = TREE_GENERAL_NODES; node < TREE_GENERAL_NODES + TREE_BRANCH_NODES - 1; node++)
         SetBoxMonTreeRank(&mon->box, node, 3);
-    SetBoxMonTreeRank(&mon->box, TREE_TRUNK_NODES + TREE_BRANCH_NODES - 1, 1);
+    SetBoxMonTreeRank(&mon->box, TREE_GENERAL_NODES + TREE_BRANCH_NODES - 1, 1);
 }
 
 TEST("Mod: mutation menu needs the tree threshold and a final mastery")

@@ -6,11 +6,11 @@
 #include "test/test.h"
 #include "constants/opponents.h"
 
-#define TRUNK_PHYSICAL 0
-#define TRUNK_SPECIAL  1
-#define FIRE_ASSAULT    4
-#define FIRE_COMBUSTION 8
-#define FIRE_SOLAR      12
+#define GENERAL_PHYSICAL 0
+#define GENERAL_SPECIAL  1
+#define FIRE_OFFENSE    4
+#define FIRE_DEFENSE    8
+#define FIRE_UTILITY    12
 
 #define OPPONENT(i) (&gParties[B_TRAINER_OPPONENT_A][i])
 
@@ -54,37 +54,38 @@ TEST("Mod: trainer build tiers follow the importance of the trainer")
     EXPECT_EQ(GetTrainerBuildTier(TRAINER_CHALLENGE_ENDURANCE_2), TRAINER_BUILD_ELITE);
 }
 
-TEST("Mod: a physical Fire opponent spends all its points, Assault branch first")
+TEST("Mod: a physical Fire opponent spends all its points, Offense branch first")
 {
     struct Pokemon mon;
     CreateWithMoves(&mon, SPECIES_ARCANINE, 40, MOVE_FLARE_BLITZ, MOVE_EXTREME_SPEED, MOVE_CRUNCH, MOVE_ROAR);
     ApplyMonTrainerBuild(&mon, TRAINER_BUILD_STRONG);
     EXPECT_EQ(GetMonData(&mon, MON_DATA_TREE_TYPE), TYPE_FIRE);
     EXPECT_EQ(GetBoxMonTreePointsSpent(&mon.box), 40 * MOD_TREE_POINTS_PER_LEVEL);
-    EXPECT_GE(GetBoxMonTreeRank(&mon.box, TRUNK_PHYSICAL), MOD_TREE_BRANCH_UNLOCK_POINTS);
-    EXPECT_GE(GetBoxMonTreeRank(&mon.box, FIRE_ASSAULT), MOD_TREE_PARENT_RANKS);
-    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_ASSAULT + 3), 1); // Maîtrise atteinte.
-    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_COMBUSTION), 0);
-    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_SOLAR), 0);
+    EXPECT_GE(GetBoxMonTreeRank(&mon.box, GENERAL_PHYSICAL), MOD_TREE_BRANCH_UNLOCK_POINTS);
+    EXPECT_GE(GetBoxMonTreeRank(&mon.box, FIRE_OFFENSE), MOD_TREE_PARENT_RANKS);
+    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_OFFENSE + 3), 1); // Maîtrise atteinte.
+    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_DEFENSE), 0);
+    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_UTILITY), 0);
     // Variante Focused sur l'attaque la plus forte (Boutefeu, STAB).
     EXPECT_EQ(GetBoxMonMoveVariant(&mon.box, 0), MOVE_VARIANT_FOCUSED);
     EXPECT_EQ(GetMonData(&mon, MON_DATA_PP1), CalculateMonMovePP(&mon, MOVE_FLARE_BLITZ, 0, 0));
     EXPECT_EQ(GetMonData(&mon, MON_DATA_HP), GetMonData(&mon, MON_DATA_MAX_HP));
 }
 
-TEST("Mod: Fire opponents pick the sun or burn branch from their moves")
+TEST("Mod: opponents pick Utility with weather or status moves, Defense when slow and bulky")
 {
     struct Pokemon mon;
     CreateWithMoves(&mon, SPECIES_CAMERUPT, 40, MOVE_ERUPTION, MOVE_EARTH_POWER, MOVE_SUNNY_DAY, MOVE_WILL_O_WISP);
     ApplyMonTrainerBuild(&mon, TRAINER_BUILD_STRONG);
     EXPECT_EQ(GetMonData(&mon, MON_DATA_TREE_TYPE), TYPE_FIRE);
-    EXPECT_GE(GetBoxMonTreeRank(&mon.box, TRUNK_SPECIAL), MOD_TREE_BRANCH_UNLOCK_POINTS);
-    EXPECT_GE(GetBoxMonTreeRank(&mon.box, FIRE_SOLAR), MOD_TREE_PARENT_RANKS);
+    EXPECT_GE(GetBoxMonTreeRank(&mon.box, GENERAL_SPECIAL), MOD_TREE_BRANCH_UNLOCK_POINTS);
+    EXPECT_GE(GetBoxMonTreeRank(&mon.box, FIRE_UTILITY), MOD_TREE_PARENT_RANKS);
+    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_OFFENSE), 0);
 
-    CreateWithMoves(&mon, SPECIES_HOUNDOOM, 40, MOVE_FLAMETHROWER, MOVE_DARK_PULSE, MOVE_WILL_O_WISP, MOVE_NASTY_PLOT);
+    CreateWithMoves(&mon, SPECIES_TORKOAL, 40, MOVE_FLAMETHROWER, MOVE_EARTH_POWER, MOVE_BODY_PRESS, MOVE_RAPID_SPIN);
     ApplyMonTrainerBuild(&mon, TRAINER_BUILD_STRONG);
-    EXPECT_GE(GetBoxMonTreeRank(&mon.box, FIRE_COMBUSTION), MOD_TREE_PARENT_RANKS);
-    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_SOLAR), 0);
+    EXPECT_GE(GetBoxMonTreeRank(&mon.box, FIRE_DEFENSE), MOD_TREE_PARENT_RANKS);
+    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, FIRE_UTILITY), 0);
 }
 
 TEST("Mod: opponent variants arrive gradually")

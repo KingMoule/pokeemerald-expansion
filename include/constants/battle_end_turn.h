@@ -21,7 +21,7 @@ enum EndTurnResolutionOrder
     ENDTURN_POISON,
     ENDTURN_BURN,
     ENDTURN_FROSTBITE,
-    ENDTURN_TREE_LINGER, // Mod : Braises tenaces et maîtrises de statut
+    ENDTURN_TREE, // Mod : soins, guérisons et maîtrises de fin de tour des arbres
     ENDTURN_NIGHTMARE,
     ENDTURN_CURSE,
     ENDTURN_WRAP,

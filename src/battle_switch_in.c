@@ -281,11 +281,14 @@ static bool32 FirstEventBlockEvents(struct BattleCalcValues *calcValues)
         gBattleStruct->eventState.battlerSwitchIn++;
         break;
     case FIRST_EVENT_BLOCK_TREE_MASTERY:
-        if (TryTreeWeatherOnEntry(battler))
+    {
+        const u8 *script = TryTreeEntryEffect(battler);
+        if (script != NULL)
         {
-            BattleScriptCall(BattleScript_TreeWeatherOnEntry);
+            BattleScriptCall(script);
             effect = TRUE;
         }
+    }
         gBattleStruct->eventState.battlerSwitchIn++;
         break;
     case FIRST_EVENT_BLOCK_IMMUNITY_ABILITIES:
@@ -329,7 +332,7 @@ static bool32 TryHazardsOnSwitchIn(enum BattlerId battler, enum Ability ability,
          && IsBattlerGrounded(battler, ability, holdEffect))
         {
             s32 spikesDmg = GetNonDynamaxMaxHP(battler) / ((5 - gSideTimers[side].spikesAmount) * 2);
-            SetPassiveDamageAmount(battler, spikesDmg);
+            SetPassiveDamageAmount(battler, ApplyTreeIndirectGuard(battler, spikesDmg)); // Mod : Mental Barrier
             SetDmgHazardsBattlescript(battler, B_MSG_PKMNHURTBYSPIKES);
             effect = TRUE;
         }
@@ -381,7 +384,7 @@ static bool32 TryHazardsOnSwitchIn(enum BattlerId battler, enum Ability ability,
     case HAZARDS_STEALTH_ROCK:
         if (IsBattlerAffectedByHazards(battler, holdEffect, FALSE) && ability != ABILITY_MAGIC_GUARD)
         {
-            gBattleStruct->passiveHpUpdate[battler] = GetStealthHazardDamage(TYPE_SIDE_HAZARD_POINTED_STONES, battler);
+            gBattleStruct->passiveHpUpdate[battler] = ApplyTreeIndirectGuard(battler, GetStealthHazardDamage(TYPE_SIDE_HAZARD_POINTED_STONES, battler)); // Mod : Mental Barrier
             if (gBattleStruct->passiveHpUpdate[battler] != 0)
             {
                 SetDmgHazardsBattlescript(battler, B_MSG_STEALTHROCKDMG);

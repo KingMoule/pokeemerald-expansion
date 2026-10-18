@@ -3810,15 +3810,143 @@ BattleScript_TreeHeartActivates::
 	tryfaintmon BS_ATTACKER
 	return
 
-BattleScript_TreeLingeringStatus::
-	printfromtable gTreeLingerStringIds
+BattleScript_TreeNodeHeal::
+	printstring STRINGID_TREENODEHEAL
+	goto BattleScript_TurnHeal
+
+BattleScript_TreeStatusCure::
+	printstring STRINGID_TREESTATUSCURE
 	waitmessage B_WAIT_TIME_LONG
 	updatestatusicon BS_SCRIPTING
 	return
 
+BattleScript_TreeAquaRing::
+	printstring STRINGID_TREENODEACTIVATES
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_ATTACKER, B_ANIM_AQUA_RING_HEAL
+	printstring STRINGID_PKMNSURROUNDEDWITHVEILOFWATER
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_TreeMolt::
+	printstring STRINGID_TREEMOLT
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_TreeConfusionSnap::
+	printstring STRINGID_TREENODEACTIVATES
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_PKMNHEALEDCONFUSION
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_TreeTerrainOnEntry::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	printfromtable gTerrainStringIds
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_SCRIPTING, B_ANIM_RESTORE_BG
+	call BattleScript_ActivateTerrainEffects
+	return
+
+BattleScript_TreeHazardOnEntry::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	printfromtable gTreeHazardStringIds
+	waitmessage B_WAIT_TIME_LONG
+	restoreattacker
+	restoretarget
+	return
+
+BattleScript_TreeTailwindOnEntry::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_TAILWINDBLEW
+	waitmessage B_WAIT_TIME_LONG
+	restoreattacker
+	return
+
+BattleScript_TreeScreenOnEntry::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	printfromtable gReflectLightScreenSafeguardStringIds
+	waitmessage B_WAIT_TIME_LONG
+	restoreattacker
+	return
+
+BattleScript_TreeStatChange::
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	trystatchanges BS_SCRIPTING, STAT_CHANGE_NO_FLAGS
+	return
+
+BattleScript_TreeNoStatLoss::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_TREENOSTATLOSS
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_TreeStatusAvoided::
+	printstring STRINGID_TREESTATUSAVOIDED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_TreeSynchronize::
+	waitstate
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	setnonvolatilestatus TRIGGER_ON_ABILITY
+	return
+
+BattleScript_TreeContactStatus::
+	waitstate
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	setnonvolatilestatus TRIGGER_ON_ABILITY
+	return
+
+BattleScript_TreeHurtAttacker::
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_HurtAttackerNoMsg
+	return
+
+BattleScript_TreeDisable::
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_CURSEDBODYDISABLED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_TreeToxicDebris::
+	printstring STRINGID_TREENODEACTIVATESSCR
+	waitmessage B_WAIT_TIME_LONG
+	settoxicspikes BattleScript_TreeToxicDebrisRet
+	printstring STRINGID_POISONSPIKESSCATTERED
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_TreeToxicDebrisRet:
+	restoretarget
+	restoreattacker
+	return
+
+BattleScript_TreePainSplit::
+	printstring STRINGID_TREENODEACTIVATES
+	waitmessage B_WAIT_TIME_LONG
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER, ASSURANCE_IGNORE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET, ASSURANCE_IGNORE
+	printstring STRINGID_SHAREDPAIN
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_TreeWeatherOnEntry::
 	pause B_WAIT_TIME_SHORT
-	printstring STRINGID_TREEWEATHERENTRY
+	printstring STRINGID_TREENODEACTIVATESSCR
 	waitmessage B_WAIT_TIME_LONG
 	printfromtable gMoveWeatherChangeStringIds
 	waitmessage B_WAIT_TIME_LONG

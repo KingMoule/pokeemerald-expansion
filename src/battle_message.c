@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle.h"
+#include "pokemon_build.h"
 #include "battle_anim.h"
 #include "battle_ai_record.h"
 #include "battle_controllers.h"
@@ -907,8 +908,13 @@ const u8 *const gBattleStringsTable[STRINGID_COUNT] =
     [STRINGID_TREEWEATHERHEAL]                      = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX} restored HP using the weather!"),
     [STRINGID_TREEHEART]                            = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX}'s mastery grows stronger, at a cost!"),
     [STRINGID_TREEWEATHERENTRY]                     = COMPOUND_STRING("{B_SCR_NAME_WITH_PREFIX}'s mastery calls the weather!"),
-    [STRINGID_TREELINGERRETURN]                     = COMPOUND_STRING("The affliction clings to {B_SCR_NAME_WITH_PREFIX2}!"),
-    [STRINGID_TREELINGERFADE]                       = COMPOUND_STRING("The lingering affliction left {B_SCR_NAME_WITH_PREFIX2}."),
+    [STRINGID_TREENODEHEAL]                         = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX} restored HP with {B_BUFF3}!"),
+    [STRINGID_TREESTATUSCURE]                       = COMPOUND_STRING("{B_SCR_NAME_WITH_PREFIX}'s {B_BUFF3} cured its status!"),
+    [STRINGID_TREENODEACTIVATES]                    = COMPOUND_STRING("{B_ATK_NAME_WITH_PREFIX}'s {B_BUFF3} activated!"),
+    [STRINGID_TREENODEACTIVATESSCR]                 = COMPOUND_STRING("{B_SCR_NAME_WITH_PREFIX}'s {B_BUFF3} activated!"),
+    [STRINGID_TREESTATUSAVOIDED]                    = COMPOUND_STRING("{B_EFF_NAME_WITH_PREFIX}'s {B_BUFF3} kept it from being afflicted!"),
+    [STRINGID_TREENOSTATLOSS]                       = COMPOUND_STRING("{B_SCR_NAME_WITH_PREFIX}'s {B_BUFF3} kept its stats from being lowered!"),
+    [STRINGID_TREEMOLT]                             = COMPOUND_STRING("{B_SCR_NAME_WITH_PREFIX} shed its lowered stats with {B_BUFF3}!"),
 };
 
 const u16 gTrainerUsedItemStringIds[] =
@@ -1430,11 +1436,12 @@ const u16 gZenModeStringIds[] =
     [B_MSG_ZEN_MODE_ENDED] = STRINGID_ZENMODEENDED
 };
 
-// Mod : retour puis fin du statut tenace (maîtrises Braises tenaces et statut).
-const u16 gTreeLingerStringIds[] =
+// Mod : pièges posés à l'entrée (Stealth Rock, Toxic Spikes, Sticky Web), dans l'ordre de enum TreeHazard.
+const u16 gTreeHazardStringIds[] =
 {
-    STRINGID_TREELINGERRETURN,
-    STRINGID_TREELINGERFADE,
+    [TREE_HAZARD_STEALTH_ROCK] = STRINGID_POINTEDSTONESFLOAT,
+    [TREE_HAZARD_TOXIC_SPIKES] = STRINGID_POISONSPIKESSCATTERED,
+    [TREE_HAZARD_STICKY_WEB]   = STRINGID_STICKYWEBUSED,
 };
 
 const u16 gCureStatusStringIds[] =

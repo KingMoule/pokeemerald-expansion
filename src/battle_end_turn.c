@@ -152,7 +152,7 @@ static bool32 HandleEndTurnWeatherDamage(enum BattlerId battler)
          && GetBattlerHoldEffect(battler) != HOLD_EFFECT_SAFETY_GOGGLES
          && !IsAbilityAndRecord(battler, ability, ABILITY_MAGIC_GUARD))
         {
-            SetPassiveDamageAmount(battler, GetNonDynamaxMaxHP(battler) / 16);
+            SetPassiveDamageAmount(battler, ApplyTreeIndirectGuard(battler, GetNonDynamaxMaxHP(battler) / 16)); // Mod : Mental Barrier
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SANDSTORM;
             BattleScriptCall(BattleScript_DamagingWeather);
             effect = TRUE;
@@ -175,7 +175,7 @@ static bool32 HandleEndTurnWeatherDamage(enum BattlerId battler)
              && GetBattlerHoldEffect(battler) != HOLD_EFFECT_SAFETY_GOGGLES
              && !IsAbilityAndRecord(battler, ability, ABILITY_MAGIC_GUARD))
             {
-                SetPassiveDamageAmount(battler, GetNonDynamaxMaxHP(battler) / 16);
+                SetPassiveDamageAmount(battler, ApplyTreeIndirectGuard(battler, GetNonDynamaxMaxHP(battler) / 16));
                 gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_HAIL;
                 BattleScriptCall(BattleScript_DamagingWeather);
                 effect = TRUE;
@@ -511,7 +511,7 @@ static bool32 HandleEndTurnLeechSeed(enum BattlerId battler)
         gBattleScripting.animArg1 = receiverBattler;
         gBattleScripting.animArg2 = drainedBattler;
 
-        s32 drainAmount = GetNonDynamaxMaxHP(drainedBattler) / 8;
+        s32 drainAmount = ApplyTreeIndirectGuard(drainedBattler, GetNonDynamaxMaxHP(drainedBattler) / 8); // Mod : Mental Barrier
         s32 healAmount = GetDrainedBigRootHp(receiverBattler, drainAmount);
 
         if (GetBattlerAbility(drainedBattler) == ABILITY_LIQUID_OOZE)
@@ -632,17 +632,18 @@ static bool32 HandleEndTurnFrostbite(enum BattlerId battler)
     return effect;
 }
 
-// Mod : retour puis fin du premier statut infligé par un Pokémon qui a la maîtrise.
-static bool32 HandleEndTurnTreeLinger(enum BattlerId battler)
+// Mod : soins, guérisons et maîtrises de fin de tour des arbres.
+static bool32 HandleEndTurnTree(enum BattlerId battler)
 {
-    gBattleStruct->eventState.endTurnBattler++;
+    const u8 *script = IsBattlerPresent(battler) ? TryTreeEndTurnEffect(battler) : NULL;
 
-    if (IsBattlerPresent(battler) && TryTreeLingeringStatus(battler))
+    if (script == NULL)
     {
-        BattleScriptCall(BattleScript_TreeLingeringStatus);
-        return TRUE;
+        gBattleStruct->eventState.endTurnBattler++;
+        return FALSE;
     }
-    return FALSE;
+    BattleScriptCall(script);
+    return TRUE;
 }
 
 static bool32 HandleEndTurnNightmare(enum BattlerId battler)
@@ -712,7 +713,7 @@ static bool32 HandleEndTurnWrap(enum BattlerId battler)
                 bindDamage = GetNonDynamaxMaxHP(battler) / (GetConfig(B_BINDING_DAMAGE) >= GEN_6 ? 6 : 8);
             else
                 bindDamage = GetNonDynamaxMaxHP(battler) / (GetConfig(B_BINDING_DAMAGE) >= GEN_6 ? 8 : 16);
-            SetPassiveDamageAmount(battler, bindDamage);
+            SetPassiveDamageAmount(battler, ApplyTreeIndirectGuard(battler, bindDamage)); // Mod : Mental Barrier
         }
         else  // broke free
         {
@@ -1598,7 +1599,7 @@ static bool32 (*const sEndTurnEffectHandlers[])(enum BattlerId battler) =
     [ENDTURN_POISON] = HandleEndTurnPoison,
     [ENDTURN_BURN] = HandleEndTurnBurn,
     [ENDTURN_FROSTBITE] = HandleEndTurnFrostbite,
-    [ENDTURN_TREE_LINGER] = HandleEndTurnTreeLinger,
+    [ENDTURN_TREE] = HandleEndTurnTree,
     [ENDTURN_NIGHTMARE] = HandleEndTurnNightmare,
     [ENDTURN_CURSE] = HandleEndTurnCurse,
     [ENDTURN_WRAP] = HandleEndTurnWrap,

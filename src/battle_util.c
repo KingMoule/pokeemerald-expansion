@@ -2135,6 +2135,7 @@ bool32 TryChangeBattleTerrain(enum BattlerId battler, enum BattleTerrain terrain
             gFieldTimers.terrainTimer = 8;
         else
             gFieldTimers.terrainTimer = 5;
+        gFieldTimers.terrainTimer += GetTreeTerrainTurnsBonus(battler, terrain); // Mod : Long Terrain
         gBattleScripting.battler = battler;
         return TRUE;
     }
@@ -7681,9 +7682,8 @@ static inline uq4_12_t GetOtherModifiers(struct DamageContext *ctx)
         DAMAGE_MULTIPLY_MODIFIER(GetDefenderItemsModifier(ctx));
         DAMAGE_MULTIPLY_MODIFIER(GetAttackerItemsModifier(ctx->battlerAtk, ctx->typeEffectivenessModifier, ctx->holdEffects[ctx->battlerAtk]));
     }
-    DAMAGE_MULTIPLY_MODIFIER(GetTreeDamageModifier(ctx->battlerAtk, ctx->battlerDef, ctx->move, ctx->moveType));
-    DAMAGE_MULTIPLY_MODIFIER(GetTreeGuardModifier(ctx->battlerDef, ctx->typeEffectivenessModifier));
-    DAMAGE_MULTIPLY_MODIFIER(GetTreeFirstWeaknessModifier(ctx->battlerDef, ctx->typeEffectivenessModifier));
+    DAMAGE_MULTIPLY_MODIFIER(GetTreeDamageModifier(ctx));  // Mod : bonus offensifs des arbres
+    DAMAGE_MULTIPLY_MODIFIER(GetTreeDefenseModifier(ctx)); // Mod : Wards et réductions des arbres
     return finalModifier;
 }
 
@@ -7954,7 +7954,8 @@ s32 CalcCritChanceStage(struct DamageContext *ctx)
     }
     else if (gBattleMons[ctx->battlerAtk].volatiles.laserFocusTimer > 0
           || MoveAlwaysCrits(ctx->move)
-          || (ctx->abilities[ctx->battlerAtk] == ABILITY_MERCILESS && gBattleMons[ctx->battlerDef].status1 & STATUS1_PSN_ANY))
+          || (ctx->abilities[ctx->battlerAtk] == ABILITY_MERCILESS && gBattleMons[ctx->battlerDef].status1 & STATUS1_PSN_ANY)
+          || TreeAlwaysCrits(ctx->battlerAtk, ctx->battlerDef)) // Mod : maîtrise Merciless
     {
         critChance = CRITICAL_HIT_ALWAYS;
     }
@@ -7967,7 +7968,7 @@ s32 CalcCritChanceStage(struct DamageContext *ctx)
                     + ((B_AFFECTION_MECHANICS == TRUE && GetBattlerAffectionHearts(ctx->battlerAtk) == AFFECTION_FIVE_HEARTS) ? 2 : 0)
                     + (ctx->abilities[ctx->battlerAtk] == ABILITY_SUPER_LUCK ? 1 : 0)
                     + gBattleMons[ctx->battlerAtk].volatiles.bonusCritStages
-                    + GetTreeCritStageBonus(ctx->battlerAtk, ctx->move, ctx->moveType); // Mod : maîtrise Focus
+                    + GetTreeCritStageBonus(ctx->battlerAtk, ctx->move, ctx->moveType); // Mod : maîtrise Keen Edge
 
         if (critChance >= ARRAY_COUNT(sCriticalHitOdds))
             critChance = ARRAY_COUNT(sCriticalHitOdds) - 1;
@@ -8110,6 +8111,11 @@ s32 GetAdjustedDamage(struct DamageContext *ctx, s32 damage)
         gLastUsedAbility = ABILITY_STURDY;
         gBattleStruct->moveResultFlags[ctx->battlerDef] |= MOVE_RESULT_STURDIED;
     }
+    else if (!ctx->aiCalc && ctx->battlerAtk != ctx->battlerDef && TryTreeEndure(ctx->battlerDef)) // Mod : Sturdy et Endure des arbres
+    {
+        enduredHit = TRUE;
+        gBattleStruct->moveResultFlags[ctx->battlerDef] |= MOVE_RESULT_FOE_ENDURED;
+    }
     else if (ctx->holdEffects[ctx->battlerDef] == HOLD_EFFECT_FOCUS_BAND && rand < GetBattlerHoldEffectParam(ctx->battlerDef))
     {
         enduredHit = TRUE;
@@ -8183,6 +8189,10 @@ static inline void MulByTypeEffectiveness(struct DamageContext *ctx, uq4_12_t *m
         mod = UQ_4_12(1.0);
         if (ctx->updateFlags)
             RecordAbilityBattle(ctx->battlerAtk, ctx->abilities[ctx->battlerAtk]);
+    }
+    else if (mod == UQ_4_12(0.0) && ctx->battlerAtk != ctx->battlerDef && TreeMoveIgnoresImmunity(ctx->battlerAtk, ctx->moveType, defType))
+    {
+        mod = UQ_4_12(1.0); // Mod : Scrappy et Grounding Blow des arbres
     }
 
     if (ctx->moveType == TYPE_PSYCHIC && defType == TYPE_DARK && gBattleMons[ctx->battlerDef].volatiles.miracleEye && mod == UQ_4_12(0.0))
@@ -8292,7 +8302,12 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(struct DamageCont
         if (B_GLARE_GHOST < GEN_4 && ctx->move == MOVE_GLARE && IS_BATTLER_OF_TYPE(ctx->battlerDef, TYPE_GHOST))
             modifier = UQ_4_12(0.0);
     }
+    else if (ctx->moveType == TYPE_GROUND && ctx->battlerAtk != ctx->battlerDef && IsTreeGroundImmune(ctx->battlerDef))
+    {
+        modifier = UQ_4_12(0.0); // Mod : Magnet Rise de l'arbre, dépensé en fin d'attaque
+    }
     else if (ctx->moveType == TYPE_GROUND
+        && !TreeMoveIgnoresImmunity(ctx->battlerAtk, TYPE_GROUND, TYPE_FLYING)
         && !IsBattlerGroundedInverseCheck(ctx->battlerDef, ctx->abilities[ctx->battlerDef], ctx->holdEffects[ctx->battlerDef], INVERSE_BATTLE, ctx->isAnticipation)
         && !(MoveIgnoresTypeIfFlyingAndUngrounded(ctx->move))
         && !(ctx->holdEffects[ctx->battlerDef] == HOLD_EFFECT_RING_TARGET && IS_BATTLER_OF_TYPE(ctx->battlerDef, TYPE_FLYING) && !IsBattlerUngroundedByAbilityItemOrEffect(ctx->battlerDef, ctx->abilities[ctx->battlerDef], ctx->holdEffects[ctx->battlerDef])))
@@ -9663,7 +9678,11 @@ u32 CalcSecondaryEffectChance(enum BattlerId battler, enum Ability battlerAbilit
     u16 secondaryEffectChance = additionalEffect->chance;
 
     if (secondaryEffectChance != 0)
-        secondaryEffectChance += GetTreeStatusChanceBonus(battler, additionalEffect->moveEffect);
+    {
+        // Mod : chances d'effet secondaire des arbres (statut, peur, confusion, Serene Spirit).
+        secondaryEffectChance += GetTreeSecondaryChanceBonus(battler, gCurrentMove, additionalEffect->moveEffect);
+        secondaryEffectChance = ApplyTreeSecondaryMultiplier(battler, secondaryEffectChance);
+    }
     secondaryEffectChance = ApplyMoveVariantEffectChance(battler, additionalEffect, secondaryEffectChance);
 
     if (hasRainbow && hasSereneGrace && additionalEffect->moveEffect == MOVE_EFFECT_FLINCH)
@@ -10442,6 +10461,10 @@ bool32 CanMoveSkipAccuracyCalc(struct BattleCalcValues *cv, u32 weather, enum Re
     {
         effect = TRUE;
     }
+    else if (TreeMoveNeverMisses(battlerAtk, cv->move) && !IsSemiInvulnerable(battlerDef, CHECK_ALL)) // Mod : Unerring Strikes
+    {
+        effect = TRUE;
+    }
     else
     {
         u32 attackerWeather = GetAttackerWeather(cv->holdEffects[battlerAtk], cv->abilities[battlerAtk], weather);
@@ -10584,6 +10607,8 @@ u32 GetTotalAccuracy(struct BattleCalcValues *cv, u32 weather)
         break;
     }
 
+    calc = ApplyTreeAccuracy(battlerAtk, battlerDef, cv->move, calc); // Mod : Compound Eyes, Spore Craft, Eerie Aura
+
     if (gBattleStruct->battlerState[battlerAtk].usedMicleBerry)
         calc = (calc * 120) / 100;  // 20% acc boost
 
@@ -10664,6 +10689,9 @@ bool32 DoesMoveMissTarget(struct BattleCalcValues *cv)
         return DoesOHKOMoveMissTarget(cv);
 
     u32 weather = GetWeather();
+
+    if (TryTreeStatusMoveBlock(cv->battlerAtk, cv->battlerDef, cv->move)) // Mod : Dark Veil
+        return TRUE;
 
     if (CanMoveSkipAccuracyCalc(cv, weather, RUN_SCRIPT))
         return FALSE;

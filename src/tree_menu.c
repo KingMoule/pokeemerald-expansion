@@ -80,9 +80,9 @@ void TreeMenu_CheckNode(void)
 
     if (treeNode != NULL)
     {
-        if (sNode >= TREE_TRUNK_NODES)
+        if (sNode >= TREE_GENERAL_NODES)
         {
-            end = StringCopy(end, gElementTrees[sTreeType].branchNames[(sNode - TREE_TRUNK_NODES) / TREE_BRANCH_NODES]);
+            end = StringCopy(end, gTreeBranchNames[(sNode - TREE_GENERAL_NODES) / TREE_BRANCH_NODES]);
             end = StringCopy(end, COMPOUND_STRING(":"));
             *end++ = CHAR_NEWLINE;
         }
@@ -92,11 +92,11 @@ void TreeMenu_CheckNode(void)
         *end++ = CHAR_PROMPT_CLEAR;
     }
     // Nœud verrouillé : dire ce qui l'ouvre.
-    if (result == TREE_INVEST_LOCKED && (sNode - TREE_TRUNK_NODES) % TREE_BRANCH_NODES == 0)
+    if (result == TREE_INVEST_LOCKED && (sNode - TREE_GENERAL_NODES) % TREE_BRANCH_NODES == 0)
     {
         end = StringCopy(end, COMPOUND_STRING("Locked. Needs "));
         end = ConvertIntToDecimalStringN(end, MOD_TREE_BRANCH_UNLOCK_POINTS, STR_CONV_MODE_LEFT_ALIGN, 2);
-        StringCopy(end, COMPOUND_STRING(" points\nin the first four nodes."));
+        StringCopy(end, COMPOUND_STRING(" points\nin General."));
     }
     else if (result == TREE_INVEST_LOCKED)
     {
@@ -216,7 +216,7 @@ void VariantMenu_Apply(void)
     TrySetBoxMonMoveVariant(GetTreeMenuBoxMon(), sMoveSlot, sVariant);
 }
 
-// Mutation volontaire, depuis le même écran BUILD : 50 points investis et une maîtrise finale
+// Mutation volontaire, depuis le même écran BUILD : 40 points investis et une maîtrise finale
 // (CanBoxMonAcquireMutation). Seuls les types ouverts sont accessibles ; un type encore scellé
 // demande un Mutation Seal, consommé, qui l'ouvre pour toute la sauvegarde.
 //   VAR_0x8006 : type d'origine remplacé.

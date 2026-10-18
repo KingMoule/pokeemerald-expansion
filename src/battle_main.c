@@ -4406,6 +4406,8 @@ u32 GetBattlerTotalSpeedStat(enum BattlerId battler, enum Ability ability, enum 
     else if (ability == ABILITY_UNBURDEN && gBattleMons[battler].volatiles.unburdenActive)
         speed *= 2;
 
+    speed = ApplyTreeFieldSpeed(battler, speed, weather); // Mod : Swift Swim, Chlorophyll, Sand Rush, Surge Surfer
+
     // player's badge boost
     if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_FRONTIER))
         && ShouldGetStatBadgeBoost(B_FLAG_BADGE_BOOST_SPEED, battler)
@@ -4476,6 +4478,10 @@ s32 GetBattleMovePriority(enum BattlerId battler, enum Ability ability, enum Mov
     else if (ability == ABILITY_GALE_WINGS
           && (GetConfig(B_GALE_WINGS) < GEN_7 || IsBattlerAtMaxHp(battler))
           && GetMoveType(move) == TYPE_FLYING)
+    {
+        priority++;
+    }
+    else if (TreeGivesPriority(battler, move)) // Mod : maîtrise Gale Wings
     {
         priority++;
     }
@@ -5739,6 +5745,9 @@ enum Type GetDynamicMoveType(struct Pokemon *mon, enum Move move, enum BattlerId
           && gimmick != GIMMICK_Z_MOVE)
     {
         enum Type ateType = TrySetAteType(move, battler, ability);
+        // Mod : Refrigerate et Pixilate des arbres, sur les mêmes attaques que les talents.
+        if (ateType == TYPE_NONE && state == MON_IN_BATTLE && TrySetAteType(move, battler, ABILITY_PIXILATE) != TYPE_NONE)
+            ateType = GetTreeAteType(battler);
         if (ateType != TYPE_NONE && state == MON_IN_BATTLE)
             gBattleStruct->battlerState[battler].ateBoost = TRUE;
         return ateType;

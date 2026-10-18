@@ -1420,7 +1420,7 @@ void CalculateMonStatsCont(struct Pokemon *mon, bool32 updateSpeedStat)
         if (B_FRIENDSHIP_BOOST == TRUE)
             n = n + ((n * 10 * friendship) / (MAX_FRIENDSHIP * 100));
         if (i == STAT_SPEED)
-            n += n * GetBoxMonTreeEffect(&mon->box, TREE_EFFECT_SPEED) / 1000;
+            n += n * GetBoxMonTreeEffect(&mon->box, TREE_EFFECT_SPEED) / 10000;
         SetMonData(mon, MON_DATA_MAX_HP + i, &n);
     }
 
@@ -1437,7 +1437,7 @@ void CalculateMonStatsCont(struct Pokemon *mon, bool32 updateSpeedStat)
     {
         s32 n = 2 * GetSpeciesBaseHP(species) + iv[STAT_HP];
         newMaxHP = (((n + ev[STAT_HP] / 4) * level) / 100) + level + 10;
-        newMaxHP += newMaxHP * GetBoxMonTreeEffect(&mon->box, TREE_EFFECT_MAX_HP) / 1000;
+        newMaxHP += newMaxHP * GetBoxMonTreeEffect(&mon->box, TREE_EFFECT_MAX_HP) / 10000;
     }
 
     gBattleScripting.levelUpHP = newMaxHP - oldMaxHP;

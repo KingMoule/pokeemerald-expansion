@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle.h"
+#include "pokemon_build.h"
 #include "battle_scripts.h"
 #include "battle_util.h"
 #include "battle_stat_change.h"
@@ -24,6 +25,7 @@ static bool32 IsFlowerVeilBlocked(struct BattleCalcValues *cv, struct StatChange
 static bool32 IsClearAmuletBlocked(struct BattleCalcValues *cv, struct StatChange *st);
 static bool32 IsIntimidateBlocked(struct BattleCalcValues *cv, struct StatChange *st);
 static bool32 IsAbilityBlocked(struct BattleCalcValues *cv, struct StatChange *st);
+static bool32 IsTreeStatLossBlocked(struct BattleCalcValues *cv, struct StatChange *st);
 static bool32 IsMirrorArmorReflected(struct BattleCalcValues *cv, struct StatChange *st);
 
 // Utitily
@@ -299,6 +301,7 @@ static enum StatChangeResult CanDecreaseStat(struct BattleCalcValues *cv, struct
      || IsFlowerVeilBlocked(cv, st)
      || IsClearAmuletBlocked(cv, st)
      || IsAbilityBlocked(cv, st)
+     || IsTreeStatLossBlocked(cv, st)
      || IsMirrorArmorReflected(cv, st))
         return STAT_CHANGE_DIDNT_WORK;
     return STAT_CHANGE_WORKED;
@@ -716,6 +719,35 @@ static bool32 IsAbilityBlocked(struct BattleCalcValues *cv, struct StatChange *s
         RecordAbilityBattle(cv->battlerDef, gLastUsedAbility);
     }
 
+    return TRUE;
+}
+
+// Mod : Clear Body et Steady (baisses venant d'un adversaire), Second Breath et Draconic Will
+// (baisses que ses propres attaques lui infligent).
+static bool32 IsTreeStatLossBlocked(struct BattleCalcValues *cv, struct StatChange *st)
+{
+    enum TreeEffect effect;
+
+    if (st->onlyChecking || st->stickyWeb)
+        return FALSE;
+    if (cv->battlerAtk == cv->battlerDef)
+    {
+        if (cv->move == MOVE_NONE)
+            return FALSE;
+        effect = TREE_EFFECT_SELF_DROP_IGNORE;
+    }
+    else
+    {
+        if (st->certain || IsBattlerAlly(cv->battlerAtk, cv->battlerDef))
+            return FALSE;
+        effect = TREE_EFFECT_STAT_DROP_IGNORE;
+    }
+    if (!TryTreeChanceEffect(cv->battlerDef, effect, effect == TREE_EFFECT_SELF_DROP_IGNORE ? RNG_TREE_SELF_DROP_IGNORE : RNG_TREE_STAT_DROP_IGNORE))
+        return FALSE;
+
+    MarkStatsAsDone(st, NUM_BATTLE_STATS);
+    gBattleScripting.battler = cv->battlerDef;
+    st->script = BattleScript_TreeNoStatLoss;
     return TRUE;
 }
 

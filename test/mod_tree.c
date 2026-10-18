@@ -2,9 +2,9 @@
 #include "pokemon_build.h"
 #include "test/test.h"
 
-#define TRUNK_PHYSICAL 0
-#define FIRE_IMPACT    4
-#define FIRE_EMBERS    5
+#define GENERAL_PHYSICAL 0
+#define FIRE_POWER     4
+#define FIRE_BLAZE     5
 #define FIRE_HEART     7
 
 static void CreateCharmander(struct Pokemon *mon, u32 level)
@@ -36,57 +36,57 @@ TEST("Mod: a Pokémon can only invest in the tree of one of its types")
 {
     struct Pokemon mon;
     CreateCharmander(&mon, 50);
-    EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_WATER, TRUNK_PHYSICAL), TREE_INVEST_WRONG_TREE);
+    EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_WATER, GENERAL_PHYSICAL), TREE_INVEST_WRONG_TREE);
     EXPECT_EQ(GetMonData(&mon, MON_DATA_TREE_TYPE), TYPE_NONE);
-    EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_FIRE, TRUNK_PHYSICAL), TREE_INVEST_OK);
+    EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_FIRE, GENERAL_PHYSICAL), TREE_INVEST_OK);
     EXPECT_EQ(GetMonData(&mon, MON_DATA_TREE_TYPE), TYPE_FIRE);
-    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, TRUNK_PHYSICAL), 1);
+    EXPECT_EQ(GetBoxMonTreeRank(&mon.box, GENERAL_PHYSICAL), 1);
 }
 
-TEST("Mod: branches open after enough trunk points, then node by node")
+TEST("Mod: branches open after enough General points, then node by node")
 {
     struct Pokemon mon;
     CreateCharmander(&mon, 60);
-    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_IMPACT), TREE_INVEST_LOCKED);
-    InvestTimes(&mon, TYPE_FIRE, TRUNK_PHYSICAL, MOD_TREE_BRANCH_UNLOCK_POINTS - 1);
-    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_IMPACT), TREE_INVEST_LOCKED);
-    InvestTimes(&mon, TYPE_FIRE, TRUNK_PHYSICAL, 1);
-    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_IMPACT), TREE_INVEST_OK);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_POWER), TREE_INVEST_LOCKED);
+    InvestTimes(&mon, TYPE_FIRE, GENERAL_PHYSICAL, MOD_TREE_BRANCH_UNLOCK_POINTS - 1);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_POWER), TREE_INVEST_LOCKED);
+    InvestTimes(&mon, TYPE_FIRE, GENERAL_PHYSICAL, 1);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_POWER), TREE_INVEST_OK);
 
-    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_EMBERS), TREE_INVEST_LOCKED);
-    InvestTimes(&mon, TYPE_FIRE, FIRE_IMPACT, MOD_TREE_PARENT_RANKS);
-    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_EMBERS), TREE_INVEST_OK);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_BLAZE), TREE_INVEST_LOCKED);
+    InvestTimes(&mon, TYPE_FIRE, FIRE_POWER, MOD_TREE_PARENT_RANKS);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_FIRE, FIRE_BLAZE), TREE_INVEST_OK);
 }
 
 TEST("Mod: tree nodes stop at their max rank and investing stops without points")
 {
     struct Pokemon mon;
     CreateCharmander(&mon, 30);
-    InvestTimes(&mon, TYPE_FIRE, TRUNK_PHYSICAL, 20);
-    EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_FIRE, TRUNK_PHYSICAL), TREE_INVEST_MAX_RANK);
-    InvestTimes(&mon, TYPE_FIRE, 1, 30 * MOD_TREE_POINTS_PER_LEVEL - 20);
+    InvestTimes(&mon, TYPE_FIRE, GENERAL_PHYSICAL, 10);
+    EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_FIRE, GENERAL_PHYSICAL), TREE_INVEST_MAX_RANK);
+    InvestTimes(&mon, TYPE_FIRE, 2, 30 * MOD_TREE_POINTS_PER_LEVEL - 10);
     EXPECT_EQ(GetBoxMonTreePointsAvailable(&mon.box), 0);
-    EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_FIRE, 2), TREE_INVEST_NO_POINTS);
+    EXPECT_EQ(TryBoxMonInvestInNode(&mon.box, TYPE_FIRE, 3), TREE_INVEST_NO_POINTS);
 }
 
 TEST("Mod: other elements open their branches like the Fire tree")
 {
     struct Pokemon mon;
     CreateRandomMonWithIVs(&mon, SPECIES_SQUIRTLE, 60, 0);
-    InvestTimes(&mon, TYPE_WATER, TRUNK_PHYSICAL, MOD_TREE_BRANCH_UNLOCK_POINTS - 1);
-    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_WATER, FIRE_IMPACT), TREE_INVEST_LOCKED);
-    InvestTimes(&mon, TYPE_WATER, TRUNK_PHYSICAL, 1);
-    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_WATER, FIRE_IMPACT), TREE_INVEST_OK);
+    InvestTimes(&mon, TYPE_WATER, GENERAL_PHYSICAL, MOD_TREE_BRANCH_UNLOCK_POINTS - 1);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_WATER, FIRE_POWER), TREE_INVEST_LOCKED);
+    InvestTimes(&mon, TYPE_WATER, GENERAL_PHYSICAL, 1);
+    EXPECT_EQ(CanBoxMonInvestInNode(&mon.box, TYPE_WATER, FIRE_POWER), TREE_INVEST_OK);
 }
 
 TEST("Mod: a mutation needs enough tree points and a final mastery")
 {
     struct Pokemon mon;
     CreateCharmander(&mon, 100);
-    InvestTimes(&mon, TYPE_FIRE, TRUNK_PHYSICAL, 20);
-    InvestTimes(&mon, TYPE_FIRE, 1, 20);
-    InvestTimes(&mon, TYPE_FIRE, FIRE_IMPACT, MOD_TREE_PARENT_RANKS);
-    InvestTimes(&mon, TYPE_FIRE, FIRE_EMBERS, MOD_TREE_PARENT_RANKS);
+    InvestTimes(&mon, TYPE_FIRE, GENERAL_PHYSICAL, 10);
+    InvestTimes(&mon, TYPE_FIRE, 2, 20);
+    InvestTimes(&mon, TYPE_FIRE, FIRE_POWER, MOD_TREE_PARENT_RANKS);
+    InvestTimes(&mon, TYPE_FIRE, FIRE_BLAZE, MOD_TREE_PARENT_RANKS);
     InvestTimes(&mon, TYPE_FIRE, 6, MOD_TREE_PARENT_RANKS);
     EXPECT_GE(GetBoxMonTreePointsSpent(&mon.box), MOD_MUTATION_TREE_POINTS);
     EXPECT_EQ(CanBoxMonAcquireMutation(&mon.box), FALSE);
@@ -100,7 +100,7 @@ TEST("Mod: Vitality and Swiftness raise max HP and Speed")
     CreateCharmander(&plain, 100);
     trained = plain;
     SetBoxMonTreeRank(&trained.box, 2, 20);
-    SetBoxMonTreeRank(&trained.box, 3, 20);
+    SetBoxMonTreeRank(&trained.box, 3, 10);
     {
         u32 fire = TYPE_FIRE;
         SetMonData(&trained, MON_DATA_TREE_TYPE, &fire);
@@ -111,7 +111,7 @@ TEST("Mod: Vitality and Swiftness raise max HP and Speed")
     EXPECT_EQ(GetMonData(&trained, MON_DATA_SPEED), GetMonData(&plain, MON_DATA_SPEED) * 110 / 100);
 }
 
-TEST("Mod: every element has three branches")
+TEST("Mod: every element has Offense, Defense and Utility branches of four nodes")
 {
     enum Type type;
     u32 branch;
@@ -121,9 +121,9 @@ TEST("Mod: every element has three branches")
             continue;
         for (branch = 0; branch < TREE_BRANCH_COUNT; branch++)
         {
-            EXPECT(gElementTrees[type].branchNames[branch] != NULL);
-            EXPECT(GetTreeNode(type, TREE_TRUNK_NODES + branch * TREE_BRANCH_NODES) != NULL);
-            EXPECT(GetTreeNode(type, TREE_TRUNK_NODES + branch * TREE_BRANCH_NODES + TREE_BRANCH_NODES - 1) != NULL);
+            EXPECT(gTreeBranchNames[branch] != NULL);
+            EXPECT(GetTreeNode(type, TREE_GENERAL_NODES + branch * TREE_BRANCH_NODES) != NULL);
+            EXPECT(GetTreeNode(type, TREE_GENERAL_NODES + branch * TREE_BRANCH_NODES + TREE_BRANCH_NODES - 1) != NULL);
         }
     }
 }

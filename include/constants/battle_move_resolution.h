@@ -133,6 +133,7 @@ enum MoveEndState
     MOVEEND_RESIST_BERRY_MESSAGE,
     MOVEEND_FORM_CHANGE_ON_HIT, // Disguise / Gulp Missile
     MOVEEND_ABILITIES_ATTACKER,
+    MOVEEND_TREE, // Mod : effets de contact, KO et vol de vie des arbres
     MOVEEND_QUEUE_DANCER,
     MOVEEND_STATUS_IMMUNITY_ABILITIES, // TODO: Do berries come before????
     MOVEEND_ATTACKER_INVISIBLE,

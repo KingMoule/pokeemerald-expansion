@@ -48,19 +48,19 @@
 #define MOD_LEVEL_CAP_PER_SEAL        10   // Niveaux de plafond gagnés par sceau (provisoire).
 
 // Arbres élémentaires
-#define MOD_TREE_NODE_COUNT           16   // Nœuds stockés par Pokémon : 4 du tronc + 3 branches de 4 (maquette Feu).
+#define MOD_TREE_NODE_COUNT           16   // Nœuds stockés par Pokémon : 4 de General + Offense, Defense et Utility de 4.
 #define MOD_TREE_RANK_BITS            5    // Bits par nœud : rang maximal stockable de 31.
 #define MOD_TREE_POINT_BUDGET         100  // Budget total de points d'arbre (illustratif).
-#define MOD_TREE_BRANCH_UNLOCK_POINTS 15   // Points dans le tronc pour ouvrir les branches.
+#define MOD_TREE_BRANCH_UNLOCK_POINTS 10   // Points dans General pour ouvrir Offense, Defense et Utility.
 #define MOD_TREE_PARENT_RANKS         5    // Rangs requis dans le nœud parent pour ouvrir le suivant.
 #define MOD_TREE_POINTS_PER_LEVEL     1    // Points d'arbre gagnés par niveau (provisoire, question ouverte du wiki).
 // Maîtrises finales (wiki section 5, maquette Feu, étendue aux autres éléments).
-#define MOD_TREE_HEART_MAX_STACKS     3    // Cœur : cumuls de +10 % aux dégâts de l'élément au plus...
-#define MOD_TREE_HEART_HP_COST        5    // ...chaque activation coûte N % des PV max.
-#define MOD_TREE_ENTRY_WEATHER_TURNS  3    // Aube : tours de météo invoqués à la première entrée (+ tours de la branche).
-#define MOD_TREE_FOCUS_CRIT_STAGES    1    // Focus : niveaux de coup critique en plus pour les attaques spéciales de l'élément.
-#define MOD_TREE_GUARD_FIRST_HIT      50   // Garde : % de dégâts en moins sur le premier coup super efficace subi par combat.
-#define MOD_TREE_LINGER_TURNS         1    // Braises tenaces / statut : tours de retour du premier statut infligé, une fois soigné.
+#define MOD_TREE_HEART_MAX_STACKS     3    // Heart et Sap Surge : cumuls au plus...
+#define MOD_TREE_HEART_HP_COST        5    // ...chaque cumul de Heart coûte N % des PV max.
+#define MOD_TREE_ENTRY_WEATHER_TURNS  3    // Maîtrises Utility : tours de météo posés à la première entrée (+ Long Summer, Long Rain...).
+#define MOD_TREE_ENTRY_TERRAIN_TURNS  5    // ...tours de terrain (+ Long Terrain)...
+#define MOD_TREE_ENTRY_TAILWIND_TURNS 3    // ...tours de Tailwind (+ Long Tailwind)...
+#define MOD_TREE_ENTRY_SCREEN_TURNS   5    // ...tours de Reflect (+ Long Screens).
 
 // EV
 #define MOD_BATTLE_EV_GAINS           FALSE // Les combats normaux ne donnent plus d'EV (donjon d'entraînement à la place).
@@ -80,7 +80,7 @@
 #define MOD_EVDJ_MAX_FLOOR            99   // Profondeur maximale.
 
 // Mutations
-#define MOD_MUTATION_TREE_POINTS      50   // Points investis requis pour acquérir soi-même une mutation.
+#define MOD_MUTATION_TREE_POINTS      40   // Points investis requis pour acquérir soi-même une mutation.
 #define MOD_MUTATION_WEAKNESS_NUM     125  // Pénalité sur les faiblesses : NUM / DEN, soit ×1,25.
 #define MOD_MUTATION_WEAKNESS_DEN     100
 // Types ouverts à la mutation dès le départ ; chaque Mutation Seal en ouvre un autre, pour toute la sauvegarde.
@@ -104,6 +104,8 @@
 #define MOD_TRAINER_VARIANT_LEVEL     30   // Champions, rival, chefs d'équipe : une variante dès ce niveau.
 #define MOD_TRAINER_MUTATIONS         TRUE // Mutations de src/data/trainer_mutations.h (Conseil 4, Maître, revanches, défis).
 #define MOD_TRAINER_FAST_BASE_SPEED   80   // Vitesse de base à partir de laquelle l'IA investit la Vitesse avant les PV.
+#define MOD_TRAINER_SLOW_BASE_SPEED   50   // En dessous de cette Vitesse de base...
+#define MOD_TRAINER_BULKY_BASE_DEFENSES 180 // ...et avec au moins cette Défense + Défense spéciale de base, l'IA prend l'arbre Defense.
 
 // Défis à règles annoncées (wiki sections 13 et 14), au Centre Pokémon d'Ever Grande, après le Panthéon.
 #define MOD_CHALLENGE_RISING_MAX_LEVEL 50  // « Rising Trial » : niveau maximal des Pokémon du joueur.

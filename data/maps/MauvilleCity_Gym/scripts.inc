@@ -424,7 +424,7 @@ MauvilleCity_Gym_Text_WattsonRematchNeedTwoMons:
 MauvilleCity_Gym_Text_ModExplainMutations:
 	.string "Wahahah! Here's something to\n"
 	.string "chew on, {PLAYER}.\p"
-	.string "A POKéMON that puts 50 points in\n"
+	.string "A POKéMON that puts 40 points in\n"
 	.string "its TREE and reaches a final\l"
 	.string "mastery can MUTATE.\p"
 	.string "It trades one of its types\n"

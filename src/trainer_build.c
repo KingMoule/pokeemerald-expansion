@@ -142,15 +142,33 @@ static bool32 KnowsTreeStatusMove(struct Pokemon *mon, const struct ElementTree 
     return FALSE;
 }
 
-// Branche suivie : météo si le Pokémon l'invoque, statut s'il l'inflige, sinon l'attaque physique
-// pour un attaquant physique et le statut pour un attaquant spécial.
-static u32 ChooseBranch(struct Pokemon *mon, const struct ElementTree *tree, bool32 physical)
+static bool32 KnowsTreeTerrainMove(struct Pokemon *mon, const struct ElementTree *tree)
 {
-    if (KnowsTreeWeatherMove(mon, tree))
-        return 2;
-    if (KnowsTreeStatusMove(mon, tree) || !physical)
-        return 1;
-    return 0;
+    u32 i;
+
+    if (tree->terrain == B_TERRAIN_NONE)
+        return FALSE;
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        enum Move move = GetMonData(mon, MON_DATA_MOVE1 + i);
+        if (move != MOVE_NONE && GetMoveEffect(move) == EFFECT_TERRAIN && GetMoveTerrainType(move) == tree->terrain)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+// Arbre suivi : Utility si le Pokémon pose la météo ou le terrain de l'élément, ou inflige son
+// statut ; Defense s'il est lent et résistant ; sinon Offense.
+static u32 ChooseBranch(struct Pokemon *mon, const struct ElementTree *tree)
+{
+    enum Species species = GetMonData(mon, MON_DATA_SPECIES);
+
+    if (KnowsTreeWeatherMove(mon, tree) || KnowsTreeTerrainMove(mon, tree) || KnowsTreeStatusMove(mon, tree))
+        return TREE_BRANCH_UTILITY;
+    if (GetSpeciesBaseSpeed(species) < MOD_TRAINER_SLOW_BASE_SPEED
+     && GetSpeciesBaseDefense(species) + GetSpeciesBaseSpDefense(species) >= MOD_TRAINER_BULKY_BASE_DEFENSES)
+        return TREE_BRANCH_DEFENSE;
+    return TREE_BRANCH_OFFENSE;
 }
 
 static void InvestUpTo(struct Pokemon *mon, enum Type treeType, u32 node, u32 rank)
@@ -184,8 +202,8 @@ static enum Type ChooseTreeType(struct Pokemon *mon)
     return type1;
 }
 
-// Répartition automatique : l'attaque principale dans le tronc jusqu'à l'ouverture des branches,
-// une branche jusqu'à sa maîtrise, puis le reste du tronc et de la branche.
+// Répartition automatique : l'attaque principale dans General jusqu'à l'ouverture des arbres,
+// un arbre jusqu'à sa maîtrise, puis le reste de General et de l'arbre.
 static void InvestTree(struct Pokemon *mon)
 {
     enum Type treeType = ChooseTreeType(mon);
@@ -197,9 +215,8 @@ static void InvestTree(struct Pokemon *mon)
     u32 node, i;
 
     InvestUpTo(mon, treeType, attackNode, MOD_TREE_BRANCH_UNLOCK_POINTS);
-    if (tree->branchNames[0] != NULL)
     {
-        u32 first = TREE_TRUNK_NODES + ChooseBranch(mon, tree, physical) * TREE_BRANCH_NODES;
+        u32 first = TREE_GENERAL_NODES + ChooseBranch(mon, tree) * TREE_BRANCH_NODES;
         for (i = 0; i < TREE_BRANCH_NODES; i++)
             InvestUpTo(mon, treeType, first + i, MOD_TREE_PARENT_RANKS);
         for (i = 0; i < TREE_BRANCH_NODES; i++)

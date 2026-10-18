@@ -20,6 +20,7 @@
 #include "random.h"
 #include "string_util.h"
 #include "config/battle.h"
+#include "pokemon_build.h"
 
 static inline bool32 IgnoreTargetingForMoveEffect(enum MoveEffect moveEffect);
 static bool32 DoesSubstituteBlockMoveEffectOnTarget(enum BattlerId battlerAtk, enum BattlerId battlerDef, enum MoveEffect moveEffect);
@@ -56,7 +57,8 @@ static void HandleSetEffectNonVolatile(struct BattleCalcValues *cv, struct SetEf
 
 static void HandleSetEffectConfusion(struct BattleCalcValues *cv, struct SetEffect *se)
 {
-    if (!CanBeConfused(cv->battlerAtk, se->effectBattler))
+    if (!CanBeConfused(cv->battlerAtk, se->effectBattler)
+     || TryTreeResistVolatile(cv->battlerAtk, se->effectBattler)) // Mod : Iron Resolve
     {
         gBattlescriptCurrInstr = se->script;
     }
@@ -84,7 +86,8 @@ static void HandleSetEffectFlinch(struct BattleCalcValues *cv, struct SetEffect 
             gBattlescriptCurrInstr = se->script;
         }
     }
-    else if (gBattleMons[se->effectBattler].volatiles.flinched)
+    else if (gBattleMons[se->effectBattler].volatiles.flinched
+          || TryTreeResistVolatile(cv->battlerAtk, se->effectBattler)) // Mod : Iron Resolve
     {
         gBattlescriptCurrInstr = se->script;
     }
@@ -114,6 +117,7 @@ static void HandleSetEffectAbsorb(struct BattleCalcValues *cv, struct SetEffect 
         }
 
         s32 healAmount = (gBattleStruct->moveDamage[cv->battlerDef] * absorbPercentage / 100);
+        healAmount = ApplyTreeDrainBonus(cv->battlerAtk, healAmount); // Mod : Deep Roots, Leech
         healAmount = GetDrainedBigRootHp(cv->battlerAtk, healAmount);
         gEffectBattler = cv->battlerAtk;
         gBattlerAbility = gBattleScripting.battler = cv->battlerDef;

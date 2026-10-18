@@ -1621,6 +1621,7 @@ bool32 TrySetReflect(enum BattlerId battler)
             gSideTimers[side].reflectTimer = 8;
         else
             gSideTimers[side].reflectTimer = 5;
+        gSideTimers[side].reflectTimer += GetTreeScreenTurnsBonus(battler); // Mod : Long Screens, Screen Craft
 
         if (IsDoubleBattle() && CountAliveMonsInBattle(BATTLE_ALIVE_SIDE, battler) == 2)
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SET_REFLECT_DOUBLE;
@@ -1642,6 +1643,7 @@ bool32 TrySetLightScreen(enum BattlerId battler)
             gSideTimers[side].lightscreenTimer = 8;
         else
             gSideTimers[side].lightscreenTimer = 5;
+        gSideTimers[side].lightscreenTimer += GetTreeScreenTurnsBonus(battler); // Mod : Long Screens, Screen Craft
 
         if (IsDoubleBattle() && CountAliveMonsInBattle(BATTLE_ALIVE_SIDE, battler) == 2)
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SET_LIGHTSCREEN_DOUBLE;
@@ -1659,7 +1661,8 @@ void TrySynchronizeActivation(enum BattlerId battlerAtk, enum BattlerId effectBa
         return;
 
     enum Ability effectAbility = GetBattlerAbility(effectBattler);
-    if (effectAbility != ABILITY_SYNCHRONIZE)
+    bool32 treeSynchronize = (effectAbility != ABILITY_SYNCHRONIZE && TreeHasSynchronize(effectBattler, battlerAtk)); // Mod : Synchronize de l'arbre
+    if (effectAbility != ABILITY_SYNCHRONIZE && !treeSynchronize)
         return;
 
     if (effect == MOVE_EFFECT_POISON
@@ -1678,8 +1681,9 @@ void TrySynchronizeActivation(enum BattlerId battlerAtk, enum BattlerId effectBa
             gBattleStruct->synchronizeState = SYNCH_STATE_START;
             gBattlerAbility = effectBattler;
             gBattleScripting.savedBattler = battlerAtk;
+            SetTreeSynchronizePending(treeSynchronize);
         }
-        else
+        else if (!treeSynchronize)
         {
             gBattleStruct->synchronizeState = SYNCH_STATE_SHOW_ABILITY_POPUP;
             gBattlerAbility = effectBattler;
@@ -1690,6 +1694,13 @@ void TrySynchronizeActivation(enum BattlerId battlerAtk, enum BattlerId effectBa
 void SetNonVolatileStatus(enum BattlerId battlerAtk, enum BattlerId effectBattler, enum MoveEffect effect, const u8 *battleScript, enum StatusTrigger trigger)
 {
     gEffectBattler = effectBattler;
+
+    if (TryTreeAvoidStatus(battlerAtk, effectBattler)) // Mod : Misty Veil
+    {
+        BattleScriptPush(battleScript);
+        gBattlescriptCurrInstr = BattleScript_TreeStatusAvoided;
+        return;
+    }
 
     if (effect == MOVE_EFFECT_SLEEP || effect == MOVE_EFFECT_FREEZE)
         CancelMultiTurnMoves(effectBattler);
@@ -4053,6 +4064,7 @@ static void Cmd_getmoneyreward(void)
         money = GetTrainerMoneyToGive(TRAINER_BATTLE_PARAM.opponentA);
         if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
             money += GetTrainerMoneyToGive(TRAINER_BATTLE_PARAM.opponentB);
+        money = ApplyTreeMoneyBonus(money); // Mod : Thief's Cut, Fortune
         AddMoney(&gSaveBlock1Ptr->money, money);
     }
     else
@@ -5205,7 +5217,7 @@ static void Cmd_tryhealhalfhealth(void)
     if (cmd->battler == BS_ATTACKER)
         gBattlerTarget = gBattlerAttacker;
 
-    SetHealAmount(gBattlerTarget, GetNonDynamaxMaxHP(gBattlerTarget) / 2);
+    SetHealAmount(gBattlerTarget, ApplyTreeHealingMoveBoost(gBattlerAttacker, GetNonDynamaxMaxHP(gBattlerTarget) / 2)); // Mod : Healing Aura, Roost Mastery
     if (gBattleMons[gBattlerTarget].hp == gBattleMons[gBattlerTarget].maxHP)
         gBattlescriptCurrInstr = failInstr;
     else
@@ -6350,7 +6362,7 @@ static void Cmd_settailwind(void)
     if (!(gSideStatuses[side] & SIDE_STATUS_TAILWIND))
     {
         gSideStatuses[side] |= SIDE_STATUS_TAILWIND;
-        gSideTimers[side].tailwindTimer = (GetConfig(B_TAILWIND_TURNS) >= GEN_5 ? 4 : 3);
+        gSideTimers[side].tailwindTimer = (GetConfig(B_TAILWIND_TURNS) >= GEN_5 ? 4 : 3) + GetTreeTailwindTurnsBonus(gBattlerAttacker); // Mod : Long Tailwind
         gBattlescriptCurrInstr = cmd->nextInstr;
     }
     else
@@ -6839,7 +6851,7 @@ static void Cmd_recoverbasedonsunlight(void)
                 recoverAmount = healingModifier * GetNonDynamaxMaxHP(gBattlerAttacker) / 8;
         }
 
-        SetHealAmount(gBattlerAttacker, recoverAmount);
+        SetHealAmount(gBattlerAttacker, ApplyTreeHealingMoveBoost(gBattlerAttacker, recoverAmount)); // Mod : Healing Aura, Roost Mastery
         if (isAffectedByMegaSol)
             gBattlescriptCurrInstr = BattleScript_MegaSolActivatesHealing;
         else
@@ -7513,6 +7525,7 @@ static void Cmd_switchoutabilities(void)
         break;
     }
     default:
+        TryTreeSwitchOutEffects(battler); // Mod : Natural Cure et Aerial Retreat des arbres
         break;
     }
 
@@ -7583,6 +7596,22 @@ static void Cmd_pickup(void)
                             SetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_HELD_ITEM, &sPickupTable[j].itemId);
                             break;
                         }
+                    }
+                }
+            }
+            else if (species != SPECIES_NONE && species != SPECIES_EGG && heldItem == ITEM_NONE && !isInPyramid
+                  && TryTreePickup(&gParties[B_TRAINER_PLAYER][i].box)) // Mod : Pickup de l'arbre Normal
+            {
+                u32 rand = Random() % 100;
+                u32 percentTotal = 0;
+
+                for (j = 0; j < ARRAY_COUNT(sPickupTable); j++)
+                {
+                    percentTotal += sPickupTable[j].percentage[lvlDivBy10];
+                    if (rand < percentTotal)
+                    {
+                        SetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_HELD_ITEM, &sPickupTable[j].itemId);
+                        break;
                     }
                 }
             }
@@ -8830,7 +8859,8 @@ static void Cmd_trysynchronize(void)
         break;
     case SYNCH_STATE_START:
         synchStatus = GetMoveEffectFromStatus(gBattlerAbility);
-        RecordAbilityBattle(gBattlerAbility, ABILITY_SYNCHRONIZE);
+        if (!IsTreeSynchronizePending())
+            RecordAbilityBattle(gBattlerAbility, ABILITY_SYNCHRONIZE);
 
         if (GetConfig(B_SYNCHRONIZE_TOXIC) < GEN_5 && synchStatus == MOVE_EFFECT_TOXIC)
             synchStatus = MOVE_EFFECT_POISON;
@@ -8840,7 +8870,16 @@ static void Cmd_trysynchronize(void)
         gBattleScripting.moveEffect = synchStatus;
         gBattleStruct->synchronizeState = SYNCH_STATE_SET_STATUS;
         PREPARE_ABILITY_BUFFER(gBattleTextBuff1, ABILITY_SYNCHRONIZE);
-        BattleScriptCall(BattleScript_SynchronizeActivates);
+        if (IsTreeSynchronizePending())
+        {
+            SetTreeSynchronizePending(FALSE);
+            SetTreeNodeNameForEffect(gBattlerAbility, TREE_EFFECT_SYNCHRONIZE);
+            BattleScriptCall(BattleScript_TreeSynchronize);
+        }
+        else
+        {
+            BattleScriptCall(BattleScript_SynchronizeActivates);
+        }
         break;
     case SYNCH_STATE_SHOW_ABILITY_POPUP: // Synchronize ability pop up still shows up even if status fails
         gBattleStruct->synchronizeState = SYNCH_STATE_END;
